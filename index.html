@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Morgenlog</title>
+<meta name="theme-color" content="#0D1320">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Morgenlog">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --nat:#0D1320; --kort:#161F30; --kant:#243048;
+    --tekst:#E9EEF6; --daempet:#8A96AB;
+    --gry:#E5A45F; --gryDim:#3A2E1E;
+    --ok:#84B68F; --okDim:#1D2B22;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  body{
+    margin:0; background:var(--nat); color:var(--tekst);
+    font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;
+    padding:env(safe-area-inset-top) 16px 40px;
+    min-height:100vh;
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:430px;margin:0 auto;padding-top:32px}
+  .top{display:flex;justify-content:space-between;align-items:baseline}
+  .eyebrow{font-size:11px;letter-spacing:.2em;color:var(--gry)}
+  h1{font-size:24px;font-weight:600;margin:4px 0 0}
+  .dato{font-size:11px;color:var(--daempet)}
+  .uge{display:flex;gap:8px;margin-top:20px}
+  .ugedag{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .ugecelle{width:100%;height:32px;border-radius:6px;border:1px solid var(--kant);
+    background:var(--kort);display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:var(--daempet)}
+  .ugecelle.logget{background:var(--okDim);border-color:var(--kant);color:var(--ok)}
+  .ugecelle.idag{border-color:var(--gry)}
+  .ugelabel{font-size:11px;color:var(--daempet)}
+  .ugelabel.idag{color:var(--gry)}
+  .vagt{margin-top:16px;padding:12px;border-radius:8px;font-size:14px;
+    background:var(--gryDim);border:1px solid var(--gry)}
+  .nav{display:flex;gap:8px;margin-top:24px}
+  .nav button{font-size:11px;letter-spacing:.1em;padding:8px 12px;border-radius:6px;
+    background:transparent;border:1px solid var(--kant);color:var(--daempet);cursor:pointer}
+  .nav button.aktiv{background:var(--kort);border-color:var(--gry);color:var(--tekst)}
+  .typer{display:flex;gap:8px;margin-top:20px}
+  .typer button{font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer;
+    background:var(--kort);border:1px solid var(--kant);color:var(--daempet)}
+  .typer button.aktiv{background:var(--gry);border-color:var(--gry);color:var(--nat)}
+  .kort{margin-top:16px;background:var(--kort);border:1px solid var(--kant);
+    border-radius:10px;padding:16px}
+  .kort-top{display:flex;justify-content:space-between;align-items:baseline}
+  .kort-top h2{font-size:16px;font-weight:600;margin:0}
+  .kort-top span{font-size:12px;color:var(--daempet)}
+  .raekke{display:flex;align-items:flex-start;gap:12px;padding:12px 0;
+    border-top:1px solid var(--kant)}
+  .raekke:first-of-type{border-top:none}
+  .flueben{width:32px;height:32px;border-radius:6px;flex-shrink:0;cursor:pointer;
+    background:var(--nat);border:1px solid var(--kant);color:var(--ok);font-size:14px}
+  .flueben.done{background:var(--okDim);border-color:var(--ok)}
+  .oev{flex:1;min-width:0}
+  .oev .navn{font-size:14px;padding-top:6px}
+  .oev .navn .vid{color:var(--gry);text-decoration:none;font-size:12px;padding:2px 4px}
+  .valg{display:flex;align-items:center;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .valg select{background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
+    border-radius:6px;padding:6px 4px;font-size:12px;
+    -webkit-appearance:none;appearance:none;text-align:center;text-align-last:center}
+  .valg select:focus{outline:none;border-color:var(--gry)}
+  .valg .s-saet{width:44px}
+  .valg .s-reps{flex:1;min-width:84px}
+  .valg .s-vaegt{flex:1;min-width:96px}
+  .valg .gange{font-size:11px;color:var(--daempet)}
+  input,textarea{
+    background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
+    border-radius:6px;padding:8px 10px;font-size:14px;width:100%}
+  input:focus,textarea:focus{outline:none;border-color:var(--gry)}
+  
+  .feels{display:flex;gap:8px;margin-top:16px}
+  .feels button{flex:1;padding:8px 0;border-radius:6px;font-size:14px;cursor:pointer;
+    background:var(--nat);border:1px solid var(--kant);color:var(--daempet)}
+  .feels button.aktiv{background:var(--gryDim);border-color:var(--gry);color:var(--tekst)}
+  .gem{margin-top:16px;width:100%;padding:12px 0;border-radius:8px;border:none;
+    font-size:15px;font-weight:600;cursor:pointer;background:var(--gry);color:var(--nat)}
+  .gem:disabled{background:var(--kant);color:var(--daempet)}
+  .kvittering{text-align:center;padding:24px 0 8px}
+  .kvittering .stor{font-size:18px;color:var(--ok)}
+  .kvittering p{font-size:14px;color:var(--daempet);margin:4px 0 0}
+  .hist{margin-top:8px;background:var(--kort);border:1px solid var(--kant);
+    border-radius:10px;padding:12px}
+  .hist .top{display:flex;justify-content:space-between}
+  .hist .titel{font-size:14px;font-weight:600}
+  .hist .detaljer{font-size:11px;color:var(--daempet);margin-top:4px}
+  .hist .note{font-size:12px;margin-top:4px}
+  .planraekke{display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-top:1px solid var(--kant);font-size:14px}
+  .planraekke:first-child{border-top:none}
+  .planraekke select{background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
+    border-radius:6px;padding:6px 8px;font-size:13px;-webkit-appearance:none;appearance:none}
+  .planraekke select:focus{outline:none;border-color:var(--gry)}
+  .backup{margin-top:28px;padding-top:20px;border-top:1px solid var(--kant)}
+  .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
+  .gem.sek{background:transparent;border:1px solid var(--kant);color:var(--tekst);font-weight:500}
+  .backup input[type=file]{font-size:12px;color:var(--daempet);border:none;padding:6px 0}
+  .tom{font-size:14px;color:var(--daempet);margin-top:20px}
+  .eksport-info{font-size:14px;color:var(--daempet);margin-top:20px}
+  textarea{font-family:ui-monospace,monospace;font-size:12px;margin-top:12px}
+  .hint{font-size:12px;color:var(--daempet);margin-top:8px}
+  label{font-size:13px;color:var(--daempet);display:block;margin-top:12px}
+  label input{margin-top:6px}
+  @media (prefers-reduced-motion:no-preference){
+    .kort{animation:ind .18s ease-out}
+    @keyframes ind{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const PROGRAM = {
+  A:{navn:"Styrke A",under:"Ben & træk",oevelser:[
+    {id:"goblet",vid:"https://www.youtube.com/results?search_query=goblet+squat+form+tutorial",navn:"Goblet squat",maal:"3 × 8–10"},
+    {id:"rdl",vid:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift+kettlebell+tutorial",navn:"Etbens-RDL",maal:"3 × 8/side"},
+    {id:"row",vid:"https://www.youtube.com/results?search_query=kettlebell+bent+over+row+form",navn:"Roning",maal:"3 × 10–12"},
+    {id:"step",vid:"https://www.youtube.com/results?search_query=bulgarian+split+squat+vs+step+up+form",navn:"Step-ups / split squat",maal:"2 × 10/side"},
+    {id:"pallof",vid:"https://www.youtube.com/results?search_query=pallof+press+band+tutorial",navn:"Pallof press",maal:"2 × 10/side"}]},
+  B:{navn:"Styrke B",under:"Pres, hofte & fod",oevelser:[
+    {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"3 × max−2"},
+    {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"3 × 8–10"},
+    {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"3 × 10–12"},
+    {id:"monster",vid:"https://www.youtube.com/results?search_query=monster+walk+band+glute+exercise",navn:"Monster walks",maal:"3 × 12–15"},
+    {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"3 × 12–15/side"},
+    {id:"carry",vid:"https://www.youtube.com/results?search_query=suitcase+carry+kettlebell+technique",navn:"Suitcase carry",maal:"3 × 30–40 m/side"}]},
+  C:{navn:"Styrke C",under:"Swings, core & brystryg",oevelser:[
+    {id:"swing",vid:"https://www.youtube.com/results?search_query=hardstyle+kettlebell+swing+strongfirst+tutorial",navn:"KB swings",maal:"5 × 15"},
+    {id:"tgu",vid:"https://www.youtube.com/results?search_query=turkish+get+up+step+by+step+strongfirst",navn:"Turkish get-up",maal:"3–4/side"},
+    {id:"pull",vid:"https://www.youtube.com/results?search_query=pull+up+progression+beginner+negatives",navn:"Træk-progression",maal:"3 × 3–5"},
+    {id:"deadbug",vid:"https://www.youtube.com/results?search_query=dead+bug+exercise+proper+form",navn:"Dead bug",maal:"3 × 8/side"},
+    {id:"birddog",vid:"https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form",navn:"Bird dog",maal:"2 × 8/side"},
+    {id:"sideplank",vid:"https://www.youtube.com/results?search_query=side+plank+proper+form+mcgill",navn:"Sideplanke",maal:"2 × 20–30 sek/side"},
+    {id:"thorax",vid:"https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",navn:"Brystrygs-mobilitet",maal:"5 min"}]},
+  LOEB:{navn:"Løb",under:"Snakketempo",oevelser:[]}
+};
+
+// Valgmuligheder: [standard sæt, liste over reps/tid, liste over vægt]
+const REPS={
+  goblet:["6","8","10","12"], rdl:["6/side","8/side","10/side"],
+  row:["8","10","12","15"], step:["8/side","10/side","12/side"],
+  pallof:["8/side","10/side","12/side"],
+  pushup:["5","8","10","12","15","20"], ohp:["6","8","10","12"],
+  hip:["8","10","12","15"], monster:["10","12","15","20"],
+  calf:["10/side","12/side","15/side","20/side"],
+  carry:["20 m/side","30 m/side","40 m/side"],
+  swing:["10","12","15","20"], tgu:["1/side","2/side","3/side","4/side"],
+  pull:["3","4","5","6","8"], deadbug:["6/side","8/side","10/side"],
+  birddog:["6/side","8/side","10/side"], sideplank:["20 sek/side","30 sek/side","45 sek/side"],
+  thorax:["3 min","5 min","8 min"]
+};
+const SAET=["1","2","3","4","5"];
+const VAEGT=["–","Kropsvægt","12 kg","16 kg","24 kg","Elastik let","Elastik middel","Elastik hård"];
+function stdSaet(maal){const m=maal.match(/^(\d)/);return m?m[1]:"3"}
+function stdReps(id,maal){const l=REPS[id]||[];return l.length?l[Math.min(1,l.length-1)]:maal}
+const STDPLAN=["FRI","LOEB","A","LOEB","B","C","LOEB"]; // index = getDay(), 0=søndag
+const DAGE=["M","T","O","T","F","L","S"];
+const FEELS=[{id:"let",label:"For let"},{id:"tilpas",label:"Tilpas"},{id:"haardt",label:"For hårdt"}];
+const KEY="traening-v1";
+
+function hentData(){
+  try{const r=localStorage.getItem(KEY);const d=r?JSON.parse(r):{};
+    return {sessions:d.sessions||[],lastWeights:d.lastWeights||{},ugeplan:d.ugeplan||STDPLAN.slice()}}
+  catch(e){return {sessions:[],lastWeights:{},ugeplan:STDPLAN.slice()}}
+}
+function gemData(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){alert("Kunne ikke gemme.")}}
+function dagsdato(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function paenDato(iso){return new Date(iso+"T12:00:00").toLocaleDateString("da-DK",{weekday:"short",day:"numeric",month:"short"})}
+function ugensDatoer(){
+  const nu=new Date(),dag=(nu.getDay()+6)%7,man=new Date(nu);
+  man.setDate(nu.getDate()-dag);
+  return Array.from({length:7},(_,i)=>{const d=new Date(man);d.setDate(man.getDate()+i);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")});
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+let data=hentData();
+let view="idag";
+let type=(()=>{const t=data.ugeplan[new Date().getDay()];return t==="FRI"?"A":t})();
+let draft={},feel=null,gemt=false;
+
+function nyDraft(){
+  draft={};
+  (PROGRAM[type].oevelser||[]).forEach(o=>{draft[o.id]={vaegt:data.lastWeights[o.id]||"–",saet:stdSaet(o.maal),reps:stdReps(o.id,o.maal),done:false}});
+  feel=null;gemt=false;
+}
+nyDraft();
+
+function eksportTekst(){
+  if(!data.sessions.length)return "Ingen pas logget endnu.";
+  return data.sessions.map(s=>{
+    const p=PROGRAM[s.type];
+    let l=s.date+"  "+p.navn;
+    if(s.minutter)l+="  "+s.minutter+" min";
+    if(s.feel){const f=FEELS.find(x=>x.id===s.feel);l+="  · "+(f?f.label:s.feel)}
+    const dele=[l];
+    if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
+      const o=p.oevelser.find(x=>x.id===id);dele.push("   "+(o?o.navn:id)+": "+v)});
+    if(s.note)dele.push("   Note: "+s.note);
+    return dele.join("\n");
+  }).join("\n\n");
+}
+
+function sel(felt,id,liste,valgt,label){
+  const ekstra=liste.includes(valgt)?"":'<option selected>'+esc(valgt)+'</option>';
+  return '<select class="mono s-'+felt+'" data-'+felt+'="'+id+'" aria-label="'+label+'">'+ekstra
+    +liste.map(v=>'<option'+(v===valgt?" selected":"")+'>'+esc(v)+'</option>').join("")+'</select>';
+}
+function render(){
+  const app=document.getElementById("app");
+  const idag=dagsdato(),uge=ugensDatoer(),p=PROGRAM[type],erLoeb=type==="LOEB";
+  const sidsteTo=data.sessions.slice(-2);
+  const forHaardt=sidsteTo.length===2&&sidsteTo.every(s=>s.feel==="haardt");
+
+  let h='<div class="top"><div><div class="eyebrow mono">KL. 05</div><h1>Morgenlog</h1></div>'
+    +'<div class="dato mono">'+esc(paenDato(idag))+'</div></div>';
+
+  h+='<div class="uge">'+uge.map((dato,i)=>{
+    const s0=data.sessions.find(s=>s.date===dato),erIdag=dato===idag;
+    const plan=data.ugeplan[(i+1)%7];
+    const vis=s0?"✓":(plan==="FRI"?"":(plan==="LOEB"?"L":plan));
+    return '<div class="ugedag"><div class="ugecelle'+(s0?" logget":"")+(erIdag?" idag":"")+'">'
+      +vis+'</div><span class="ugelabel'+(erIdag?" idag":"")+' mono">'+DAGE[i]+'</span></div>';
+  }).join("")+'</div>';
+
+  if(forHaardt&&view==="idag")
+    h+='<div class="vagt">To pas i træk føltes for hårde. Overvej at eksportere loggen og tage den med til Claude, før du fortsætter som planlagt.</div>';
+
+  h+='<div class="nav mono">'+[["idag","I DAG"],["plan","PLAN"],["historik","HISTORIK"],["eksport","EKSPORT"]]
+    .map(([id,l])=>'<button data-view="'+id+'" class="'+(view===id?"aktiv":"")+'">'+l+'</button>').join("")+'</div>';
+
+  if(view==="idag"){
+    h+='<div class="typer mono">'+["A","B","C","LOEB"].map(t=>
+      '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+(t==="LOEB"?"LØB":t)+'</button>').join("")+'</div>';
+    h+='<div class="kort"><div class="kort-top"><h2>'+p.navn+'</h2><span>'+p.under+'</span></div>';
+    if(gemt){
+      h+='<div class="kvittering"><div class="stor">Logget ✓</div><p>Så er det ud af døren. Resten passer sig selv.</p></div>';
+    }else{
+      if(erLoeb){
+        h+='<p class="hint" style="margin-top:12px;color:var(--tekst)">4 × 5 min · 2 min gang imellem<br>'
+          +'<span style="color:var(--daempet)">6:45–7:00 min/km · puls under 145</span></p>'
+          +'<label>Varighed (min)<input type="number" inputmode="numeric" id="minutter" placeholder="28"></label>'
+          +'<p class="hint">Detaljerne (kadence, puls, watt) bor i CSV-filen fra uret – den uploader du i chatten hos Claude.</p>';
+      }else{
+        h+=p.oevelser.map(o=>{const d=draft[o.id];
+          return '<div class="raekke"><button class="flueben'+(d.done?" done":"")+'" data-ex="'+o.id+'" aria-label="Markér '+esc(o.navn)+'">'+(d.done?"✓":"")+'</button>'
+            +'<div class="oev"><div class="navn">'+esc(o.navn)
+            +(o.vid?' <a class="vid" href="'+o.vid+'" target="_blank" rel="noopener" aria-label="Se video">▷</a>':'')
+            +'</div><div class="valg">'
+            +sel("saet",o.id,SAET,d.saet,"Sæt")+'<span class="gange">×</span>'
+            +sel("reps",o.id,REPS[o.id]||[o.maal],d.reps,"Gentagelser")
+            +sel("vaegt",o.id,VAEGT,d.vaegt,"Vægt")
+            +'</div></div></div>';
+        }).join("");
+      }
+      h+='<div class="feels">'+FEELS.map(f=>
+        '<button data-feel="'+f.id+'" class="'+(feel===f.id?"aktiv":"")+'">'+f.label+'</button>').join("")+'</div>';
+      h+='<input id="note" placeholder="Note (valgfri – fx \'forfod øm\')" style="margin-top:12px">';
+      const kan=erLoeb||Object.values(draft).some(v=>v.done);
+      h+='<button class="gem" id="gem" '+(kan?"":"disabled")+'>Gem morgenpas</button>';
+    }
+    h+='</div>';
+  }
+
+  if(view==="plan"){
+    const NAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+    const MULIG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],["FRI","Fri"]];
+    h+='<p class="eksport-info">Byt rundt på dagene, som din uge ser ud. Skal du bare rykke en enkelt træning i dag, behøver du ikke ændre noget her – vælg blot passet under "I dag".</p>';
+    h+='<div class="kort">'+NAVNE.map((n,i)=>{
+      const dagIdx=(i+1)%7, valgt=data.ugeplan[dagIdx];
+      return '<div class="planraekke"><span>'+n+'</span><select data-plan="'+dagIdx+'">'
+        +MULIG.map(([v,l])=>'<option value="'+v+'"'+(v===valgt?" selected":"")+'>'+l+'</option>').join("")
+        +'</select></div>';
+    }).join("")+'</div>';
+    const antalStyrke=data.ugeplan.filter(x=>["A","B","C"].includes(x)).length;
+    const antalLoeb=data.ugeplan.filter(x=>x==="LOEB").length;
+    let advar="";
+    for(let i=0;i<7;i++){
+      const a=data.ugeplan[i], b=data.ugeplan[(i+1)%7];
+      if(a==="LOEB"&&b==="LOEB"){advar="To løbedage i træk. Det er netop det mønster, der gik galt sidst – læg en styrke- eller fridag imellem.";break}
+    }
+    if(!advar&&antalStyrke<3)advar="Færre end tre styrkedage. Styrken er det, der holder SI-leddet i ro – skær hellere i løb end i styrke.";
+    if(advar)h+='<div class="vagt" style="margin-top:16px">'+advar+'</div>';
+    h+='<p class="hint">'+antalStyrke+' styrkedage · '+antalLoeb+' løbedage</p>';
+  }
+
+  if(view==="historik"){
+    if(!data.sessions.length)h+='<p class="tom">Ingen pas endnu. Det første logger du under "I dag".</p>';
+    h+=[...data.sessions].reverse().slice(0,30).map(s=>{
+      const sp=PROGRAM[s.type];
+      let det=[];
+      if(s.minutter)det.push(s.minutter+" min");
+      if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
+        const o=sp.oevelser.find(x=>x.id===id);det.push((o?o.navn:id)+" "+esc(v))});
+      if(s.feel){const f=FEELS.find(x=>x.id===s.feel);det.push(f?f.label:s.feel)}
+      return '<div class="hist" style="margin-top:8px"><div class="top"><span class="titel">'+sp.navn+'</span>'
+        +'<span class="dato mono">'+esc(paenDato(s.date))+'</span></div>'
+        +'<div class="detaljer mono">'+det.join(" · ")+'</div>'
+        +(s.note?'<div class="note">'+esc(s.note)+'</div>':"")+'</div>';
+    }).join("");
+  }
+
+  if(view==="eksport"){
+    h+='<p class="eksport-info">Kopiér og sæt ind i chatten hos Claude hver 2.–3. uge, sammen med CSV-filer fra dine løb. Så justerer vi programmet derfra.</p>'
+      +'<textarea readonly rows="12" id="ekstekst">'+esc(eksportTekst())+'</textarea>'
+      +'<button class="gem" id="kopier">Kopiér loggen</button>'
+      +'<div class="backup"><h3>Sikkerhedskopi</h3>'
+      +'<p class="hint">Dine pas ligger i telefonen og forsvinder ikke, når appen opdateres. Men skifter du telefon eller rydder browserdata, er de væk – tag en kopi en gang imellem.</p>'
+      +'<button class="gem sek" id="download">Gem backup-fil</button>'
+      +'<label style="margin-top:10px">Gendan fra backup-fil<input type="file" id="upload" accept="application/json"></label>'
+      +'<p class="hint">'+data.sessions.length+' pas gemt · seneste '+(data.sessions.length?esc(data.sessions[data.sessions.length-1].date):'–')+'</p></div>';
+  }
+
+  app.innerHTML=h;
+
+  app.querySelectorAll("[data-plan]").forEach(sel=>sel.onchange=()=>{
+    data.ugeplan[+sel.dataset.plan]=sel.value;gemData(data);render()});
+  app.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{view=b.dataset.view;render()});
+  app.querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>{type=b.dataset.type;nyDraft();render()});
+  app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{
+    const d=draft[b.dataset.ex];d.done=!d.done;laesInputs();render()});
+  app.querySelectorAll("[data-feel]").forEach(b=>b.onclick=()=>{
+    feel=(feel===b.dataset.feel)?null:b.dataset.feel;laesInputs();render()});
+  const gemBtn=document.getElementById("gem");
+  if(gemBtn)gemBtn.onclick=gemSession;
+  const dl=document.getElementById("download");
+  if(dl)dl.onclick=()=>{
+    const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(b);a.download="morgenlog-"+dagsdato()+".json";a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+  const up=document.getElementById("upload");
+  if(up)up.onchange=(e)=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const ny=JSON.parse(r.result);
+        if(!Array.isArray(ny.sessions))throw new Error("forkert format");
+        if(!confirm("Gendan "+ny.sessions.length+" pas? Det, der ligger nu ("+data.sessions.length+" pas), bliver erstattet."))return;
+        data={sessions:ny.sessions,lastWeights:ny.lastWeights||{},ugeplan:ny.ugeplan||STDPLAN.slice()};
+        gemData(data);render();
+      }catch(err){alert("Kunne ikke læse filen.")}
+    };
+    r.readAsText(f);
+  };
+  const kop=document.getElementById("kopier");
+  if(kop)kop.onclick=async()=>{
+    const t=document.getElementById("ekstekst").value;
+    try{await navigator.clipboard.writeText(t);kop.textContent="Kopieret ✓"}
+    catch(e){document.getElementById("ekstekst").select();document.execCommand("copy");kop.textContent="Kopieret ✓"}
+    setTimeout(()=>{kop.textContent="Kopiér loggen"},2000);
+  };
+}
+
+function laesInputs(){
+  document.querySelectorAll("[data-vaegt]").forEach(i=>{draft[i.dataset.vaegt].vaegt=i.value});
+  document.querySelectorAll("[data-reps]").forEach(i=>{draft[i.dataset.reps].reps=i.value});
+  document.querySelectorAll("[data-saet]").forEach(i=>{draft[i.dataset.saet].saet=i.value});
+  const n=document.getElementById("note");if(n)laesInputs._note=n.value;
+  const m=document.getElementById("minutter");if(m)laesInputs._min=m.value;
+}
+
+function gemSession(){
+  laesInputs();
+  const erLoeb=type==="LOEB";
+  const session={date:dagsdato(),type,feel,
+    note:(laesInputs._note||"").trim()||undefined};
+  if(erLoeb){session.minutter=(laesInputs._min||"").trim()||undefined}
+  else{
+    session.entries={};
+    Object.entries(draft).forEach(([k,v])=>{if(v.done)session.entries[k]=(v.saet+" × "+v.reps+" · "+(v.vaegt||"–"))});
+    Object.entries(draft).forEach(([k,v])=>{if(v.done&&v.vaegt&&v.vaegt!=="–")data.lastWeights[k]=v.vaegt});
+  }
+  data.sessions.push(session);
+  gemData(data);
+  gemt=true;laesInputs._note="";laesInputs._min="";
+  render();
+}
+
+render();
+</script>
+<script>
+if("serviceWorker" in navigator)
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
