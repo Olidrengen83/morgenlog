@@ -45,6 +45,11 @@ mod en tabel: HRV (28 %), søvn (25 %), krop og hoved (17 %), belastningsbalance
 HRV og hvilepuls læses som 7-dages snit mod en 42-dages basislinje — enkeltdage
 støjer for meget til at handle på.
 
+**Alle slags pas tæller.** Gåture og cykling kommer med i den samlede
+belastning som deres egen kategori (rav i diagrammet) — anstrengelsen regnes af
+pulsen, så en rask gåtur og en hård cykeltur vejer det, de faktisk kostede.
+Kun træninger logget som «Anden» uden genkendelig type springes over.
+
 **Træningsfiler** (FIT, GPX og TCX) regnes ud i telefonen. Løb: distance,
 bevægetid, tempo, kilometersplits, puls, kadence, stigning og afkobling — fart
 pr. hjerteslag i anden halvdel mod første; over cirka 5 % kostede turen mere,
