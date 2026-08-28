@@ -324,6 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
+const APPVERSION=4;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -2459,6 +2460,8 @@ function visData(){
     'Tag en sikkerhedskopi først.</p>'+
     '<button class="gem sek" id="sletAlt" style="border-color:var(--st-kritisk);'+
     'color:var(--st-kritisk)">Slet alt</button></div>';
+  h+='<p class="lille" style="text-align:center;margin-top:20px">Morgenlog · version '+
+    APPVERSION+'</p>';
   return h;
 }
 
