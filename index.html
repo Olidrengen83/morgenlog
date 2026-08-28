@@ -10,51 +10,83 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Morgenlog">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root{
-    --nat:#0D1320; --kort:#161F30; --kant:#243048;
-    --tekst:#E9EEF6; --daempet:#8A96AB;
+    /* Fladen: natten før huset vågner, og gryet der løfter den */
+    --nat:#0D1320; --kort:#161F30; --kant:#243048; --kant2:#2E3A55;
+    --tekst:#E9EEF6; --daempet:#8A96AB; --svag:#5F6C82;
     --gry:#E5A45F; --gryDim:#3A2E1E;
     --ok:#84B68F; --okDim:#1D2B22;
+
+    /* Serier (identitet). Valideret mod #161F30, mørk tilstand, alle par.
+       Løb #3987E5 ↔ Styrke #D55181: CVD ΔE 15.9 · normalsyn ΔE 26.5 · begge >3:1. */
+    --s-loeb:#3987E5; --s-styrke:#D55181;
+
+    /* Status (tilstand). Fast palet – aldrig genbrugt som serie. */
+    --st-god:#0CA30C; --st-varsel:#FAB219; --st-alvor:#EC835A; --st-kritisk:#D03B3B;
+
+    /* Diagramkrom */
+    --grid:#232C41; --akse:#2E3850;
   }
+  :root{ --s-loeb-dim:rgba(57,135,229,.16); --s-styrke-dim:rgba(213,81,129,.16) }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   body{
     margin:0; background:var(--nat); color:var(--tekst);
-    font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;
-    padding:env(safe-area-inset-top) 16px 40px;
-    min-height:100vh;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:env(safe-area-inset-top) 16px 48px;
+    min-height:100vh; -webkit-text-size-adjust:100%;
   }
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-  .wrap{max-width:430px;margin:0 auto;padding-top:32px}
-  .top{display:flex;justify-content:space-between;align-items:baseline}
+  .tal{font-variant-numeric:tabular-nums}
+  .wrap{max-width:460px;margin:0 auto;padding-top:28px}
+
+  /* --- top --- */
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
   .eyebrow{font-size:11px;letter-spacing:.2em;color:var(--gry)}
   h1{font-size:24px;font-weight:600;margin:4px 0 0}
   .dato{font-size:11px;color:var(--daempet)}
-  .uge{display:flex;gap:8px;margin-top:20px}
+  .tandhjul{background:transparent;border:1px solid var(--kant);color:var(--daempet);
+    border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;flex-shrink:0}
+
+  /* --- ugestribe --- */
+  .uge{display:flex;gap:6px;margin-top:18px}
   .ugedag{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-  .ugecelle{width:100%;height:32px;border-radius:6px;border:1px solid var(--kant);
+  .ugecelle{width:100%;height:34px;border-radius:6px;border:1px solid var(--kant);
     background:var(--kort);display:flex;align-items:center;justify-content:center;
-    font-size:12px;color:var(--daempet)}
-  .ugecelle.logget{background:var(--okDim);border-color:var(--kant);color:var(--ok)}
+    font-size:12px;color:var(--daempet);position:relative;overflow:hidden}
+  .ugecelle.logget{color:var(--tekst)}
   .ugecelle.idag{border-color:var(--gry)}
+  .ugecelle i{position:absolute;left:0;right:0;bottom:0;height:3px;font-style:normal}
   .ugelabel{font-size:11px;color:var(--daempet)}
   .ugelabel.idag{color:var(--gry)}
-  .vagt{margin-top:16px;padding:12px;border-radius:8px;font-size:14px;
-    background:var(--gryDim);border:1px solid var(--gry)}
-  .nav{display:flex;gap:8px;margin-top:24px}
-  .nav button{font-size:11px;letter-spacing:.1em;padding:8px 12px;border-radius:6px;
-    background:transparent;border:1px solid var(--kant);color:var(--daempet);cursor:pointer}
+
+  /* --- navigation --- */
+  .nav{display:flex;gap:6px;margin-top:22px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{font-size:11px;letter-spacing:.09em;padding:8px 11px;border-radius:6px;
+    background:transparent;border:1px solid var(--kant);color:var(--daempet);
+    cursor:pointer;white-space:nowrap;flex-shrink:0}
   .nav button.aktiv{background:var(--kort);border-color:var(--gry);color:var(--tekst)}
-  .typer{display:flex;gap:8px;margin-top:20px}
-  .typer button{font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer;
-    background:var(--kort);border:1px solid var(--kant);color:var(--daempet)}
-  .typer button.aktiv{background:var(--gry);border-color:var(--gry);color:var(--nat)}
-  .kort{margin-top:16px;background:var(--kort);border:1px solid var(--kant);
+
+  /* --- kort --- */
+  .kort{margin-top:14px;background:var(--kort);border:1px solid var(--kant);
     border-radius:10px;padding:16px}
-  .kort-top{display:flex;justify-content:space-between;align-items:baseline}
+  .kort-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
   .kort-top h2{font-size:16px;font-weight:600;margin:0}
   .kort-top span{font-size:12px;color:var(--daempet)}
+  h3.afsnit{font-size:11px;letter-spacing:.16em;color:var(--daempet);
+    margin:26px 0 0;font-weight:500}
+
+  /* --- vagt/besked --- */
+  .vagt{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.45;
+    background:var(--gryDim);border:1px solid var(--gry)}
+  .vagt.ro{background:var(--okDim);border-color:var(--ok)}
+  .vagt.stop{background:rgba(208,59,59,.14);border-color:var(--st-kritisk)}
+  .vagt b{font-weight:600}
+
+  /* --- øvelsesrækker --- */
   .raekke{display:flex;align-items:flex-start;gap:12px;padding:12px 0;
     border-top:1px solid var(--kant)}
   .raekke:first-of-type{border-top:none}
@@ -64,6 +96,7 @@
   .oev{flex:1;min-width:0}
   .oev .navn{font-size:14px;padding-top:6px}
   .oev .navn .vid{color:var(--gry);text-decoration:none;font-size:12px;padding:2px 4px}
+  .oev .sidst{font-size:11px;color:var(--svag);margin-top:2px}
   .valg{display:flex;align-items:center;gap:4px;margin-top:6px;flex-wrap:wrap}
   .valg select{background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
     border-radius:6px;padding:6px 4px;font-size:12px;
@@ -73,43 +106,139 @@
   .valg .s-reps{flex:1;min-width:84px}
   .valg .s-vaegt{flex:1;min-width:96px}
   .valg .gange{font-size:11px;color:var(--daempet)}
-  input,textarea{
+
+  /* --- felter --- */
+  input,textarea,select.bred{
     background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
-    border-radius:6px;padding:8px 10px;font-size:14px;width:100%}
-  input:focus,textarea:focus{outline:none;border-color:var(--gry)}
-  
+    border-radius:6px;padding:9px 10px;font-size:14px;width:100%}
+  input:focus,textarea:focus,select.bred:focus{outline:none;border-color:var(--gry)}
+  label{font-size:13px;color:var(--daempet);display:block;margin-top:12px}
+  label input,label select{margin-top:6px}
+  .to{display:flex;gap:10px}
+  .to>label{flex:1;min-width:0}
+  .hint{font-size:12px;color:var(--daempet);margin:8px 0 0;line-height:1.5}
+  .tom{font-size:14px;color:var(--daempet);margin-top:20px;line-height:1.5}
+
+  /* --- skala 1-5 --- */
+  .skala{display:flex;gap:6px;margin-top:6px}
+  .skala button{flex:1;padding:9px 0;border-radius:6px;font-size:13px;cursor:pointer;
+    background:var(--nat);border:1px solid var(--kant);color:var(--daempet)}
+  .skala button.aktiv{background:var(--gryDim);border-color:var(--gry);color:var(--tekst)}
+  .skalatekst{font-size:11px;color:var(--svag);margin-top:5px;display:flex;
+    justify-content:space-between}
+
   .feels{display:flex;gap:8px;margin-top:16px}
-  .feels button{flex:1;padding:8px 0;border-radius:6px;font-size:14px;cursor:pointer;
+  .feels button{flex:1;padding:9px 0;border-radius:6px;font-size:14px;cursor:pointer;
     background:var(--nat);border:1px solid var(--kant);color:var(--daempet)}
   .feels button.aktiv{background:var(--gryDim);border-color:var(--gry);color:var(--tekst)}
+
+  /* --- knapper --- */
   .gem{margin-top:16px;width:100%;padding:12px 0;border-radius:8px;border:none;
     font-size:15px;font-weight:600;cursor:pointer;background:var(--gry);color:var(--nat)}
-  .gem:disabled{background:var(--kant);color:var(--daempet)}
+  .gem:disabled{background:var(--kant);color:var(--daempet);cursor:default}
+  .gem.sek{background:transparent;border:1px solid var(--kant);color:var(--tekst);font-weight:500}
+  .knaprad{display:flex;gap:8px}
+  .knaprad .gem{flex:1}
+
   .kvittering{text-align:center;padding:24px 0 8px}
   .kvittering .stor{font-size:18px;color:var(--ok)}
-  .kvittering p{font-size:14px;color:var(--daempet);margin:4px 0 0}
+  .kvittering p{font-size:14px;color:var(--daempet);margin:6px 0 0;line-height:1.5}
+
+  /* --- parathedsring (heltal + bue) --- */
+  .ring{display:flex;align-items:center;gap:18px}
+  .ring svg{flex-shrink:0}
+  .ringtal{font-size:34px;font-weight:600;line-height:1}
+  .ringband{font-size:15px;font-weight:600;margin-top:2px}
+  .ringund{font-size:12px;color:var(--daempet);margin-top:4px;line-height:1.45}
+  .ringikon{font-size:13px;margin-right:5px}
+
+  /* --- nøgletal --- */
+  .fliser{display:flex;gap:8px;margin-top:14px}
+  .flise{flex:1;background:var(--nat);border:1px solid var(--kant);border-radius:8px;
+    padding:10px;min-width:0}
+  .flise .navn{font-size:10px;letter-spacing:.1em;color:var(--daempet)}
+  .flise .vaerdi{font-size:19px;font-weight:600;margin-top:4px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .flise .under{font-size:11px;color:var(--svag);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* --- diagrammer --- */
+  .diagram{margin-top:12px}
+  .diagram svg{display:block;width:100%;height:auto;overflow:visible}
+  .legende{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;
+    color:var(--daempet)}
+  .legende span{display:flex;align-items:center;gap:5px}
+  .legende i{width:9px;height:9px;border-radius:2px;display:inline-block;font-style:normal}
+  .legende i.linje{height:2px;border-radius:1px;width:14px}
+  .udlaes{margin-top:8px;font-size:12px;color:var(--daempet);min-height:17px;
+    border-top:1px solid var(--kant);padding-top:8px}
+  .udlaes b{color:var(--tekst);font-weight:600}
+  .maalebar{margin-top:6px}
+
+  /* --- tabelvisning --- */
+  table.data{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+  table.data th{text-align:left;font-weight:500;color:var(--daempet);
+    font-size:10px;letter-spacing:.08em;padding:6px 6px 6px 0;
+    border-bottom:1px solid var(--kant)}
+  table.data td{padding:7px 6px 7px 0;border-bottom:1px solid var(--grid);
+    color:var(--tekst);font-variant-numeric:tabular-nums}
+  table.data td.d{color:var(--daempet)}
+  .rul{overflow-x:auto}
+
+  /* --- historik --- */
   .hist{margin-top:8px;background:var(--kort);border:1px solid var(--kant);
     border-radius:10px;padding:12px}
-  .hist .top{display:flex;justify-content:space-between}
+  .hist .hrad{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
   .hist .titel{font-size:14px;font-weight:600}
-  .hist .detaljer{font-size:11px;color:var(--daempet);margin-top:4px}
-  .hist .note{font-size:12px;margin-top:4px}
+  .hist .detaljer{font-size:11px;color:var(--daempet);margin-top:5px;line-height:1.6}
+  .hist .note{font-size:12px;margin-top:5px;color:var(--tekst)}
+  .maerke{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+
+  /* --- plan --- */
   .planraekke{display:flex;justify-content:space-between;align-items:center;
-    padding:10px 0;border-top:1px solid var(--kant);font-size:14px}
+    gap:10px;padding:10px 0;border-top:1px solid var(--kant);font-size:14px}
   .planraekke:first-child{border-top:none}
   .planraekke select{background:var(--nat);border:1px solid var(--kant);color:var(--tekst);
-    border-radius:6px;padding:6px 8px;font-size:13px;-webkit-appearance:none;appearance:none}
-  .planraekke select:focus{outline:none;border-color:var(--gry)}
-  .backup{margin-top:28px;padding-top:20px;border-top:1px solid var(--kant)}
+    border-radius:6px;padding:7px 8px;font-size:13px;-webkit-appearance:none;appearance:none}
+  .planraekke .byt{background:transparent;border:1px solid var(--kant);color:var(--daempet);
+    border-radius:6px;width:30px;height:30px;font-size:13px;cursor:pointer;flex-shrink:0}
+
+  /* --- fil --- */
+  .drop{margin-top:12px;border:1px dashed var(--kant2);border-radius:10px;
+    padding:20px 14px;text-align:center;color:var(--daempet);font-size:13px;
+    cursor:pointer;line-height:1.5}
+  .drop.over{border-color:var(--gry);background:var(--gryDim);color:var(--tekst)}
+  .drop b{color:var(--tekst);font-weight:600;display:block;margin-bottom:4px}
+  input[type=file]{font-size:12px;color:var(--daempet);border:none;padding:6px 0;
+    background:transparent}
+  .bom{height:4px;background:var(--nat);border-radius:2px;overflow:hidden;margin-top:10px}
+  .bom i{display:block;height:100%;background:var(--gry);width:0;font-style:normal;
+    transition:width .2s}
+
+  /* --- chat --- */
+  .boble{margin-top:10px;padding:11px 13px;border-radius:10px;font-size:14px;
+    line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .boble.mig{background:var(--kant);margin-left:36px}
+  .boble.claude{background:var(--kort);border:1px solid var(--kant);margin-right:12px}
+  .boble.fejl{background:rgba(208,59,59,.14);border:1px solid var(--st-kritisk)}
+  .boble b{font-weight:600}
+  .skriv{display:flex;gap:8px;margin-top:14px;align-items:flex-end}
+  .skriv textarea{flex:1;min-height:44px;max-height:140px;resize:none;
+    font-family:inherit;font-size:14px}
+  .skriv button{flex-shrink:0;width:44px;height:44px;border-radius:8px;border:none;
+    background:var(--gry);color:var(--nat);font-size:17px;cursor:pointer}
+  .skriv button:disabled{background:var(--kant);color:var(--daempet)}
+  .forslag{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .forslag button{font-size:12px;padding:7px 10px;border-radius:14px;cursor:pointer;
+    background:var(--nat);border:1px solid var(--kant);color:var(--daempet);text-align:left}
+
+  textarea.udtraek{font-family:ui-monospace,monospace;font-size:11px;margin-top:12px;
+    line-height:1.5}
+
+  .backup{margin-top:26px;padding-top:20px;border-top:1px solid var(--kant)}
   .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
-  .gem.sek{background:transparent;border:1px solid var(--kant);color:var(--tekst);font-weight:500}
-  .backup input[type=file]{font-size:12px;color:var(--daempet);border:none;padding:6px 0}
-  .tom{font-size:14px;color:var(--daempet);margin-top:20px}
-  .eksport-info{font-size:14px;color:var(--daempet);margin-top:20px}
-  textarea{font-family:ui-monospace,monospace;font-size:12px;margin-top:12px}
-  .hint{font-size:12px;color:var(--daempet);margin-top:8px}
-  label{font-size:13px;color:var(--daempet);display:block;margin-top:12px}
-  label input{margin-top:6px}
+  .lille{font-size:11px;color:var(--svag);margin-top:6px;line-height:1.5}
+
   @media (prefers-reduced-motion:no-preference){
     .kort{animation:ind .18s ease-out}
     @keyframes ind{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -119,32 +248,44 @@
 <body>
 <div class="wrap" id="app"></div>
 <script>
-const PROGRAM = {
-  A:{navn:"Styrke A",under:"Ben & træk",oevelser:[
-    {id:"goblet",vid:"https://www.youtube.com/results?search_query=goblet+squat+form+tutorial",navn:"Goblet squat",maal:"3 × 8–10"},
-    {id:"rdl",vid:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift+kettlebell+tutorial",navn:"Etbens-RDL",maal:"3 × 8/side"},
-    {id:"row",vid:"https://www.youtube.com/results?search_query=kettlebell+bent+over+row+form",navn:"Roning",maal:"3 × 10–12"},
-    {id:"step",vid:"https://www.youtube.com/results?search_query=bulgarian+split+squat+vs+step+up+form",navn:"Step-ups / split squat",maal:"2 × 10/side"},
-    {id:"pallof",vid:"https://www.youtube.com/results?search_query=pallof+press+band+tutorial",navn:"Pallof press",maal:"2 × 10/side"}]},
-  B:{navn:"Styrke B",under:"Pres, hofte & fod",oevelser:[
-    {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"3 × max−2"},
-    {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"3 × 8–10"},
-    {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"3 × 10–12"},
-    {id:"monster",vid:"https://www.youtube.com/results?search_query=monster+walk+band+glute+exercise",navn:"Monster walks",maal:"3 × 12–15"},
-    {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"3 × 12–15/side"},
-    {id:"carry",vid:"https://www.youtube.com/results?search_query=suitcase+carry+kettlebell+technique",navn:"Suitcase carry",maal:"3 × 30–40 m/side"}]},
-  C:{navn:"Styrke C",under:"Swings, core & brystryg",oevelser:[
-    {id:"swing",vid:"https://www.youtube.com/results?search_query=hardstyle+kettlebell+swing+strongfirst+tutorial",navn:"KB swings",maal:"5 × 15"},
-    {id:"tgu",vid:"https://www.youtube.com/results?search_query=turkish+get+up+step+by+step+strongfirst",navn:"Turkish get-up",maal:"3–4/side"},
-    {id:"pull",vid:"https://www.youtube.com/results?search_query=pull+up+progression+beginner+negatives",navn:"Træk-progression",maal:"3 × 3–5"},
-    {id:"deadbug",vid:"https://www.youtube.com/results?search_query=dead+bug+exercise+proper+form",navn:"Dead bug",maal:"3 × 8/side"},
-    {id:"birddog",vid:"https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form",navn:"Bird dog",maal:"2 × 8/side"},
-    {id:"sideplank",vid:"https://www.youtube.com/results?search_query=side+plank+proper+form+mcgill",navn:"Sideplanke",maal:"2 × 20–30 sek/side"},
-    {id:"thorax",vid:"https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",navn:"Brystrygs-mobilitet",maal:"5 min"}]},
-  LOEB:{navn:"Løb",under:"Snakketempo",oevelser:[]}
-};
+"use strict";
+/* ==========================================================================
+   1. PROGRAM OG KONSTANTER
+   ========================================================================== */
 
-// Valgmuligheder: [standard sæt, liste over reps/tid, liste over vægt]
+const PROGRAM = {
+  A:{navn:"Styrke A",under:"Ben & træk",farve:"styrke",oevelser:[
+    {id:"goblet",vid:"https://www.youtube.com/results?search_query=goblet+squat+form+tutorial",navn:"Goblet squat",maal:"3 × 8–10",hvorfor:"Kvadriceps og knæ – bærer nedad i bakkerne"},
+    {id:"rdl",vid:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift+kettlebell+tutorial",navn:"Etbens-RDL",maal:"3 × 8/side",hvorfor:"Baglår og balance – den vigtigste enkeltøvelse for løbere"},
+    {id:"row",vid:"https://www.youtube.com/results?search_query=kettlebell+bent+over+row+form",navn:"Roning",maal:"3 × 10–12",hvorfor:"Øvre ryg – holder overkroppen oprejst sent i løbet"},
+    {id:"step",vid:"https://www.youtube.com/results?search_query=bulgarian+split+squat+vs+step+up+form",navn:"Step-ups / split squat",maal:"2 × 10/side",hvorfor:"Etbenskraft – det løb faktisk er"},
+    {id:"pallof",vid:"https://www.youtube.com/results?search_query=pallof+press+band+tutorial",navn:"Pallof press",maal:"2 × 10/side",hvorfor:"Anti-rotation – holder bækkenet i ro"}]},
+  B:{navn:"Styrke B",under:"Pres, hofte & fod",farve:"styrke",oevelser:[
+    {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"3 × max−2",hvorfor:"Overkropsbalance"},
+    {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"3 × 8–10",hvorfor:"Skulderstabilitet og brystryg"},
+    {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"3 × 10–12",hvorfor:"Ballemuskler – motoren i frasparket"},
+    {id:"monster",vid:"https://www.youtube.com/results?search_query=monster+walk+band+glute+exercise",navn:"Monster walks",maal:"3 × 12–15",hvorfor:"Gluteus medius – stopper knæet i at falde ind"},
+    {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"3 × 12–15/side",hvorfor:"Akillessene – den hyppigste løbeskade"},
+    {id:"carry",vid:"https://www.youtube.com/results?search_query=suitcase+carry+kettlebell+technique",navn:"Suitcase carry",maal:"3 × 30–40 m/side",hvorfor:"Sidestabilitet under træthed"}]},
+  C:{navn:"Styrke C",under:"Swings, core & brystryg",farve:"styrke",oevelser:[
+    {id:"swing",vid:"https://www.youtube.com/results?search_query=hardstyle+kettlebell+swing+strongfirst+tutorial",navn:"KB swings",maal:"5 × 15",hvorfor:"Eksplosiv hofte – uden at belaste knæene"},
+    {id:"tgu",vid:"https://www.youtube.com/results?search_query=turkish+get+up+step+by+step+strongfirst",navn:"Turkish get-up",maal:"3–4/side",hvorfor:"Helkropskontrol – langsomt og bevidst"},
+    {id:"pull",vid:"https://www.youtube.com/results?search_query=pull+up+progression+beginner+negatives",navn:"Træk-progression",maal:"3 × 3–5",hvorfor:"Trækstyrke"},
+    {id:"deadbug",vid:"https://www.youtube.com/results?search_query=dead+bug+exercise+proper+form",navn:"Dead bug",maal:"3 × 8/side",hvorfor:"Dyb core uden rygbelastning"},
+    {id:"birddog",vid:"https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form",navn:"Bird dog",maal:"2 × 8/side",hvorfor:"Kobler skulder og modsat hofte"},
+    {id:"sideplank",vid:"https://www.youtube.com/results?search_query=side+plank+proper+form+mcgill",navn:"Sideplanke",maal:"2 × 20–30 sek/side",hvorfor:"Sidekæden – direkte kobling til SI-leddet"},
+    {id:"thorax",vid:"https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",navn:"Brystrygs-mobilitet",maal:"5 min",hvorfor:"Giver vejrtrækningen plads"}]},
+  MOB:{navn:"Mobilitet",under:"Rød dag – bevægelse uden belastning",farve:"styrke",oevelser:[
+    {id:"thorax2",vid:"https://www.youtube.com/results?search_query=thoracic+extension+foam+roller+mobility",navn:"Brystrygs-mobilitet",maal:"5 min",hvorfor:"Åbner uden at koste noget"},
+    {id:"hofte",vid:"https://www.youtube.com/results?search_query=couch+stretch+hip+flexor+mobility",navn:"Hoftebøjer-stræk",maal:"2 × 60 sek/side",hvorfor:"Modvægt til alle timerne siddende"},
+    {id:"90_90",vid:"https://www.youtube.com/results?search_query=90+90+hip+switch+mobility",navn:"90/90 hofteskift",maal:"2 × 8/side",hvorfor:"Rotation i hoften, ikke i ryggen"},
+    {id:"ankel",vid:"https://www.youtube.com/results?search_query=ankle+dorsiflexion+mobility+drill+knee+to+wall",navn:"Ankelmobilitet",maal:"2 × 10/side",hvorfor:"Stiv ankel flytter arbejdet op i knæet"},
+    {id:"gang",vid:"",navn:"Rolig gåtur",maal:"20–30 min",hvorfor:"Blodgennemstrømning uden belastning"}]},
+  LOEB:{navn:"Løb",under:"Snakketempo",farve:"loeb",oevelser:[]}
+};
+const STYRKETYPER=["A","B","C"];
+const ERSTYRKE=(t)=>t==="A"||t==="B"||t==="C"||t==="MOB";
+
 const REPS={
   goblet:["6","8","10","12"], rdl:["6/side","8/side","10/side"],
   row:["8","10","12","15"], step:["8/side","10/side","12/side"],
@@ -156,236 +297,2018 @@ const REPS={
   swing:["10","12","15","20"], tgu:["1/side","2/side","3/side","4/side"],
   pull:["3","4","5","6","8"], deadbug:["6/side","8/side","10/side"],
   birddog:["6/side","8/side","10/side"], sideplank:["20 sek/side","30 sek/side","45 sek/side"],
-  thorax:["3 min","5 min","8 min"]
+  thorax:["3 min","5 min","8 min"], thorax2:["3 min","5 min","8 min"],
+  hofte:["45 sek/side","60 sek/side","90 sek/side"], "90_90":["6/side","8/side","10/side"],
+  ankel:["8/side","10/side","12/side"], gang:["20 min","30 min","45 min"]
 };
-const SAET=["1","2","3","4","5"];
-const VAEGT=["–","Kropsvægt","12 kg","16 kg","24 kg","Elastik let","Elastik middel","Elastik hård"];
-function stdSaet(maal){const m=maal.match(/^(\d)/);return m?m[1]:"3"}
-function stdReps(id,maal){const l=REPS[id]||[];return l.length?l[Math.min(1,l.length-1)]:maal}
-const STDPLAN=["FRI","LOEB","A","LOEB","B","C","LOEB"]; // index = getDay(), 0=søndag
+const SAET=["1","2","3","4","5","6"];
+const VAEGT=["–","Kropsvægt","8 kg","12 kg","16 kg","20 kg","24 kg","28 kg","32 kg",
+  "Elastik let","Elastik middel","Elastik hård"];
+const FEELS=[{id:"let",label:"For let",rpe:4},{id:"tilpas",label:"Tilpas",rpe:6},
+  {id:"haardt",label:"For hårdt",rpe:8.5}];
+const LOEBTYPER=[
+  {id:"rolig",navn:"Roligt / snakketempo",rpe:4},
+  {id:"lang",navn:"Langtur",rpe:5},
+  {id:"interval",navn:"Interval / fart",rpe:8},
+  {id:"tempo",navn:"Tempo / tærskel",rpe:7}
+];
+const STDPLAN=["FRI","LOEB","A","LOEB","B","C","LOEB"]; // index = getDay(), 0 = søndag
 const DAGE=["M","T","O","T","F","L","S"];
-const FEELS=[{id:"let",label:"For let"},{id:"tilpas",label:"Tilpas"},{id:"haardt",label:"For hårdt"}];
-const KEY="traening-v1";
+const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
+const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
+  ["MOB","Mobilitet"],["FRI","Fri"]];
 
-function hentData(){
-  try{const r=localStorage.getItem(KEY);const d=r?JSON.parse(r):{};
-    return {sessions:d.sessions||[],lastWeights:d.lastWeights||{},ugeplan:d.ugeplan||STDPLAN.slice()}}
-  catch(e){return {sessions:[],lastWeights:{},ugeplan:STDPLAN.slice()}}
+const KEY="morgenlog-v2";
+const GAMMELKEY="traening-v1";
+const MODEL="claude-opus-5";
+
+/* ==========================================================================
+   2. SMÅ HJÆLPERE
+   ========================================================================== */
+
+const esc=(s)=>String(s==null?"":s).replace(/[&<>"']/g,c=>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const klem=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const erTal=(v)=>typeof v==="number"&&isFinite(v);
+function num(v,dec){
+  if(!erTal(v))return "–";
+  return v.toFixed(dec==null?0:dec).replace(".",",");
 }
-function gemData(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){alert("Kunne ikke gemme.")}}
-function dagsdato(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function paenDato(iso){return new Date(iso+"T12:00:00").toLocaleDateString("da-DK",{weekday:"short",day:"numeric",month:"short"})}
+function iso(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+
+    String(d.getDate()).padStart(2,"0");
+}
+const idag=()=>iso(new Date());
+function fraIso(s){return new Date(s+"T12:00:00")}
+function plusDage(isoStr,n){const d=fraIso(isoStr);d.setDate(d.getDate()+n);return iso(d)}
+function dageMellem(a,b){
+  return Math.round((fraIso(b)-fraIso(a))/86400000);
+}
+function paenDato(s){
+  return fraIso(s).toLocaleDateString("da-DK",{weekday:"short",day:"numeric",month:"short"});
+}
+function kortDato(s){
+  return fraIso(s).toLocaleDateString("da-DK",{day:"numeric",month:"short"});
+}
 function ugensDatoer(){
-  const nu=new Date(),dag=(nu.getDay()+6)%7,man=new Date(nu);
-  man.setDate(nu.getDate()-dag);
-  return Array.from({length:7},(_,i)=>{const d=new Date(man);d.setDate(man.getDate()+i);
-    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")});
+  const nu=new Date(),forskyd=(nu.getDay()+6)%7,man=new Date(nu);
+  man.setDate(nu.getDate()-forskyd);
+  return Array.from({length:7},(_,i)=>{const d=new Date(man);d.setDate(man.getDate()+i);return iso(d)});
 }
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function sidsteNDatoer(n,slut){
+  const ud=[],s=slut||idag();
+  for(let i=n-1;i>=0;i--)ud.push(plusDage(s,-i));
+  return ud;
+}
+function tidTekst(sek){
+  if(!erTal(sek))return "–";
+  const t=Math.floor(sek/3600),m=Math.floor((sek%3600)/60),s=Math.round(sek%60);
+  return t?t+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
+          :m+":"+String(s).padStart(2,"0");
+}
+function tempoTekst(sekPrKm){
+  if(!erTal(sekPrKm)||sekPrKm<=0)return "–";
+  const m=Math.floor(sekPrKm/60),s=Math.round(sekPrKm%60);
+  return m+":"+String(s).padStart(2,"0")+"/km";
+}
+function gennemsnit(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function spredning(a){
+  if(a.length<2)return null;
+  const m=gennemsnit(a);
+  return Math.sqrt(a.reduce((s,v)=>s+(v-m)*(v-m),0)/(a.length-1));
+}
+function nyId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+/* ==========================================================================
+   3. LAGER
+   ========================================================================== */
+
+const STDPROFIL={maxPuls:186,hvilePuls:52,soevnBehov:7.5,foedselsaar:null};
+
+function tomtData(){
+  return {v:2,profil:Object.assign({},STDPROFIL),ugeplan:STDPLAN.slice(),
+    sessions:[],morgener:[],sidsteVaegte:{},ui:{apiNoegle:"",gemNoegle:false}};
+}
+function hentData(){
+  const d=tomtData();
+  try{
+    const raa=localStorage.getItem(KEY);
+    if(raa){
+      const p=JSON.parse(raa);
+      if(p&&typeof p==="object"){
+        if(p.profil)Object.assign(d.profil,p.profil);
+        if(Array.isArray(p.ugeplan)&&p.ugeplan.length===7)d.ugeplan=p.ugeplan;
+        if(Array.isArray(p.sessions))d.sessions=p.sessions;
+        if(Array.isArray(p.morgener))d.morgener=p.morgener;
+        if(p.sidsteVaegte)d.sidsteVaegte=p.sidsteVaegte;
+        if(p.ui)Object.assign(d.ui,p.ui);
+      }
+      return oprydData(d);
+    }
+    // Migrering fra første version: intet må gå tabt.
+    const gl=localStorage.getItem(GAMMELKEY);
+    if(gl){
+      const p=JSON.parse(gl);
+      if(Array.isArray(p.sessions))d.sessions=p.sessions.map(s=>Object.assign({id:nyId()},s,
+        {dato:s.dato||s.date,minutter:erTal(+s.minutter)?+s.minutter:undefined}));
+      if(p.lastWeights)d.sidsteVaegte=p.lastWeights;
+      if(Array.isArray(p.ugeplan)&&p.ugeplan.length===7)d.ugeplan=p.ugeplan;
+    }
+  }catch(e){/* et defekt lager må ikke tage appen med sig */}
+  return oprydData(d);
+}
+function oprydData(d){
+  d.sessions=d.sessions.filter(s=>s&&s.dato&&PROGRAM[s.type]);
+  d.sessions.forEach(s=>{if(!s.id)s.id=nyId()});
+  d.sessions.sort((a,b)=>a.dato<b.dato?-1:a.dato>b.dato?1:0);
+  d.morgener=d.morgener.filter(m=>m&&m.dato);
+  d.morgener.sort((a,b)=>a.dato<b.dato?-1:a.dato>b.dato?1:0);
+  return d;
+}
+let gemFejl=false;
+function gemData(d){
+  nulstilBeregning();
+  try{localStorage.setItem(KEY,JSON.stringify(rensTilLager(d)));gemFejl=false}
+  catch(e){gemFejl=true}
+}
+function rensTilLager(d){
+  const k=JSON.parse(JSON.stringify(d));
+  if(!k.ui.gemNoegle)k.ui.apiNoegle="";
+  return k;
+}
+function morgenFor(d,dato){return d.morgener.find(m=>m.dato===dato)||null}
+function sessionerFor(d,dato){return d.sessions.filter(s=>s.dato===dato)}
+
+/* ==========================================================================
+   4. BELASTNING
+   Én valuta for alt: sRPE-load = minutter × anstrengelse (1–10). Foster's
+   metode. Det er den eneste måde at lægge styrke og løb sammen på uden at
+   sammenligne æbler og pærer.
+   ========================================================================== */
+
+function anstrengelse(s,profil){
+  const feel=FEELS.find(f=>f.id===s.feel);
+  const feelRpe=feel?feel.rpe:null;
+  let pulsRpe=null;
+  if(s.type==="LOEB"&&s.loeb&&erTal(s.loeb.gnsPuls)&&profil.maxPuls>profil.hvilePuls+20){
+    const hrr=(s.loeb.gnsPuls-profil.hvilePuls)/(profil.maxPuls-profil.hvilePuls);
+    pulsRpe=klem(1+12*(hrr-0.35),2,10);
+  }
+  let planRpe=null;
+  if(s.type==="LOEB"){
+    const t=LOEBTYPER.find(x=>x.id===s.loebType);
+    planRpe=t?t.rpe:4.5;
+  }else if(s.type==="MOB"){planRpe=2.5}
+  else{planRpe=6}
+  // Pulsen vejer tungest når den findes; følelsen korrigerer den.
+  if(pulsRpe!=null&&feelRpe!=null)return 0.7*pulsRpe+0.3*feelRpe;
+  if(pulsRpe!=null)return pulsRpe;
+  if(feelRpe!=null)return 0.6*feelRpe+0.4*planRpe;
+  return planRpe;
+}
+function varighed(s){
+  if(erTal(s.minutter)&&s.minutter>0)return s.minutter;
+  if(s.type==="LOEB"&&s.loeb&&erTal(s.loeb.tidSek))return s.loeb.tidSek/60;
+  if(ERSTYRKE(s.type)){
+    const n=s.entries?Object.keys(s.entries).length:0;
+    return n?klem(10+n*7,20,90):(s.type==="MOB"?25:45);
+  }
+  return 30;
+}
+function sessionLoad(s,profil){
+  return Math.round(varighed(s)*anstrengelse(s,profil));
+}
+function dagligeLoads(d,datoer){
+  const kort={};
+  datoer.forEach(dt=>kort[dt]={loeb:0,styrke:0,total:0,pas:[]});
+  d.sessions.forEach(s=>{
+    if(!kort[s.dato])return;
+    const l=sessionLoad(s,d.profil);
+    kort[s.dato][s.type==="LOEB"?"loeb":"styrke"]+=l;
+    kort[s.dato].total+=l;
+    kort[s.dato].pas.push(s);
+  });
+  return kort;
+}
+
+/* Eksponentielt vægtede snit: akut (τ=7) mod kronisk (τ=28).
+   Forholdet mellem dem er det tal, der forudsiger overbelastning bedst. */
+let beregnVersion=0, beregnCache={};
+function nulstilBeregning(){beregnVersion++;beregnCache={}}
+function belastningsTal(d,tilDato){
+  const slut=tilDato||idag();
+  const noegle=beregnVersion+"|"+slut;
+  if(beregnCache[noegle])return beregnCache[noegle];
+  const start=d.sessions.length?d.sessions[0].dato:slut;
+  const spand=klem(dageMellem(start,slut)+1,1,400);
+  const datoer=sidsteNDatoer(spand,slut);
+  const kort=dagligeLoads(d,datoer);
+  const foerste14=datoer.slice(0,14).map(dt=>kort[dt].total);
+  let atl=gennemsnit(foerste14)||0, ctl=atl;
+  const serie=[];
+  datoer.forEach(dt=>{
+    const l=kort[dt].total;
+    atl=atl+(l-atl)/7;
+    ctl=ctl+(l-ctl)/28;
+    serie.push({dato:dt,load:l,loeb:kort[dt].loeb,styrke:kort[dt].styrke,atl:atl,ctl:ctl});
+  });
+  const sidste7=datoer.slice(-7).map(dt=>kort[dt].total);
+  const forrige7=datoer.slice(-14,-7).map(dt=>kort[dt].total);
+  const ugeSum=sidste7.reduce((a,b)=>a+b,0);
+  const forrigeSum=forrige7.reduce((a,b)=>a+b,0);
+  const sd=spredning(sidste7);
+  const m=gennemsnit(sidste7);
+  const monotoni=(sd&&sd>0.0001)?m/sd:(ugeSum>0?3.0:null);
+  const svar={
+    serie:serie,
+    atl:atl, ctl:ctl,
+    forhold:ctl>5?atl/ctl:null,          // akut:kronisk
+    form:ctl-atl,                         // positiv = frisk
+    ugeSum:ugeSum, forrigeUgeSum:forrigeSum,
+    aendring:forrigeSum>0?(ugeSum-forrigeSum)/forrigeSum:null,
+    monotoni:monotoni,
+    strain:monotoni?Math.round(ugeSum*monotoni):null,
+    dage:spand
+  };
+  beregnCache[noegle]=svar;
+  return svar;
+}
+function forholdZone(r){
+  if(r==null)return {id:"ukendt",navn:"For lidt data",farve:"var(--daempet)",ikon:"○"};
+  if(r<0.8)return {id:"lav",navn:"Lav – du taber form",farve:"var(--st-varsel)",ikon:"▽"};
+  if(r<=1.3)return {id:"god",navn:"I balance",farve:"var(--st-god)",ikon:"●"};
+  if(r<=1.5)return {id:"hoej",navn:"Stiger hurtigt",farve:"var(--st-alvor)",ikon:"▲"};
+  return {id:"risiko",navn:"Rød zone",farve:"var(--st-kritisk)",ikon:"■"};
+}
+
+/* ==========================================================================
+   5. RESTITUTION
+   Alt måles mod dig selv, ikke mod en tabel. Derfor rullende basislinjer.
+   ========================================================================== */
+
+const MORGENFELTER=[
+  {id:"hrv",navn:"HRV",enhed:"ms",retning:1},
+  {id:"hvilePuls",navn:"Hvilepuls",enhed:"slag/min",retning:-1},
+  {id:"soevnT",navn:"Søvn",enhed:"t",retning:1},
+  {id:"soevnKval",navn:"Søvnkvalitet",enhed:"/5",retning:1},
+  {id:"oemhed",navn:"Ømhed",enhed:"/5",retning:-1},
+  {id:"energi",navn:"Energi",enhed:"/5",retning:1},
+  {id:"stress",navn:"Stress",enhed:"/5",retning:-1}
+];
+
+function vaerdier(d,felt,tilDato,dage){
+  const graense=plusDage(tilDato,-(dage||42));
+  return d.morgener.filter(m=>m.dato<=tilDato&&m.dato>graense&&erTal(m[felt]))
+    .map(m=>({dato:m.dato,v:m[felt]}));
+}
+const SDGULV={hrv:3,hvilePuls:2,soevnT:0.4,soevnKval:0.5,oemhed:0.5,energi:0.5,stress:0.5};
+function basislinje(d,felt,tilDato){
+  // Basislinjen ser 42 dage tilbage, men ikke på selve dagen.
+  const graense=plusDage(tilDato,-42);
+  const v=d.morgener.filter(m=>m.dato<tilDato&&m.dato>graense&&erTal(m[felt])).map(m=>m[felt]);
+  if(v.length<5)return {n:v.length,m:null,sd:null};
+  const m=gennemsnit(v);
+  // Uden et gulv gør en usædvanlig rolig periode hver lille afvigelse
+  // til et alarmsignal. Gulvet er sat efter, hvad målingen realistisk svinger.
+  const gulv=SDGULV[felt]||Math.max(Math.abs(m)*0.04,0.5);
+  const sd=Math.max(spredning(v)||0,gulv);
+  return {n:v.length,m:m,sd:sd};
+}
+function rullende(d,felt,tilDato,dage){
+  const v=vaerdier(d,felt,tilDato,dage||7).map(x=>x.v);
+  return v.length?{v:gennemsnit(v),n:v.length}:{v:null,n:0};
+}
+function zScore(vaerdi,bl,retning){
+  if(vaerdi==null||bl.m==null)return null;
+  return klem(((vaerdi-bl.m)/bl.sd)*retning,-2.5,2.5);
+}
+const zTilScore=(z)=>klem(50+z*22,0,100);
+
+const BAND=[
+  {min:72,navn:"Klar",farve:"var(--st-god)",ikon:"▲",status:"god",
+   raad:"Kør planen. Der er plads til at lægge lidt til i dag."},
+  {min:56,navn:"Normal",farve:"var(--tekst)",ikon:"●",status:"normal",
+   raad:"Kør planen som den står. Ingen grund til at ændre noget."},
+  {min:40,navn:"Skru ned",farve:"var(--st-varsel)",ikon:"▼",status:"varsel",
+   raad:"Behold passet, men tag intensiteten ud. Volumen før fart."},
+  {min:-1,navn:"Hvil",farve:"var(--st-kritisk)",ikon:"■",status:"kritisk",
+   raad:"Byt til mobilitet eller en fridag. Det her er ikke dovenskab."}
+];
+const bandFor=(s)=>BAND.find(b=>s>=b.min)||BAND[BAND.length-1];
+
+function parathed(d,dato){
+  const dt=dato||idag();
+  const m=morgenFor(d,dt);
+  const bt=belastningsTal(d,dt);
+  const dele=[];
+  const mangler=[];
+
+  // HRV: 7-dages rullende mod 42-dages basislinje. Enkeltdage er for støjende.
+  const hrvBl=basislinje(d,"hrv",dt), hrv7=rullende(d,"hrv",dt,7);
+  if(hrv7.v!=null&&hrvBl.m!=null){
+    const z=zScore(hrv7.v,hrvBl,1);
+    dele.push({id:"hrv",navn:"HRV",vaegt:.28,score:zTilScore(z),z:z,
+      vaerdi:hrv7.v,basis:hrvBl.m,enhed:"ms",n:hrvBl.n,
+      tekst:num(hrv7.v,0)+" ms mod basis "+num(hrvBl.m,0)});
+  }else if(!m||!erTal(m.hrv))mangler.push("HRV");
+
+  const hpBl=basislinje(d,"hvilePuls",dt), hp7=rullende(d,"hvilePuls",dt,7);
+  if(hp7.v!=null&&hpBl.m!=null){
+    const z=zScore(hp7.v,hpBl,-1);
+    dele.push({id:"hvilePuls",navn:"Hvilepuls",vaegt:.15,score:zTilScore(z),z:z,
+      vaerdi:hp7.v,basis:hpBl.m,enhed:"slag/min",n:hpBl.n,
+      tekst:num(hp7.v,0)+" mod basis "+num(hpBl.m,0)});
+  }else if(!m||!erTal(m.hvilePuls))mangler.push("hvilepuls");
+
+  // Søvn: gælden over tre nætter vejer tungere end i går nat alene.
+  const naetter=vaerdier(d,"soevnT",dt,3).map(x=>x.v);
+  if(naetter.length){
+    const behov=d.profil.soevnBehov||7.5;
+    const gaeld=Math.max(0,naetter.reduce((s,t)=>s+(behov-t),0));
+    const gaeldScore=klem(100-gaeld*13,0,100);
+    const kval=rullende(d,"soevnKval",dt,3).v;
+    const kvalScore=kval!=null?klem((kval-1)/4*100,0,100):null;
+    const score=kvalScore!=null?0.65*gaeldScore+0.35*kvalScore:gaeldScore;
+    dele.push({id:"soevn",navn:"Søvn",vaegt:.25,score:score,z:null,
+      vaerdi:gennemsnit(naetter),gaeld:gaeld,behov:behov,enhed:"t",n:naetter.length,
+      tekst:num(gennemsnit(naetter),1)+" t i snit · "+
+        (gaeld>0.3?num(gaeld,1)+" t gæld på 3 nætter":"ingen gæld")});
+  }else mangler.push("søvn");
+
+  const subj=[];
+  if(m&&erTal(m.energi))subj.push({k:"energi",s:(m.energi-1)/4*100});
+  if(m&&erTal(m.oemhed))subj.push({k:"ømhed",s:(5-m.oemhed)/4*100});
+  if(m&&erTal(m.stress))subj.push({k:"stress",s:(5-m.stress)/4*100});
+  if(subj.length){
+    const vaerst=subj.slice().sort((a,b)=>a.s-b.s)[0];
+    dele.push({id:"subjektiv",navn:"Krop & hoved",vaegt:.17,
+      score:gennemsnit(subj.map(x=>x.s)),z:null,n:subj.length,vaerst:vaerst.k,
+      tekst:subj.length+" af 3 svar · lavest: "+vaerst.k});
+  }else mangler.push("ømhed, energi og stress");
+
+  // Belastningsbalancen tæller med, også når du ikke har målt noget.
+  if(bt.forhold!=null){
+    const r=bt.forhold;
+    let s;
+    if(r<0.8)s=88;
+    else if(r<=1.3)s=100;
+    else if(r<=1.5)s=100-(r-1.3)/0.2*35;
+    else s=Math.max(12,65-(r-1.5)*100);
+    if(bt.monotoni&&bt.monotoni>2)s-=klem((bt.monotoni-2)*25,0,30);
+    dele.push({id:"belastning",navn:"Belastning",vaegt:.15,score:klem(s,0,100),z:null,
+      vaerdi:r,n:bt.dage,tekst:"akut:kronisk "+num(r,2)});
+  }
+
+  const sumVaegt=dele.reduce((s,x)=>s+x.vaegt,0);
+  const score=sumVaegt>0?Math.round(dele.reduce((s,x)=>s+x.score*x.vaegt,0)/sumVaegt):null;
+  const band=score!=null?bandFor(score):null;
+
+  // Løftestangen: hvor koster det mest lige nu?
+  const rangeret=dele.slice().sort((a,b)=>
+    (b.vaegt*(100-b.score))-(a.vaegt*(100-a.score)));
+  const top=rangeret[0]&&rangeret[0].score<70?rangeret[0]:null;
+
+  return {score:score,band:band,dele:dele,mangler:mangler,
+    loeftestang:top?{del:top,raad:loeftestangsRaad(top,d,dt,bt)}:null,
+    rangeret:rangeret,bt:bt,harMorgen:!!m,dato:dt};
+}
+
+function loeftestangsRaad(del,d,dt,bt){
+  if(del.id==="soevn"){
+    if(del.gaeld>0.5)return "Sov mere. Du mangler "+num(del.gaeld,1)+
+      " t over de sidste tre nætter mod dit behov på "+num(del.behov,1)+
+      " t. En time tidligere i seng i aften flytter mere end nogen ændring i programmet.";
+    return "Søvnkvaliteten trækker ned, selvom timerne er der. Kig på skærm, alkohol og temperatur før du kigger på træningen.";
+  }
+  if(del.id==="hrv"){
+    const pct=del.basis?(del.vaerdi-del.basis)/del.basis*100:0;
+    const stoerrelse=Math.abs(pct)>=5
+      ? num(Math.abs(pct),0)+" % under dit 42-dages snit"
+      : num(Math.abs(del.z||0),1)+" spredning under dit normale udsving";
+    return "Din HRV ligger "+stoerrelse+" ("+num(del.vaerdi,0)+" mod "+num(del.basis,0)+
+      " ms som 7-dages snit). Det er et systemsignal, ikke et bensignal: hold volumen, "+
+      "men tag farten ud, indtil den er tilbage over basis.";
+  }
+  if(del.id==="hvilePuls"){
+    return "Hvilepulsen ligger "+num(del.vaerdi-del.basis,0)+" slag over dit snit. "+
+      "Det plejer at være væske, alkohol, sen mad eller begyndende sygdom – tjek dem, før du skruer på træningen.";
+  }
+  if(del.id==="subjektiv"){
+    if(del.vaerst==="ømhed")return "Ømheden er det, der trækker ned. Den kommer af styrken, ikke af løbet – "+
+      "flyt næste styrkepas en dag og behold løbeturen let.";
+    if(del.vaerst==="stress")return "Stress uden for træningen tæller med i den samlede belastning. "+
+      "På sådan en dag er et roligt pas bedre end intet, men et hårdt pas er værre end intet.";
+    return "Energien er lav. Hvis søvn og HRV ser fine ud, er det typisk mad eller jern – ellers er det bare en dag.";
+  }
+  if(del.id==="belastning"){
+    const r=bt.forhold;
+    if(r>1.3)return "Din akutte belastning er "+num(r*100,0)+" % af den kroniske. "+
+      "Over 1,30 stiger skadesrisikoen målbart. Læg en rolig uge ind på omkring "+
+      num(bt.ctl*7*0.85,0)+" belastningspoint i stedet for "+num(bt.ugeSum,0)+".";
+    if(bt.monotoni&&bt.monotoni>2)return "Monotonien er "+num(bt.monotoni,1)+
+      ". Alle dine dage ligner hinanden for meget – gør de hårde hårdere og de lette lettere.";
+    return "Belastningen er i balance. Fortsæt.";
+  }
+  return "";
+}
+
+/* Anbefaling for dagens pas – konkret, ikke en formaning. */
+function dagensRaad(p,plantype){
+  if(p.score==null)return {tekst:"Registrér et morgentjek, så begynder appen at kunne sige noget om dagen.",status:"normal"};
+  const b=p.band, erLoeb=plantype==="LOEB";
+  if(b.status==="kritisk")
+    return {tekst:erLoeb?"Byt løbeturen ud med 20 minutters gåtur eller mobilitet. Løbet er der stadig i morgen."
+      :"Drop styrken i dag. Mobilitet eller fri – ingen af delene koster dig noget.",status:"kritisk"};
+  if(b.status==="varsel")
+    return {tekst:erLoeb?"Løb, men kun roligt: snakketempo hele vejen, ingen intervaller, og skær 10 minutter af."
+      :"Kør øvelserne, men tag et sæt af hver og bliv på den vægt du kender. Ingen nye rekorder i dag.",status:"varsel"};
+  if(b.status==="god")
+    return {tekst:erLoeb?"Grønt lys. Hvis der skal lægges fart ind i ugen, er det i dag."
+      :"Grønt lys. Det er i dag, du må prøve et kilo mere eller en ekstra gentagelse.",status:"god"};
+  return {tekst:"Kør planen som den står.",status:"normal"};
+}
+
+/* ==========================================================================
+   6. FILER FRA URET
+   GPX og TCX dækker det, Apple Watch kan sende ud gennem HealthFit, RunGap,
+   Strava og WorkOutDoors. Alt regnes ud her i telefonen – filen forlader den
+   ikke, medmindre du selv sender den videre.
+   ========================================================================== */
+
+function lokalNavn(el){return el.localName||el.nodeName.replace(/^.*:/,"")}
+function foerste(el,navn){
+  const a=el.getElementsByTagName("*");
+  for(let i=0;i<a.length;i++)if(lokalNavn(a[i])===navn)return a[i];
+  return null;
+}
+function talIndhold(el,navn){
+  const n=foerste(el,navn);
+  if(!n)return null;
+  const v=parseFloat(String(n.textContent).replace(",","."));
+  return isFinite(v)?v:null;
+}
+function afstandM(a,b){
+  const R=6371000,rad=Math.PI/180;
+  const dLat=(b.lat-a.lat)*rad, dLon=(b.lon-a.lon)*rad;
+  const la=a.lat*rad, lb=b.lat*rad;
+  const h=Math.sin(dLat/2)**2+Math.cos(la)*Math.cos(lb)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function tidStempel(s){
+  const t=Date.parse(String(s).trim());
+  return isFinite(t)?t:null;
+}
+
+function punkterFraGpx(doc){
+  const ud=[],pkt=doc.getElementsByTagName("*");
+  for(let i=0;i<pkt.length;i++){
+    const el=pkt[i];
+    if(lokalNavn(el)!=="trkpt"&&lokalNavn(el)!=="rtept")continue;
+    const lat=parseFloat(el.getAttribute("lat")),lon=parseFloat(el.getAttribute("lon"));
+    const t=tidStempel(talTekst(el,"time"));
+    let hr=null,cad=null;
+    const b=el.getElementsByTagName("*");
+    for(let j=0;j<b.length;j++){
+      const n=lokalNavn(b[j]);
+      if(n==="hr")hr=parseFloat(b[j].textContent);
+      else if(n==="cad")cad=parseFloat(b[j].textContent);
+    }
+    ud.push({t:t,lat:isFinite(lat)?lat:null,lon:isFinite(lon)?lon:null,
+      ele:talIndhold(el,"ele"),hr:isFinite(hr)?hr:null,cad:isFinite(cad)?cad:null,dist:null});
+  }
+  return ud;
+}
+function talTekst(el,navn){
+  const n=foerste(el,navn);
+  return n?n.textContent:null;
+}
+function punkterFraTcx(doc){
+  const ud=[],alle=doc.getElementsByTagName("*");
+  for(let i=0;i<alle.length;i++){
+    const el=alle[i];
+    if(lokalNavn(el)!=="Trackpoint")continue;
+    const t=tidStempel(talTekst(el,"Time"));
+    const pos=foerste(el,"Position");
+    let lat=null,lon=null;
+    if(pos){lat=talIndhold(pos,"LatitudeDegrees");lon=talIndhold(pos,"LongitudeDegrees")}
+    const hrEl=foerste(el,"HeartRateBpm");
+    const hr=hrEl?talIndhold(hrEl,"Value"):null;
+    let cad=talIndhold(el,"Cadence");
+    if(cad==null)cad=talIndhold(el,"RunCadence");
+    ud.push({t:t,lat:lat,lon:lon,ele:talIndhold(el,"AltitudeMeters"),
+      hr:hr,cad:cad,dist:talIndhold(el,"DistanceMeters")});
+  }
+  return ud;
+}
+
+function analyserPunkter(pkt){
+  const p=pkt.filter(x=>x.t!=null).sort((a,b)=>a.t-b.t);
+  if(p.length<5)return null;
+  const tidSek=(p[p.length-1].t-p[0].t)/1000;
+  let brugDist=p.some(x=>erTal(x.dist));
+  let samlet=0, bevaegSek=0, stigning=0, sidsteEle=null;
+  const hrDt=[],cadV=[];
+  const kum=[];   // {t, m} kumulativ afstand
+  for(let i=0;i<p.length;i++){
+    const a=p[i];
+    if(i>0){
+      const f=p[i-1], dt=(a.t-f.t)/1000;
+      let dm=0;
+      if(brugDist&&erTal(a.dist)&&erTal(f.dist))dm=Math.max(0,a.dist-f.dist);
+      else if(a.lat!=null&&f.lat!=null)dm=afstandM(f,a);
+      if(dt>0&&dt<=25){
+        samlet+=dm;
+        if(dm/dt>0.5)bevaegSek+=dt;      // under 1,8 km/t er det et stop
+        if(erTal(a.hr))hrDt.push({hr:a.hr,dt:dt});
+      }
+    }
+    if(erTal(a.ele)){
+      if(sidsteEle==null)sidsteEle=a.ele;
+      else if(a.ele-sidsteEle>1.5){stigning+=a.ele-sidsteEle;sidsteEle=a.ele}
+      else if(a.ele<sidsteEle)sidsteEle=a.ele;
+    }
+    if(erTal(a.cad)&&a.cad>0)cadV.push(a.cad);
+    kum.push({t:(a.t-p[0].t)/1000,m:samlet,hr:a.hr});
+  }
+  if(samlet<200)return null;
+  const vaegtSum=hrDt.reduce((s,x)=>s+x.dt,0);
+  const gnsPuls=vaegtSum>0?hrDt.reduce((s,x)=>s+x.hr*x.dt,0)/vaegtSum:null;
+  const maxPuls=hrDt.length?Math.max.apply(null,hrDt.map(x=>x.hr)):null;
+  let kadence=cadV.length?gennemsnit(cadV):null;
+  if(kadence!=null&&kadence<120)kadence*=2;   // nogle ure tæller kun ét ben
+
+  // Kilometersplits
+  const splits=[];
+  let naeste=1000,sidsteT=0,sidsteHrIdx=0;
+  for(let i=1;i<kum.length;i++){
+    while(kum[i].m>=naeste&&naeste<=samlet){
+      const a=kum[i-1],b=kum[i];
+      const andel=(b.m-a.m)>0?(naeste-a.m)/(b.m-a.m):0;
+      const tid=a.t+(b.t-a.t)*andel;
+      const pulsIKm=kum.slice(sidsteHrIdx,i).map(x=>x.hr).filter(erTal);
+      splits.push({km:splits.length+1,sek:Math.round(tid-sidsteT),
+        puls:pulsIKm.length?Math.round(gennemsnit(pulsIKm)):null});
+      sidsteT=tid;sidsteHrIdx=i;naeste+=1000;
+    }
+  }
+
+  // Afkobling: fart pr. hjerteslag i første mod anden halvdel.
+  let kobling=null;
+  if(gnsPuls&&kum.length>20){
+    const midt=Math.floor(kum.length/2);
+    const del=(fra,til)=>{
+      const m=kum[til-1].m-kum[fra].m, s=kum[til-1].t-kum[fra].t;
+      const h=kum.slice(fra,til).map(x=>x.hr).filter(erTal);
+      if(s<=0||!h.length)return null;
+      const hm=gennemsnit(h);
+      return hm>0?(m/s)/hm:null;
+    };
+    const e1=del(0,midt), e2=del(midt,kum.length);
+    if(e1&&e2&&e1>0)kobling=(e1-e2)/e1*100;
+  }
+  return {
+    distanceKm:samlet/1000,
+    tidSek:Math.round(tidSek),
+    bevaegSek:Math.round(bevaegSek||tidSek),
+    tempoSekPrKm:samlet>0?(bevaegSek||tidSek)/(samlet/1000):null,
+    gnsPuls:gnsPuls?Math.round(gnsPuls):null,
+    maxPuls:maxPuls?Math.round(maxPuls):null,
+    stigningM:Math.round(stigning),
+    kadence:kadence?Math.round(kadence):null,
+    kobling:kobling,
+    splits:splits.slice(0,42),
+    startTid:p[0].t
+  };
+}
+
+function laesLoebefil(tekst,filnavn){
+  const navn=(filnavn||"").toLowerCase();
+  try{
+    if(navn.endsWith(".fit")||/^\x0e?.{2}\.FIT/.test(tekst.slice(0,16)))
+      return {fejl:"FIT-filer kan appen ikke læse. Vælg GPX eller TCX i eksporten – "+
+        "HealthFit, RunGap og Strava kan alle sende begge dele."};
+    if(/^\s*[{[]/.test(tekst))return {fejl:"Det ser ud til at være en JSON-fil. "+
+      "Løbefiler skal være GPX eller TCX; helbredsdata hører hjemme under Data."};
+    const doc=new DOMParser().parseFromString(tekst,"application/xml");
+    if(doc.getElementsByTagName("parsererror").length)
+      return {fejl:"Filen kunne ikke læses som XML."};
+    const rod=lokalNavn(doc.documentElement||{nodeName:""});
+    let pkt=[];
+    if(rod==="gpx")pkt=punkterFraGpx(doc);
+    else if(rod==="TrainingCenterDatabase")pkt=punkterFraTcx(doc);
+    else{
+      pkt=punkterFraGpx(doc);
+      if(!pkt.length)pkt=punkterFraTcx(doc);
+    }
+    if(pkt.length<5)return {fejl:"Fandt ingen brugbare punkter i filen."};
+    const r=analyserPunkter(pkt);
+    if(!r)return {fejl:"Punkterne mangler tid eller position – turen kan ikke regnes ud."};
+    r.kilde="fil"; r.filnavn=filnavn||"";
+    return {loeb:r};
+  }catch(e){return {fejl:"Kunne ikke læse filen: "+e.message}}
+}
+
+/* ==========================================================================
+   7. HELBREDSDATA
+   Tre veje ind, fordi Apple ikke har gjort det til én:
+   Health Auto Export (JSON/CSV), Apples egen export.xml, eller en simpel CSV.
+   ========================================================================== */
+
+function appleDato(s){
+  // "2026-08-27 06:12:33 +0200" → { dato:"2026-08-27", time:6 }
+  const m=/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/.exec(String(s));
+  if(m)return {dato:m[1],time:+m[2],min:+m[3]};
+  const t=Date.parse(s);
+  if(isFinite(t)){const d=new Date(t);return {dato:iso(d),time:d.getHours(),min:d.getMinutes()}}
+  return null;
+}
+function samlerNy(){return {}}
+function tilfoej(samler,dato,felt,vaerdi){
+  if(!dato||!erTal(vaerdi))return;
+  if(!samler[dato])samler[dato]={};
+  if(!samler[dato][felt])samler[dato][felt]=[];
+  samler[dato][felt].push(vaerdi);
+}
+function samlerTilMorgener(samler){
+  return Object.keys(samler).sort().map(dato=>{
+    const r={dato:dato};
+    ["hrv","hvilePuls"].forEach(f=>{
+      if(samler[dato][f]&&samler[dato][f].length)
+        r[f]=Math.round(gennemsnit(samler[dato][f])*10)/10;
+    });
+    if(samler[dato].soevnMin&&samler[dato].soevnMin.length)
+      r.soevnT=Math.round(samler[dato].soevnMin.reduce((a,b)=>a+b,0)/60*10)/10;
+    return r;
+  }).filter(r=>erTal(r.hrv)||erTal(r.hvilePuls)||erTal(r.soevnT));
+}
+
+function laesHealthAutoExport(objekt){
+  const samler=samlerNy();
+  const metrics=(objekt.data&&objekt.data.metrics)||objekt.metrics||[];
+  if(!Array.isArray(metrics))return null;
+  metrics.forEach(met=>{
+    const navn=String(met.name||"").toLowerCase();
+    const raekker=met.data||[];
+    raekker.forEach(r=>{
+      const d=appleDato(r.date||r.startDate);
+      if(!d)return;
+      if(navn.indexOf("heart_rate_variability")>=0||navn.indexOf("hrv")>=0)
+        tilfoej(samler,d.dato,"hrv",+r.qty);
+      else if(navn.indexOf("resting_heart_rate")>=0)
+        tilfoej(samler,d.dato,"hvilePuls",+r.qty);
+      else if(navn.indexOf("sleep")>=0){
+        // Feltnavnene har skiftet et par gange i Health Auto Export.
+        let timer=null;
+        ["totalSleep","asleep","sleepDuration"].forEach(k=>{
+          if(timer==null&&erTal(+r[k])&&+r[k]>0)timer=+r[k];
+        });
+        if(timer==null){
+          const dele=["deep","core","rem","light","awake"].map(k=>erTal(+r[k])?+r[k]:0);
+          const sum=dele[0]+dele[1]+dele[2]+dele[3];
+          if(sum>0)timer=sum;
+        }
+        if(timer!=null)tilfoej(samler,d.dato,"soevnMin",timer*60);
+      }
+    });
+  });
+  const ud=samlerTilMorgener(samler);
+  return ud.length?ud:null;
+}
+
+async function laesAppleEksport(fil,paaFremdrift){
+  // export.xml er tit hundredvis af megabyte. Vi læser den i skiver og
+  // fisker kun de tre linjetyper op, appen faktisk bruger.
+  const samler=samlerNy();
+  const SKIVE=4*1024*1024, OVERLAP=600;
+  const reRecord=/<Record\s+type="(HK[A-Za-z]+)"[^>]*?startDate="([^"]+)"\s+endDate="([^"]+)"\s+value="([^"]*)"/g;
+  let pos=0, fundet=0;
+  while(pos<fil.size){
+    const slut=Math.min(fil.size,pos+SKIVE);
+    const tekst=await fil.slice(pos,Math.min(fil.size,slut+OVERLAP)).text();
+    reRecord.lastIndex=0;
+    let m;
+    while((m=reRecord.exec(tekst))){
+      const type=m[1], start=appleDato(m[2]), slutD=appleDato(m[3]), v=parseFloat(m[4]);
+      if(!start)continue;
+      if(type==="HKQuantityTypeIdentifierHeartRateVariabilitySDNN"&&isFinite(v)){
+        tilfoej(samler,start.dato,"hrv",v);fundet++;
+      }else if(type==="HKQuantityTypeIdentifierRestingHeartRate"&&isFinite(v)){
+        tilfoej(samler,start.dato,"hvilePuls",v);fundet++;
+      }else if(type==="HKCategoryTypeIdentifierSleepAnalysis"&&slutD){
+        if(/Asleep/i.test(m[4])){
+          const t0=Date.parse(m[2].replace(" ","T").replace(/ ([+-]\d{2})(\d{2})$/,"$1:$2"));
+          const t1=Date.parse(m[3].replace(" ","T").replace(/ ([+-]\d{2})(\d{2})$/,"$1:$2"));
+          if(isFinite(t0)&&isFinite(t1)&&t1>t0){
+            // Natten hører til den morgen, den ender på.
+            const dato=slutD.time<18?slutD.dato:plusDage(slutD.dato,1);
+            tilfoej(samler,dato,"soevnMin",(t1-t0)/60000);
+            fundet++;
+          }
+        }
+      }
+    }
+    pos=slut;
+    if(paaFremdrift)paaFremdrift(pos/fil.size,fundet);
+    await new Promise(r=>setTimeout(r,0));   // giv skærmen lov til at tegne
+  }
+  const ud=samlerTilMorgener(samler);
+  return ud.length?ud:null;
+}
+
+function laesHelbredCsv(tekst){
+  const linjer=tekst.split(/\r?\n/).filter(l=>l.trim());
+  if(linjer.length<2)return null;
+  const skil=(linjer[0].split(";").length>linjer[0].split(",").length)?";":",";
+  const hoved=linjer[0].split(skil).map(h=>h.trim().toLowerCase().replace(/^"|"$/g,""));
+  const find=(...ord)=>hoved.findIndex(h=>ord.some(o=>h.indexOf(o)>=0));
+  const iDato=find("date","dato","dag");
+  const iHrv=find("hrv","variability","variabilitet");
+  const iHp=find("resting","hvilepuls","rhr");
+  const iSoevn=find("sleep","søvn","soevn");
+  if(iDato<0)return null;
+  const ud=[];
+  for(let i=1;i<linjer.length;i++){
+    const c=linjer[i].split(skil).map(x=>x.trim().replace(/^"|"$/g,""));
+    const d=appleDato(c[iDato]);
+    if(!d)continue;
+    const r={dato:d.dato};
+    const tal=(idx)=>{
+      if(idx<0||c[idx]==null)return null;
+      const v=parseFloat(String(c[idx]).replace(",","."));
+      return isFinite(v)?v:null;
+    };
+    const hrv=tal(iHrv), hp=tal(iHp);
+    let so=tal(iSoevn);
+    if(so!=null&&so>20)so=so/60;              // minutter i stedet for timer
+    if(hrv!=null)r.hrv=hrv;
+    if(hp!=null)r.hvilePuls=hp;
+    if(so!=null)r.soevnT=Math.round(so*10)/10;
+    if(erTal(r.hrv)||erTal(r.hvilePuls)||erTal(r.soevnT))ud.push(r);
+  }
+  return ud.length?ud:null;
+}
+
+function flet(d,nyeMorgener){
+  // Målte tal vinder over gamle målte tal. Det du selv har tastet af
+  // ømhed, energi og stress bliver stående.
+  let nye=0,opdateret=0;
+  nyeMorgener.forEach(n=>{
+    let m=d.morgener.find(x=>x.dato===n.dato);
+    if(!m){m={dato:n.dato};d.morgener.push(m);nye++}
+    else opdateret++;
+    ["hrv","hvilePuls","soevnT"].forEach(f=>{if(erTal(n[f]))m[f]=n[f]});
+  });
+  oprydData(d);
+  return {nye:nye,opdateret:opdateret};
+}
+
+/* ==========================================================================
+   8. DIAGRAMMER
+   Alt tegnes som inline-SVG. Ingen biblioteker, ingen netværk.
+   Hvert diagram har en tabelvisning et sted i appen – tal skal altid kunne
+   læses, ikke kun ses.
+   ========================================================================== */
+
+function parathedsRing(score,band){
+  const R=32,O=2*Math.PI*R,pct=score==null?0:klem(score,0,100)/100;
+  const farve=band?band.farve:"var(--daempet)";
+  return '<svg width="80" height="80" viewBox="0 0 80 80" role="img" aria-label="Parathed '+
+    (score==null?"ukendt":score+" af 100")+'">'+
+    '<circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--kant)" stroke-width="5"/>'+
+    (score==null?"":'<circle cx="40" cy="40" r="'+R+'" fill="none" stroke="'+farve+
+      '" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+(O*pct).toFixed(1)+' '+
+      (O*(1-pct)+2).toFixed(1)+'" transform="rotate(-90 40 40)"/>')+
+    '<text x="40" y="45" text-anchor="middle" font-size="21" font-weight="600" '+
+      'fill="var(--tekst)" font-family="ui-sans-serif,system-ui,sans-serif">'+
+      (score==null?"–":score)+'</text></svg>';
+}
+
+function belastningsDiagram(bt,dage){
+  const n=dage||28;
+  const s=bt.serie.slice(-n);
+  if(!s.length)return '<p class="tom">Ingen pas endnu.</p>';
+  const W=420,H=118,pT=8,pB=20,pL=26,pR=6;
+  const plotH=H-pT-pB, plotW=W-pL-pR;
+  const maxLoad=Math.max(10,...s.map(x=>x.load),...s.map(x=>x.ctl*1.6));
+  const trin=Math.ceil(maxLoad/3/50)*50||50;
+  const top=Math.max(trin*3,maxLoad*1.05);
+  const y=(v)=>pT+plotH-(v/top)*plotH;
+  const bredde=Math.max(3,plotW/s.length-2);
+  const x=(i)=>pL+i*(plotW/s.length)+1;
+
+  let g="";
+  for(let i=1;i<=3;i++){
+    const yy=y(trin*i);
+    if(yy<pT)break;
+    g+='<line x1="'+pL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yy.toFixed(1)+
+      '" stroke="var(--grid)" stroke-width="1"/>'+
+      '<text x="'+(pL-5)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-size="8" '+
+      'fill="var(--daempet)" font-family="ui-monospace,monospace">'+(trin*i)+'</text>';
+  }
+  let søjler="";
+  s.forEach((p,i)=>{
+    const xx=x(i);
+    let bund=pT+plotH;
+    // 2 px mellemrum mellem segmenterne – ingen streger rundt om felterne.
+    if(p.styrke>0){
+      const h=Math.max(1.5,(p.styrke/top)*plotH);
+      søjler+='<rect x="'+xx.toFixed(1)+'" y="'+(bund-h).toFixed(1)+'" width="'+bredde.toFixed(1)+
+        '" height="'+h.toFixed(1)+'" rx="1.5" fill="var(--s-styrke)"/>';
+      bund-=h+2;
+    }
+    if(p.loeb>0){
+      const h=Math.max(1.5,(p.loeb/top)*plotH);
+      søjler+='<rect x="'+xx.toFixed(1)+'" y="'+(bund-h).toFixed(1)+'" width="'+bredde.toFixed(1)+
+        '" height="'+h.toFixed(1)+'" rx="1.5" fill="var(--s-loeb)"/>';
+    }
+    søjler+='<rect class="soejle" data-i="'+i+'" x="'+(xx-1).toFixed(1)+'" y="'+pT+
+      '" width="'+(bredde+2).toFixed(1)+'" height="'+plotH+'" fill="transparent" '+
+      'style="cursor:pointer"><title>'+esc(kortDato(p.dato))+': '+p.load+' AU</title></rect>';
+  });
+  const linje=s.map((p,i)=>(x(i)+bredde/2).toFixed(1)+","+y(p.ctl).toFixed(1)).join(" ");
+  let akse="";
+  s.forEach((p,i)=>{
+    if(i%7!==0&&i!==s.length-1)return;
+    akse+='<text x="'+(x(i)+bredde/2).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" '+
+      'font-size="8" fill="var(--daempet)" font-family="ui-monospace,monospace">'+
+      esc(fraIso(p.dato).getDate()+"/"+(fraIso(p.dato).getMonth()+1))+'</text>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Daglig belastning, '+n+' dage">'+
+    g+søjler+
+    '<polyline points="'+linje+'" fill="none" stroke="var(--daempet)" stroke-width="2" '+
+      'stroke-linejoin="round" opacity=".85"/>'+
+    '<line x1="'+pL+'" y1="'+(pT+plotH)+'" x2="'+(W-pR)+'" y2="'+(pT+plotH)+
+      '" stroke="var(--akse)" stroke-width="1"/>'+akse+'</svg>';
+}
+
+function forholdsMaaler(r){
+  const W=420,H=44;
+  const zoner=[[0,0.8,"var(--st-varsel)"],[0.8,1.3,"var(--st-god)"],
+    [1.3,1.5,"var(--st-alvor)"],[1.5,2.0,"var(--st-kritisk)"]];
+  const px=(v)=>8+(klem(v,0,2)/2)*(W-16);
+  let ud='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Forholdet mellem akut og kronisk belastning">';
+  zoner.forEach(z=>{
+    ud+='<rect x="'+px(z[0]).toFixed(1)+'" y="14" width="'+(px(z[1])-px(z[0])-2).toFixed(1)+
+      '" height="9" rx="2" fill="'+z[2]+'" opacity=".55"/>';
+  });
+  [0.8,1.3,1.5].forEach(t=>{
+    ud+='<text x="'+px(t).toFixed(1)+'" y="38" text-anchor="middle" font-size="8" '+
+      'fill="var(--daempet)" font-family="ui-monospace,monospace">'+num(t,1)+'</text>';
+  });
+  if(r!=null){
+    const p=px(r);
+    ud+='<polygon points="'+p.toFixed(1)+',12 '+(p-4).toFixed(1)+',4 '+(p+4).toFixed(1)+
+      ',4" fill="var(--tekst)"/>'+
+      '<rect x="'+(p-1).toFixed(1)+'" y="12" width="2" height="13" fill="var(--tekst)"/>';
+  }
+  return ud+'</svg>';
+}
+
+function sparkline(d,felt,tilDato,farve){
+  const dage=28,W=420,H=54,pT=6,pB=12,pL=4,pR=34;
+  const punkter=vaerdier(d,felt,tilDato,dage);
+  if(punkter.length<3)return null;
+  const bl=basislinje(d,felt,tilDato);
+  const v=punkter.map(p=>p.v);
+  let lo=Math.min.apply(null,v), hi=Math.max.apply(null,v);
+  if(bl.m!=null){lo=Math.min(lo,bl.m-bl.sd);hi=Math.max(hi,bl.m+bl.sd)}
+  const pad=(hi-lo)*0.15||1; lo-=pad; hi+=pad;
+  const plotH=H-pT-pB, plotW=W-pL-pR;
+  const foerste=dageMellem(punkter[0].dato,tilDato);
+  const x=(dato)=>pL+plotW*(1-(dageMellem(dato,tilDato)/Math.max(foerste,1)));
+  const y=(val)=>pT+plotH-((val-lo)/(hi-lo))*plotH;
+  let ud='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(felt)+' seneste 28 dage">';
+  if(bl.m!=null){
+    ud+='<rect x="'+pL+'" y="'+y(bl.m+bl.sd).toFixed(1)+'" width="'+plotW+'" height="'+
+      Math.abs(y(bl.m-bl.sd)-y(bl.m+bl.sd)).toFixed(1)+'" fill="var(--kant)" opacity=".55"/>'+
+      '<line x1="'+pL+'" y1="'+y(bl.m).toFixed(1)+'" x2="'+(pL+plotW)+'" y2="'+
+      y(bl.m).toFixed(1)+'" stroke="var(--akse)" stroke-width="1"/>';
+  }
+  ud+='<polyline points="'+punkter.map(p=>x(p.dato).toFixed(1)+","+y(p.v).toFixed(1)).join(" ")+
+    '" fill="none" stroke="'+farve+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  const sidst=punkter[punkter.length-1];
+  ud+='<circle cx="'+x(sidst.dato).toFixed(1)+'" cy="'+y(sidst.v).toFixed(1)+
+    '" r="3" fill="'+farve+'" stroke="var(--kort)" stroke-width="2"/>'+
+    '<text x="'+(x(sidst.dato)+8).toFixed(1)+'" y="'+(y(sidst.v)+3.5).toFixed(1)+
+    '" font-size="10" fill="var(--tekst)" font-family="ui-monospace,monospace">'+
+    num(sidst.v,felt==="soevnT"?1:0)+'</text></svg>';
+  return ud;
+}
+
+/* ==========================================================================
+   9. BRIEFING TIL CLAUDE
+   Den samme tekst bruges to steder: til kopiér-og-indsæt, og som kontekst
+   når du spørger inde i appen. Én sandhed, ikke to.
+   ========================================================================== */
+
+function typeNavn(t){return PROGRAM[t]?PROGRAM[t].navn:t}
+const ALLEOEVELSER=(()=>{
+  const k={};
+  Object.keys(PROGRAM).forEach(t=>(PROGRAM[t].oevelser||[]).forEach(o=>{k[o.id]=o}));
+  return k;
+})();
+function oevelsesNavn(id){return ALLEOEVELSER[id]?ALLEOEVELSER[id].navn:id}
+
+function loebLinje(s){
+  const l=s.loeb||{};
+  const dele=[];
+  if(erTal(l.distanceKm))dele.push(num(l.distanceKm,2)+" km");
+  if(erTal(l.bevaegSek))dele.push(tidTekst(l.bevaegSek));
+  if(erTal(l.tempoSekPrKm))dele.push(tempoTekst(l.tempoSekPrKm));
+  if(erTal(l.gnsPuls))dele.push("puls "+l.gnsPuls+(erTal(l.maxPuls)?"/"+l.maxPuls:""));
+  if(erTal(l.kadence))dele.push(l.kadence+" spm");
+  if(erTal(l.stigningM)&&l.stigningM>5)dele.push("+"+l.stigningM+" m");
+  if(erTal(l.kobling))dele.push("afkobling "+num(l.kobling,1)+" %");
+  if(!dele.length&&erTal(s.minutter))dele.push(s.minutter+" min");
+  return dele.join(" · ");
+}
+
+function briefing(d){
+  const dt=idag(), p=parathed(d,dt), bt=p.bt;
+  const L=[];
+  L.push("# Morgenlog – status "+dt);
+  L.push("");
+  L.push("Jeg træner løb ca. 3 gange om ugen og styrke ca. 3 gange om ugen. Løbet er hovedsagen;");
+  L.push("styrken er der for at holde mig hel. Nedenfor er alt, appen har registreret.");
+  L.push("");
+  L.push("## Profil");
+  L.push("- Maxpuls (antaget): "+d.profil.maxPuls+" · hvilepuls: "+d.profil.hvilePuls+
+    " · søvnbehov: "+num(d.profil.soevnBehov,1)+" t");
+  L.push("- Ugeplan: "+UGEDAGSNAVNE.map((n,i)=>n.slice(0,3)+" "+
+    (PLANVALG.find(v=>v[0]===d.ugeplan[(i+1)%7])||["","?"])[1]).join(" · "));
+  L.push("");
+
+  L.push("## Restitution i dag");
+  if(p.score==null)L.push("- Ingen morgental endnu.");
+  else{
+    L.push("- **Parathedsscore "+p.score+"/100 – "+p.band.navn+"**");
+    p.dele.forEach(x=>L.push("  - "+x.navn+": "+Math.round(x.score)+"/100 ("+x.tekst+
+      ", vægt "+num(x.vaegt*100,0)+" %)"));
+    if(p.loeftestang)L.push("- Appens største løftestang: "+p.loeftestang.del.navn);
+    if(p.mangler.length)L.push("- Mangler måling af: "+p.mangler.join(", "));
+  }
+  L.push("");
+
+  L.push("## Belastning (sRPE-load = minutter × anstrengelse 1–10)");
+  L.push("- Akut (7 dages EWMA): "+num(bt.atl,0)+" AU/dag");
+  L.push("- Kronisk (28 dages EWMA): "+num(bt.ctl,0)+" AU/dag");
+  L.push("- Akut:kronisk = "+(bt.forhold!=null?num(bt.forhold,2)+" ("+forholdZone(bt.forhold).navn+")":"for lidt data"));
+  L.push("- Form (kronisk − akut): "+num(bt.form,0));
+  L.push("- Denne uge: "+num(bt.ugeSum,0)+" AU mod "+num(bt.forrigeUgeSum,0)+" AU i sidste uge"+
+    (bt.aendring!=null?" ("+(bt.aendring>0?"+":"")+num(bt.aendring*100,0)+" %)":""));
+  if(bt.monotoni!=null)L.push("- Monotoni: "+num(bt.monotoni,2)+
+    " · strain: "+num(bt.strain,0));
+  L.push("");
+
+  const md=sidsteNDatoer(14,dt).filter(x=>morgenFor(d,x));
+  if(md.length){
+    L.push("## Morgental, seneste 14 dage");
+    L.push("| dato | HRV | hvilepuls | søvn | kvalitet | ømhed | energi | stress |");
+    L.push("|---|---|---|---|---|---|---|---|");
+    md.forEach(dato=>{
+      const m=morgenFor(d,dato);
+      L.push("| "+dato+" | "+num(m.hrv,0)+" | "+num(m.hvilePuls,0)+" | "+num(m.soevnT,1)+
+        " | "+num(m.soevnKval,0)+" | "+num(m.oemhed,0)+" | "+num(m.energi,0)+
+        " | "+num(m.stress,0)+" |");
+    });
+    L.push("");
+  }
+
+  const graense=plusDage(dt,-28);
+  const pas=d.sessions.filter(s=>s.dato>graense);
+  if(pas.length){
+    L.push("## Pas, seneste 28 dage");
+    L.push("| dato | pas | min | RPE | load | følelse |");
+    L.push("|---|---|---|---|---|---|");
+    pas.forEach(s=>{
+      const f=FEELS.find(x=>x.id===s.feel);
+      L.push("| "+s.dato+" | "+typeNavn(s.type)+" | "+num(varighed(s),0)+" | "+
+        num(anstrengelse(s,d.profil),1)+" | "+sessionLoad(s,d.profil)+" | "+(f?f.label:"–")+" |");
+    });
+    L.push("");
+    const medDetalje=pas.filter(s=>ERSTYRKE(s.type)&&s.entries&&Object.keys(s.entries).length);
+    if(medDetalje.length){
+      L.push("### Styrkedetaljer");
+      medDetalje.slice(-8).forEach(s=>{
+        const pr=PROGRAM[s.type];
+        L.push("- "+s.dato+" "+pr.navn+": "+Object.entries(s.entries)
+          .map(([id,v])=>oevelsesNavn(id)+" "+v).join("; ")+(s.note?" — note: "+s.note:""));
+      });
+      L.push("");
+    }
+    const loeb=pas.filter(s=>s.type==="LOEB"&&s.loeb).slice(-6);
+    if(loeb.length){
+      L.push("### Løbeture med data fra uret");
+      loeb.forEach(s=>{
+        L.push("- **"+s.dato+"**: "+loebLinje(s)+(s.note?" — "+s.note:""));
+        if(s.loeb.splits&&s.loeb.splits.length>1)
+          L.push("  - splits: "+s.loeb.splits.map(k=>k.km+": "+tidTekst(k.sek)+
+            (erTal(k.puls)?" ("+k.puls+")":"")).join(", "));
+      });
+      L.push("");
+    }
+  }
+  L.push("---");
+  L.push("Afkobling = fart pr. hjerteslag i anden halvdel mod første. Over ca. 5 % betyder det,");
+  L.push("at turen kostede mere, end tempoet antyder.");
+  return L.join("\n");
+}
+
+const SPOERGSMAAL=[
+  "Hvad skal jeg gøre i dag – og hvorfor?",
+  "Er min belastning på vej et sted hen, jeg ikke kan se?",
+  "Hvor giver det bedst mening at skrue lige nu?",
+  "Kig på min seneste løbetur og sig, hvad den fortæller.",
+  "Læg de næste to uger for mig."
+];
+
+const SYSTEMPROMPT=
+"Du er træner for en voksen motionist, der løber ca. tre gange om ugen og styrketræner ca. tre gange "+
+"om ugen. Løb er hovedsagen; styrken er der for at holde ham hel. Han har tidligere haft problemer "+
+"med SI-leddet, så tre styrkedage er ikke til forhandling – skær hellere i løbet.\n\n"+
+"Du får en struktureret status fra hans app: parathedsscore, belastningstal (sRPE-load, akut:kronisk, "+
+"monotoni), morgental (HRV, hvilepuls, søvn, ømhed, energi, stress) og de seneste pas og løbeture.\n\n"+
+"Sådan svarer du:\n"+
+"- På dansk, i du-form, roligt og konkret. Ingen udråbstegn, ingen peptalk.\n"+
+"- Henvis altid til hans faktiske tal. \"Din HRV er 8 % under basis\" – ikke \"din restitution ser lidt lav ud\".\n"+
+"- Sig én ting, han skal gøre, før du siger fem ting, han kunne gøre.\n"+
+"- Når data mangler, så sig det i stedet for at gætte.\n"+
+"- Vær ærlig, når tallene siger hvil. Han har bedt om at blive holdt i ørerne.\n"+
+"- Hold det kort nok til at læses på en telefon kl. 05: typisk 100–250 ord.\n"+
+"- Du er ikke læge. Ved smerte (ikke ømhed), feber eller noget, der ikke går væk, henviser du videre.";
+
+/* ==========================================================================
+   10. FORBINDELSEN TIL CLAUDE
+   Nøglen bliver i telefonen. Kaldet går direkte til api.anthropic.com –
+   ingen server imellem, fordi der ikke er nogen server.
+   ========================================================================== */
+
+async function spoergClaude(noegle,beskeder,paaDelta,paaTilstand){
+  const svar=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{
+      "content-type":"application/json",
+      "x-api-key":noegle,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify({
+      model:MODEL,
+      max_tokens:8000,
+      stream:true,
+      thinking:{type:"adaptive"},
+      system:SYSTEMPROMPT,
+      messages:beskeder
+    })
+  });
+  if(!svar.ok){
+    let besked="";
+    try{const j=await svar.json();besked=(j.error&&j.error.message)||""}catch(e){}
+    if(svar.status===401)throw new Error("API-nøglen blev afvist. Tjek den under Data.");
+    if(svar.status===429)throw new Error("For mange kald lige nu. Prøv igen om lidt.");
+    throw new Error("Claude svarede "+svar.status+(besked?": "+besked:"."));
+  }
+  const laeser=svar.body.getReader(), afkoder=new TextDecoder();
+  let rest="",tekst="";
+  for(;;){
+    const {done,value}=await laeser.read();
+    if(done)break;
+    rest+=afkoder.decode(value,{stream:true});
+    const linjer=rest.split("\n");
+    rest=linjer.pop();
+    for(const linje of linjer){
+      if(!linje.startsWith("data:"))continue;
+      const raa=linje.slice(5).trim();
+      if(!raa||raa==="[DONE]")continue;
+      let h;try{h=JSON.parse(raa)}catch(e){continue}
+      if(h.type==="content_block_start"&&h.content_block&&h.content_block.type==="thinking")
+        paaTilstand&&paaTilstand("taenker");
+      if(h.type==="content_block_delta"&&h.delta){
+        if(h.delta.type==="text_delta"){
+          paaTilstand&&paaTilstand("skriver");
+          tekst+=h.delta.text;
+          paaDelta&&paaDelta(tekst);
+        }
+      }
+      if(h.type==="error")throw new Error((h.error&&h.error.message)||"Ukendt fejl fra Claude.");
+    }
+  }
+  if(!tekst.trim())throw new Error("Claude sendte et tomt svar.");
+  return tekst;
+}
+
+/* ==========================================================================
+   11. TILSTAND
+   ========================================================================== */
 
 let data=hentData();
-let view="idag";
+let visning="idag";
 let type=(()=>{const t=data.ugeplan[new Date().getDay()];return t==="FRI"?"A":t})();
-let draft={},feel=null,gemt=false;
+let kladde={},feel=null,gemt=false,note="",minutter="";
+let loebType="rolig", loebFil=null, loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
+let morgenKladde=null, morgenAaben=false;
+let samtale=[], claudeTravl=false, claudeTilstand="", claudeUdkast="", claudeFejl="";
+let importStatus=null, valgtDag=null, systemBesked=null;
 
-function nyDraft(){
-  draft={};
-  (PROGRAM[type].oevelser||[]).forEach(o=>{draft[o.id]={vaegt:data.lastWeights[o.id]||"–",saet:stdSaet(o.maal),reps:stdReps(o.id,o.maal),done:false}});
-  feel=null;gemt=false;
+function nyKladde(){
+  kladde={};
+  (PROGRAM[type]&&PROGRAM[type].oevelser||[]).forEach(o=>{
+    kladde[o.id]={vaegt:data.sidsteVaegte[o.id]||"–",saet:stdSaet(o.maal),
+      reps:stdReps(o.id,o.maal),done:false};
+  });
+  feel=null;gemt=false;note="";minutter="";
 }
-nyDraft();
-
-function eksportTekst(){
-  if(!data.sessions.length)return "Ingen pas logget endnu.";
-  return data.sessions.map(s=>{
-    const p=PROGRAM[s.type];
-    let l=s.date+"  "+p.navn;
-    if(s.minutter)l+="  "+s.minutter+" min";
-    if(s.feel){const f=FEELS.find(x=>x.id===s.feel);l+="  · "+(f?f.label:s.feel)}
-    const dele=[l];
-    if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
-      const o=p.oevelser.find(x=>x.id===id);dele.push("   "+(o?o.navn:id)+": "+v)});
-    if(s.note)dele.push("   Note: "+s.note);
-    return dele.join("\n");
-  }).join("\n\n");
+function stdSaet(maal){const m=/^(\d)/.exec(maal);return m?m[1]:"3"}
+function stdReps(id,maal){const l=REPS[id]||[];return l.length?l[Math.min(1,l.length-1)]:maal}
+function aabnMorgen(){
+  const m=morgenFor(data,idag());
+  morgenKladde=m?Object.assign({},m):{dato:idag()};
+  morgenAaben=true;
 }
+nyKladde();
 
-function sel(felt,id,liste,valgt,label){
-  const ekstra=liste.includes(valgt)?"":'<option selected>'+esc(valgt)+'</option>';
-  return '<select class="mono s-'+felt+'" data-'+felt+'="'+id+'" aria-label="'+label+'">'+ekstra
-    +liste.map(v=>'<option'+(v===valgt?" selected":"")+'>'+esc(v)+'</option>').join("")+'</select>';
+/* ==========================================================================
+   12. VISNINGER
+   ========================================================================== */
+
+function vaelger(felt,id,liste,valgt,label){
+  const ekstra=liste.indexOf(valgt)>=0?"":'<option selected>'+esc(valgt)+'</option>';
+  return '<select class="mono s-'+felt+'" data-'+felt+'="'+esc(id)+'" aria-label="'+esc(label)+'">'+
+    ekstra+liste.map(v=>'<option'+(v===valgt?" selected":"")+'>'+esc(v)+'</option>').join("")+
+    '</select>';
 }
-function render(){
-  const app=document.getElementById("app");
-  const idag=dagsdato(),uge=ugensDatoer(),p=PROGRAM[type],erLoeb=type==="LOEB";
-  const sidsteTo=data.sessions.slice(-2);
-  const forHaardt=sidsteTo.length===2&&sidsteTo.every(s=>s.feel==="haardt");
+function skala(felt,vaerdi,lav,hoej){
+  return '<div class="skala">'+[1,2,3,4,5].map(n=>
+    '<button data-skala="'+felt+'" data-v="'+n+'" class="'+(vaerdi===n?"aktiv":"")+'">'+n+
+    '</button>').join("")+'</div><div class="skalatekst"><span>'+esc(lav)+'</span><span>'+
+    esc(hoej)+'</span></div>';
+}
+function serieFarve(t){return t==="LOEB"?"var(--s-loeb)":"var(--s-styrke)"}
 
-  let h='<div class="top"><div><div class="eyebrow mono">KL. 05</div><h1>Morgenlog</h1></div>'
-    +'<div class="dato mono">'+esc(paenDato(idag))+'</div></div>';
-
-  h+='<div class="uge">'+uge.map((dato,i)=>{
-    const s0=data.sessions.find(s=>s.date===dato),erIdag=dato===idag;
+function topDel(){
+  return '<div class="top"><div><div class="eyebrow mono">KL. 05</div><h1>Morgenlog</h1></div>'+
+    '<div style="display:flex;align-items:center;gap:10px">'+
+    '<div class="dato mono">'+esc(paenDato(idag()))+'</div>'+
+    '<button class="tandhjul" data-visning="data" aria-label="Data og indstillinger">⚙</button>'+
+    '</div></div>';
+}
+function ugeStribe(){
+  const uge=ugensDatoer(),iDag=idag();
+  return '<div class="uge">'+uge.map((dato,i)=>{
+    const pas=sessionerFor(data,dato), erIdag=dato===iDag;
     const plan=data.ugeplan[(i+1)%7];
-    const vis=s0?"✓":(plan==="FRI"?"":(plan==="LOEB"?"L":plan));
-    return '<div class="ugedag"><div class="ugecelle'+(s0?" logget":"")+(erIdag?" idag":"")+'">'
-      +vis+'</div><span class="ugelabel'+(erIdag?" idag":"")+' mono">'+DAGE[i]+'</span></div>';
+    const vis=pas.length?(pas.length>1?String(pas.length):(pas[0].type==="LOEB"?"L":pas[0].type))
+      :(plan==="FRI"?"":(plan==="LOEB"?"L":plan));
+    const stribe=pas.length?'<i style="background:'+serieFarve(pas[0].type)+'"></i>':"";
+    return '<div class="ugedag"><div class="ugecelle'+(pas.length?" logget":"")+
+      (erIdag?" idag":"")+'">'+vis+stribe+'</div>'+
+      '<span class="ugelabel'+(erIdag?" idag":"")+' mono">'+DAGE[i]+'</span></div>';
   }).join("")+'</div>';
+}
+function navDel(){
+  return '<div class="nav mono">'+[["idag","I DAG"],["balance","BALANCE"],["plan","PLAN"],
+    ["log","LOG"],["claude","CLAUDE"]]
+    .map(([id,l])=>'<button data-visning="'+id+'" class="'+(visning===id?"aktiv":"")+'">'+l+
+      '</button>').join("")+'</div>';
+}
 
-  if(forHaardt&&view==="idag")
-    h+='<div class="vagt">To pas i træk føltes for hårde. Overvej at eksportere loggen og tage den med til Claude, før du fortsætter som planlagt.</div>';
+/* ---------- I DAG ---------- */
 
-  h+='<div class="nav mono">'+[["idag","I DAG"],["plan","PLAN"],["historik","HISTORIK"],["eksport","EKSPORT"]]
-    .map(([id,l])=>'<button data-view="'+id+'" class="'+(view===id?"aktiv":"")+'">'+l+'</button>').join("")+'</div>';
+function visIdag(){
+  const p=parathed(data,idag());
+  const planType=data.ugeplan[new Date().getDay()];
+  const raad=dagensRaad(p,type);
+  let h="";
 
-  if(view==="idag"){
-    h+='<div class="typer mono">'+["A","B","C","LOEB"].map(t=>
-      '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+(t==="LOEB"?"LØB":t)+'</button>').join("")+'</div>';
-    h+='<div class="kort"><div class="kort-top"><h2>'+p.navn+'</h2><span>'+p.under+'</span></div>';
-    if(gemt){
-      h+='<div class="kvittering"><div class="stor">Logget ✓</div><p>Så er det ud af døren. Resten passer sig selv.</p></div>';
-    }else{
-      if(erLoeb){
-        h+='<p class="hint" style="margin-top:12px;color:var(--tekst)">4 × 5 min · 2 min gang imellem<br>'
-          +'<span style="color:var(--daempet)">6:45–7:00 min/km · puls under 145</span></p>'
-          +'<label>Varighed (min)<input type="number" inputmode="numeric" id="minutter" placeholder="28"></label>'
-          +'<p class="hint">Detaljerne (kadence, puls, watt) bor i CSV-filen fra uret – den uploader du i chatten hos Claude.</p>';
-      }else{
-        h+=p.oevelser.map(o=>{const d=draft[o.id];
-          return '<div class="raekke"><button class="flueben'+(d.done?" done":"")+'" data-ex="'+o.id+'" aria-label="Markér '+esc(o.navn)+'">'+(d.done?"✓":"")+'</button>'
-            +'<div class="oev"><div class="navn">'+esc(o.navn)
-            +(o.vid?' <a class="vid" href="'+o.vid+'" target="_blank" rel="noopener" aria-label="Se video">▷</a>':'')
-            +'</div><div class="valg">'
-            +sel("saet",o.id,SAET,d.saet,"Sæt")+'<span class="gange">×</span>'
-            +sel("reps",o.id,REPS[o.id]||[o.maal],d.reps,"Gentagelser")
-            +sel("vaegt",o.id,VAEGT,d.vaegt,"Vægt")
-            +'</div></div></div>';
-        }).join("");
-      }
-      h+='<div class="feels">'+FEELS.map(f=>
-        '<button data-feel="'+f.id+'" class="'+(feel===f.id?"aktiv":"")+'">'+f.label+'</button>').join("")+'</div>';
-      h+='<input id="note" placeholder="Note (valgfri – fx \'forfod øm\')" style="margin-top:12px">';
-      const kan=erLoeb||Object.values(draft).some(v=>v.done);
-      h+='<button class="gem" id="gem" '+(kan?"":"disabled")+'>Gem morgenpas</button>';
+  // Parathed
+  h+='<div class="kort"><div class="ring">'+parathedsRing(p.score,p.band)+
+    '<div style="min-width:0"><div class="ringband" style="color:'+
+      (p.band?p.band.farve:"var(--daempet)")+'">'+
+      '<span class="ringikon">'+(p.band?p.band.ikon:"○")+'</span>'+
+      (p.band?esc(p.band.navn):"Ingen tal endnu")+'</div>'+
+    '<div class="ringund">'+esc(p.score==null
+      ? "Tast et morgentjek, så begynder appen at kende dig."
+      : p.band.raad)+'</div></div></div>';
+
+  if(p.dele.length){
+    h+='<div class="udlaes">'+p.dele.map(x=>
+      '<b>'+esc(x.navn)+'</b> '+Math.round(x.score)).join(" · ")+
+      ' <span style="color:var(--svag)">· hver af 100</span></div>';
+  }
+  h+='</div>';
+
+  if(p.loeftestang){
+    h+='<div class="vagt"><b>Skru her:</b> '+esc(p.loeftestang.raad)+'</div>';
+  }
+  if(p.mangler.length&&p.score!=null){
+    h+='<p class="hint">Uden '+esc(p.mangler.join(" og "))+
+      ' regner appen kun på det halve. Tallene ligger i Health-appen på telefonen.</p>';
+  }
+
+  // Morgentjek
+  const m=morgenFor(data,idag());
+  if(morgenAaben){
+    const k=morgenKladde||{};
+    h+='<div class="kort"><div class="kort-top"><h2>Morgentjek</h2>'+
+      '<span>20 sekunder</span></div>'+
+      '<div class="to"><label>HRV (ms)<input type="number" inputmode="decimal" step="0.1" '+
+        'data-morgen="hrv" value="'+(erTal(k.hrv)?k.hrv:"")+'" placeholder="fx 48"></label>'+
+      '<label>Hvilepuls<input type="number" inputmode="numeric" data-morgen="hvilePuls" '+
+        'value="'+(erTal(k.hvilePuls)?k.hvilePuls:"")+'" placeholder="fx 52"></label></div>'+
+      '<label>Søvn i nat (timer)<input type="number" inputmode="decimal" step="0.25" '+
+        'data-morgen="soevnT" value="'+(erTal(k.soevnT)?k.soevnT:"")+'" placeholder="fx 7,5"></label>'+
+      '<label>Søvnkvalitet</label>'+skala("soevnKval",k.soevnKval,"elendig","perfekt")+
+      '<label>Ømhed i benene</label>'+skala("oemhed",k.oemhed,"ingen","meget")+
+      '<label>Energi</label>'+skala("energi",k.energi,"tom","fuld")+
+      '<label>Stress uden for træning</label>'+skala("stress",k.stress,"ingen","meget")+
+      '<div class="knaprad"><button class="gem sek" id="morgenAnnuller">Fortryd</button>'+
+      '<button class="gem" id="morgenGem">Gem morgentjek</button></div>'+
+      '<p class="hint">HRV og hvilepuls kan importeres automatisk under ⚙ Data. '+
+      'De tre skalaer skal du selv svare på – det er dem, uret ikke kan måle.</p></div>';
+  }else if(m){
+    const dele=[];
+    if(erTal(m.hrv))dele.push("HRV "+num(m.hrv,0));
+    if(erTal(m.hvilePuls))dele.push("puls "+num(m.hvilePuls,0));
+    if(erTal(m.soevnT))dele.push("søvn "+num(m.soevnT,1)+" t");
+    if(erTal(m.energi))dele.push("energi "+m.energi+"/5");
+    if(erTal(m.oemhed))dele.push("ømhed "+m.oemhed+"/5");
+    h+='<div class="kort"><div class="kort-top"><h2>Morgentjek ✓</h2>'+
+      '<span><button class="tandhjul" id="morgenRet" style="width:auto;height:auto;'+
+      'padding:4px 10px;font-size:11px">RET</button></span></div>'+
+      '<div class="udlaes" style="border-top:none;padding-top:6px">'+esc(dele.join(" · "))+
+      '</div></div>';
+  }else{
+    h+='<div class="kort"><div class="kort-top"><h2>Morgentjek</h2><span>ikke taget i dag</span></div>'+
+      '<p class="hint" style="margin-top:10px">Fire tal og tre skalaer. Det er dem, hele '+
+      'restitutionsbilledet hviler på.</p>'+
+      '<button class="gem" id="morgenStart">Tag morgentjekket</button></div>';
+  }
+
+  // Dagens pas
+  h+='<h3 class="afsnit">DAGENS PAS</h3>';
+  h+='<div class="nav mono" style="margin-top:10px">'+["A","B","C","MOB","LOEB"].map(t=>
+    '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+
+    (t==="LOEB"?"LØB":t==="MOB"?"MOBIL":t)+'</button>').join("")+'</div>';
+  if(planType!==type&&planType!=="FRI"){
+    h+='<p class="hint">Planen siger '+esc((PLANVALG.find(v=>v[0]===planType)||["","?"])[1])+
+      ' i dag. Du kan trygt bytte om – appen regner på det, du faktisk laver.</p>';
+  }
+
+  const pr=PROGRAM[type];
+  h+='<div class="kort"><div class="kort-top"><h2>'+esc(pr.navn)+'</h2><span>'+
+    esc(pr.under)+'</span></div>';
+
+  if(gemt){
+    h+='<div class="kvittering"><div class="stor">Logget ✓</div>'+
+      '<p>Så er det ud af døren. Resten passer sig selv.</p></div>';
+  }else{
+    if(type==="LOEB")h+=loebFelter();
+    else h+=styrkeFelter(pr);
+    h+='<div class="feels">'+FEELS.map(f=>
+      '<button data-feel="'+f.id+'" class="'+(feel===f.id?"aktiv":"")+'">'+esc(f.label)+
+      '</button>').join("")+'</div>';
+    h+='<input data-kladde="note" value="'+esc(note)+
+      '" placeholder="Note (valgfri – fx &quot;forfod øm&quot;)" style="margin-top:12px">';
+    const kan=type==="LOEB"
+      ? !!(loebFil||erTal(loebManuel.distanceKm)||erTal(loebManuel.minutter))
+      : Object.keys(kladde).some(k=>kladde[k].done);
+    h+='<button class="gem" id="gemPas" '+(kan?"":"disabled")+'>Gem '+
+      (type==="LOEB"?"løbeturen":"morgenpas")+'</button>';
+    if(!kan)h+='<p class="hint">'+(type==="LOEB"
+      ? "Læg filen fra uret ind, eller tast distance og tid."
+      : "Sæt flueben ved mindst én øvelse.")+'</p>';
+  }
+  h+='</div>';
+
+  if(!gemt&&p.score!=null){
+    h+='<div class="vagt'+(raad.status==="kritisk"?" stop":raad.status==="god"?" ro":"")+
+      '">'+esc(raad.tekst)+'</div>';
+  }
+  return h;
+}
+
+function styrkeFelter(pr){
+  return pr.oevelser.map(o=>{
+    const k=kladde[o.id]||{saet:"3",reps:o.maal,vaegt:"–",done:false};
+    const sidst=data.sidsteVaegte[o.id];
+    return '<div class="raekke"><button class="flueben'+(k.done?" done":"")+'" data-oev="'+
+      esc(o.id)+'" aria-label="Markér '+esc(o.navn)+'">'+(k.done?"✓":"")+'</button>'+
+      '<div class="oev"><div class="navn">'+esc(o.navn)+
+      (o.vid?' <a class="vid" href="'+esc(o.vid)+'" target="_blank" rel="noopener" '+
+        'aria-label="Se video">▷</a>':"")+'</div>'+
+      (o.hvorfor?'<div class="sidst">'+esc(o.hvorfor)+'</div>':"")+
+      '<div class="valg">'+
+        vaelger("saet",o.id,SAET,k.saet,"Sæt")+'<span class="gange">×</span>'+
+        vaelger("reps",o.id,REPS[o.id]||[o.maal],k.reps,"Gentagelser")+
+        vaelger("vaegt",o.id,VAEGT,k.vaegt,"Vægt")+
+      '</div>'+
+      (sidst&&sidst!=="–"?'<div class="sidst">Sidst: '+esc(sidst)+'</div>':"")+
+      '</div></div>';
+  }).join("");
+}
+
+function loebFelter(){
+  let h='<label>Type løb<select class="bred" data-loebtype>'+LOEBTYPER.map(t=>
+    '<option value="'+t.id+'"'+(loebType===t.id?" selected":"")+'>'+esc(t.navn)+
+    '</option>').join("")+'</select></label>';
+  if(loebFil){
+    const l=loebFil;
+    h+='<div class="kort" style="margin-top:14px;background:var(--nat)">'+
+      '<div class="kort-top"><h2 style="font-size:14px">'+esc(l.filnavn||"Turen")+'</h2>'+
+      '<span><button class="tandhjul" id="loebRyd" style="width:auto;height:auto;'+
+      'padding:4px 9px;font-size:11px">FJERN</button></span></div>'+
+      '<div class="fliser" style="margin-top:10px">'+
+        flise("DISTANCE",num(l.distanceKm,2),"km")+
+        flise("TID",tidTekst(l.bevaegSek),"min:sek")+
+        flise("TEMPO",tempoTekst(l.tempoSekPrKm).replace("/km",""),"min/km")+
+      '</div><div class="fliser">'+
+        flise("PULS",erTal(l.gnsPuls)?String(l.gnsPuls):"–",erTal(l.maxPuls)?"max "+l.maxPuls:"")+
+        flise("KADENCE",erTal(l.kadence)?String(l.kadence):"–","spm")+
+        flise("STIGNING",erTal(l.stigningM)?"+"+l.stigningM:"–","meter")+
+      '</div>';
+    if(erTal(l.kobling)){
+      const slem=l.kobling>5;
+      h+='<div class="udlaes"><b>Afkobling '+num(l.kobling,1)+' %</b> – '+
+        (slem?"farten faldt mere end pulsen. Turen kostede mere, end tempoet siger."
+             :"fart og puls fulgtes ad hele vejen. Pænt aerobt.")+'</div>';
+    }
+    if(l.splits&&l.splits.length>1){
+      h+='<div class="rul"><table class="data"><thead><tr><th>KM</th><th>TID</th>'+
+        '<th>PULS</th></tr></thead><tbody>'+l.splits.map(k=>
+        '<tr><td class="d">'+k.km+'</td><td>'+tidTekst(k.sek)+'</td><td>'+
+        (erTal(k.puls)?k.puls:"–")+'</td></tr>').join("")+'</tbody></table></div>';
     }
     h+='</div>';
+  }else{
+    h+='<div class="drop" id="loebDrop"><b>Læg turen ind</b>'+
+      'GPX eller TCX fra uret. Filen bliver i telefonen.'+
+      '<input type="file" id="loebInput" accept=".gpx,.tcx,.xml,application/gpx+xml" '+
+      'style="display:none"></div>'+
+      '<p class="hint">Apple Watch kommer ud gennem HealthFit, RunGap, WorkOutDoors eller '+
+      'Strava – vælg GPX eller TCX i eksporten. Har du ikke filen, så tast det vigtigste:</p>'+
+      '<div class="to"><label>Distance (km)<input type="number" inputmode="decimal" step="0.01" '+
+        'data-loebm="distanceKm" value="'+(erTal(loebManuel.distanceKm)?loebManuel.distanceKm:"")+
+        '" placeholder="8,2"></label>'+
+      '<label>Tid (min)<input type="number" inputmode="numeric" data-loebm="minutter" '+
+        'value="'+(erTal(loebManuel.minutter)?loebManuel.minutter:"")+
+        '" placeholder="52"></label></div>'+
+      '<label>Gennemsnitspuls (valgfri)<input type="number" inputmode="numeric" '+
+        'data-loebm="gnsPuls" value="'+(erTal(loebManuel.gnsPuls)?loebManuel.gnsPuls:"")+
+        '" placeholder="146"></label>';
+  }
+  return h;
+}
+function flise(navn,vaerdi,under){
+  return '<div class="flise"><div class="navn mono">'+esc(navn)+'</div>'+
+    '<div class="vaerdi">'+esc(vaerdi)+'</div>'+
+    (under?'<div class="under">'+esc(under)+'</div>':"")+'</div>';
+}
+
+/* ---------- BALANCE ---------- */
+
+function visBalance(){
+  const bt=belastningsTal(data,idag());
+  const zone=forholdZone(bt.forhold);
+  const p=parathed(data,idag());
+  let h="";
+
+  h+='<div class="fliser" style="margin-top:16px">'+
+    flise("AKUT 7 D",num(bt.atl,0),"AU pr. dag")+
+    flise("KRONISK 28 D",num(bt.ctl,0),"AU pr. dag")+
+    flise("FORM",(bt.form>0?"+":"")+num(bt.form,0),bt.form>0?"frisk":"træt")+
+  '</div>';
+
+  h+='<div class="kort"><div class="kort-top"><h2>Akut mod kronisk</h2>'+
+    '<span class="mono">'+(bt.forhold!=null?num(bt.forhold,2):"–")+'</span></div>'+
+    '<div class="diagram maalebar">'+forholdsMaaler(bt.forhold)+'</div>'+
+    '<div class="udlaes"><b style="color:'+zone.farve+'">'+zone.ikon+' '+esc(zone.navn)+
+      '</b> – '+esc(forholdsTekst(bt))+'</div></div>';
+
+  h+='<div class="kort"><div class="kort-top"><h2>Belastning pr. dag</h2>'+
+    '<span>28 dage · AU</span></div>'+
+    '<div class="diagram">'+belastningsDiagram(bt,28)+'</div>'+
+    '<div class="legende"><span><i style="background:var(--s-loeb)"></i>Løb</span>'+
+    '<span><i style="background:var(--s-styrke)"></i>Styrke</span>'+
+    '<span><i class="linje" style="background:var(--daempet)"></i>Grundform (28 d)</span></div>'+
+    '<p class="hint">AU = minutter × anstrengelse (1–10). Det er den fælles enhed, '+
+    'der gør et styrkepas og en løbetur sammenlignelige.</p>'+
+    '<div class="udlaes" id="soejleUdlaes">'+esc(valgtDag||
+      "Denne uge: "+num(bt.ugeSum,0)+" AU mod "+num(bt.forrigeUgeSum,0)+" AU i sidste uge"+
+      (bt.aendring!=null?" ("+(bt.aendring>0?"+":"")+num(bt.aendring*100,0)+" %)":"")+".")+
+    '</div></div>';
+
+  if(bt.monotoni!=null){
+    const slem=bt.monotoni>2;
+    h+='<div class="kort"><div class="kort-top"><h2>Monotoni</h2>'+
+      '<span class="mono">'+num(bt.monotoni,2)+'</span></div>'+
+      '<p class="hint">'+(slem
+        ? "Over 2,0. Dine dage ligner hinanden for meget – det er den kombination af "+
+          "middelhård hver dag, der slider mest. Gør de hårde hårdere og de lette lettere."
+        : "Under 2,0. Der er ordentlig forskel på dine hårde og lette dage. Sådan skal det være.")+
+      '</p>'+(bt.strain?'<p class="hint">Samlet strain denne uge: '+num(bt.strain,0)+'</p>':"")+
+      '</div>';
   }
 
-  if(view==="plan"){
-    const NAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
-    const MULIG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],["FRI","Fri"]];
-    h+='<p class="eksport-info">Byt rundt på dagene, som din uge ser ud. Skal du bare rykke en enkelt træning i dag, behøver du ikke ændre noget her – vælg blot passet under "I dag".</p>';
-    h+='<div class="kort">'+NAVNE.map((n,i)=>{
-      const dagIdx=(i+1)%7, valgt=data.ugeplan[dagIdx];
-      return '<div class="planraekke"><span>'+n+'</span><select data-plan="'+dagIdx+'">'
-        +MULIG.map(([v,l])=>'<option value="'+v+'"'+(v===valgt?" selected":"")+'>'+l+'</option>').join("")
-        +'</select></div>';
-    }).join("")+'</div>';
-    const antalStyrke=data.ugeplan.filter(x=>["A","B","C"].includes(x)).length;
-    const antalLoeb=data.ugeplan.filter(x=>x==="LOEB").length;
-    let advar="";
-    for(let i=0;i<7;i++){
-      const a=data.ugeplan[i], b=data.ugeplan[(i+1)%7];
-      if(a==="LOEB"&&b==="LOEB"){advar="To løbedage i træk. Det er netop det mønster, der gik galt sidst – læg en styrke- eller fridag imellem.";break}
+  const hrvSpark=sparkline(data,"hrv",idag(),"var(--gry)");
+  const soevnSpark=sparkline(data,"soevnT",idag(),"var(--gry)");
+  if(hrvSpark||soevnSpark){
+    h+='<h3 class="afsnit">MOD DIN EGEN BASISLINJE</h3>';
+    if(hrvSpark)h+='<div class="kort"><div class="kort-top"><h2>HRV</h2>'+
+      '<span>28 dage · ms</span></div><div class="diagram">'+hrvSpark+'</div>'+
+      '<div class="udlaes">Det grå bånd er dit 42-dages snit ± én spredning. '+
+      'Under båndet tre dage i træk er signalet – ikke en enkelt lav morgen.</div></div>';
+    if(soevnSpark)h+='<div class="kort"><div class="kort-top"><h2>Søvn</h2>'+
+      '<span>28 dage · timer</span></div><div class="diagram">'+soevnSpark+'</div>'+
+      '<div class="udlaes">Behov sat til '+num(data.profil.soevnBehov,1)+
+      ' t. Ret det under ⚙ Data.</div></div>';
+  }
+
+  // Tabelvisning: hvert tal i diagrammerne skal også kunne læses som tal.
+  h+='<h3 class="afsnit">TALLENE</h3><div class="kort"><div class="rul">'+
+    '<table class="data"><thead><tr><th>DATO</th><th>PAS</th><th>LOAD</th>'+
+    '<th>PARAT</th><th>HRV</th><th>SØVN</th></tr></thead><tbody>'+
+    sidsteNDatoer(14).slice().reverse().map(dt=>{
+      const pas=sessionerFor(data,dt), m=morgenFor(data,dt);
+      const load=pas.reduce((s,x)=>s+sessionLoad(x,data.profil),0);
+      const pp=parathed(data,dt);
+      return '<tr><td class="d">'+esc(kortDato(dt))+'</td>'+
+        '<td>'+(pas.length?pas.map(x=>x.type==="LOEB"?"Løb":x.type).join("+"):"–")+'</td>'+
+        '<td>'+(load||"–")+'</td>'+
+        '<td>'+(pp.score==null?"–":pp.score)+'</td>'+
+        '<td>'+(m&&erTal(m.hrv)?num(m.hrv,0):"–")+'</td>'+
+        '<td>'+(m&&erTal(m.soevnT)?num(m.soevnT,1):"–")+'</td></tr>';
+    }).join("")+'</tbody></table></div></div>';
+
+  if(p.rangeret.length>1){
+    h+='<h3 class="afsnit">HVOR DET KOSTER MEST</h3><div class="kort">'+
+      p.rangeret.map((x,i)=>'<div class="planraekke"><span>'+(i+1)+'. '+esc(x.navn)+
+        '</span><span class="mono" style="color:'+
+        (x.score<45?"var(--st-kritisk)":x.score<65?"var(--st-varsel)":"var(--daempet)")+'">'+
+        Math.round(x.score)+'</span></div>').join("")+
+      '</div><p class="hint">Rangeret efter hvor meget hver del trækker den samlede '+
+      'parathed ned – vægten ganget med afstanden til 100.</p>';
+  }
+  return h;
+}
+function forholdsTekst(bt){
+  if(bt.forhold==null)return "Appen skal bruge et par ugers pas, før forholdet betyder noget.";
+  const r=bt.forhold;
+  if(r<0.8)return "Du træner mindre end du plejer. Fint efter en hård periode, dyrt hvis det varer ved.";
+  if(r<=1.3)return "Belastningen stiger i takt med, at du tåler mere. Det er præcis her, du gerne vil ligge.";
+  if(r<=1.5)return "Du lægger på hurtigere, end kroppen bygger op. Hold ugen flad nu.";
+  return "Akut belastning langt over den kroniske. Det er det mønster, der går forud for skader – "+
+    "skær ned i denne uge, ikke i næste.";
+}
+
+/* ---------- PLAN ---------- */
+
+function visPlan(){
+  let h='<p class="tom">Byt rundt på dagene, som din uge ser ud. Skal du bare flytte '+
+    'dagens pas, behøver du ikke ændre noget her – vælg passet under "I dag".</p>';
+  h+='<div class="kort">'+UGEDAGSNAVNE.map((navn,i)=>{
+    const dagIdx=(i+1)%7, valgt=data.ugeplan[dagIdx];
+    return '<div class="planraekke"><span>'+navn+'</span>'+
+      '<span style="display:flex;gap:6px;align-items:center">'+
+      '<select data-plan="'+dagIdx+'">'+PLANVALG.map(([v,l])=>
+        '<option value="'+v+'"'+(v===valgt?" selected":"")+'>'+esc(l)+'</option>').join("")+
+      '</select>'+
+      '<button class="byt" data-byt="'+i+'" aria-label="Byt med '+
+        esc(UGEDAGSNAVNE[(i+1)%7])+'">⇅</button></span></div>';
+  }).join("")+'</div>';
+
+  const antalStyrke=data.ugeplan.filter(x=>STYRKETYPER.indexOf(x)>=0).length;
+  const antalLoeb=data.ugeplan.filter(x=>x==="LOEB").length;
+  const advarsler=[];
+  for(let i=0;i<7;i++){
+    if(data.ugeplan[i]==="LOEB"&&data.ugeplan[(i+1)%7]==="LOEB"){
+      advarsler.push("To løbedage i træk. Læg en styrke- eller fridag imellem – "+
+        "det er præcis det mønster, der plejer at gå galt.");break;
     }
-    if(!advar&&antalStyrke<3)advar="Færre end tre styrkedage. Styrken er det, der holder SI-leddet i ro – skær hellere i løb end i styrke.";
-    if(advar)h+='<div class="vagt" style="margin-top:16px">'+advar+'</div>';
-    h+='<p class="hint">'+antalStyrke+' styrkedage · '+antalLoeb+' løbedage</p>';
   }
-
-  if(view==="historik"){
-    if(!data.sessions.length)h+='<p class="tom">Ingen pas endnu. Det første logger du under "I dag".</p>';
-    h+=[...data.sessions].reverse().slice(0,30).map(s=>{
-      const sp=PROGRAM[s.type];
-      let det=[];
-      if(s.minutter)det.push(s.minutter+" min");
-      if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
-        const o=sp.oevelser.find(x=>x.id===id);det.push((o?o.navn:id)+" "+esc(v))});
-      if(s.feel){const f=FEELS.find(x=>x.id===s.feel);det.push(f?f.label:s.feel)}
-      return '<div class="hist" style="margin-top:8px"><div class="top"><span class="titel">'+sp.navn+'</span>'
-        +'<span class="dato mono">'+esc(paenDato(s.date))+'</span></div>'
-        +'<div class="detaljer mono">'+det.join(" · ")+'</div>'
-        +(s.note?'<div class="note">'+esc(s.note)+'</div>':"")+'</div>';
-    }).join("");
-  }
-
-  if(view==="eksport"){
-    h+='<p class="eksport-info">Kopiér og sæt ind i chatten hos Claude hver 2.–3. uge, sammen med CSV-filer fra dine løb. Så justerer vi programmet derfra.</p>'
-      +'<textarea readonly rows="12" id="ekstekst">'+esc(eksportTekst())+'</textarea>'
-      +'<button class="gem" id="kopier">Kopiér loggen</button>'
-      +'<div class="backup"><h3>Sikkerhedskopi</h3>'
-      +'<p class="hint">Dine pas ligger i telefonen og forsvinder ikke, når appen opdateres. Men skifter du telefon eller rydder browserdata, er de væk – tag en kopi en gang imellem.</p>'
-      +'<button class="gem sek" id="download">Gem backup-fil</button>'
-      +'<label style="margin-top:10px">Gendan fra backup-fil<input type="file" id="upload" accept="application/json"></label>'
-      +'<p class="hint">'+data.sessions.length+' pas gemt · seneste '+(data.sessions.length?esc(data.sessions[data.sessions.length-1].date):'–')+'</p></div>';
-  }
-
-  app.innerHTML=h;
-
-  app.querySelectorAll("[data-plan]").forEach(sel=>sel.onchange=()=>{
-    data.ugeplan[+sel.dataset.plan]=sel.value;gemData(data);render()});
-  app.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{view=b.dataset.view;render()});
-  app.querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>{type=b.dataset.type;nyDraft();render()});
-  app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{
-    const d=draft[b.dataset.ex];d.done=!d.done;laesInputs();render()});
-  app.querySelectorAll("[data-feel]").forEach(b=>b.onclick=()=>{
-    feel=(feel===b.dataset.feel)?null:b.dataset.feel;laesInputs();render()});
-  const gemBtn=document.getElementById("gem");
-  if(gemBtn)gemBtn.onclick=gemSession;
-  const dl=document.getElementById("download");
-  if(dl)dl.onclick=()=>{
-    const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(b);a.download="morgenlog-"+dagsdato()+".json";a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  };
-  const up=document.getElementById("upload");
-  if(up)up.onchange=(e)=>{
-    const f=e.target.files[0];if(!f)return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const ny=JSON.parse(r.result);
-        if(!Array.isArray(ny.sessions))throw new Error("forkert format");
-        if(!confirm("Gendan "+ny.sessions.length+" pas? Det, der ligger nu ("+data.sessions.length+" pas), bliver erstattet."))return;
-        data={sessions:ny.sessions,lastWeights:ny.lastWeights||{},ugeplan:ny.ugeplan||STDPLAN.slice()};
-        gemData(data);render();
-      }catch(err){alert("Kunne ikke læse filen.")}
-    };
-    r.readAsText(f);
-  };
-  const kop=document.getElementById("kopier");
-  if(kop)kop.onclick=async()=>{
-    const t=document.getElementById("ekstekst").value;
-    try{await navigator.clipboard.writeText(t);kop.textContent="Kopieret ✓"}
-    catch(e){document.getElementById("ekstekst").select();document.execCommand("copy");kop.textContent="Kopieret ✓"}
-    setTimeout(()=>{kop.textContent="Kopiér loggen"},2000);
-  };
+  if(antalStyrke<3)advarsler.push("Færre end tre styrkedage. Styrken er det, der holder "+
+    "SI-leddet i ro – skær hellere i løbet end i styrken.");
+  if(antalLoeb>4)advarsler.push("Mere end fire løbedage. Med tre styrkedage ved siden af "+
+    "bliver der ikke plads til at bygge noget op.");
+  if(data.ugeplan.filter(x=>x==="FRI").length===0)advarsler.push("Ingen fridag i ugen. "+
+    "Fremgangen sker på fridagene, ikke på træningsdagene.");
+  advarsler.forEach(a=>{h+='<div class="vagt">'+esc(a)+'</div>'});
+  if(!advarsler.length)h+='<div class="vagt ro">Ugen ser fornuftig ud: '+antalLoeb+
+    ' løbedage, '+antalStyrke+' styrkedage.</div>';
+  h+='<p class="hint">'+antalStyrke+' styrkedage · '+antalLoeb+' løbedage · '+
+    data.ugeplan.filter(x=>x==="FRI").length+' fridage</p>';
+  return h;
 }
 
-function laesInputs(){
-  document.querySelectorAll("[data-vaegt]").forEach(i=>{draft[i.dataset.vaegt].vaegt=i.value});
-  document.querySelectorAll("[data-reps]").forEach(i=>{draft[i.dataset.reps].reps=i.value});
-  document.querySelectorAll("[data-saet]").forEach(i=>{draft[i.dataset.saet].saet=i.value});
-  const n=document.getElementById("note");if(n)laesInputs._note=n.value;
-  const m=document.getElementById("minutter");if(m)laesInputs._min=m.value;
+/* ---------- LOG ---------- */
+
+function visLog(){
+  if(!data.sessions.length)
+    return '<p class="tom">Ingen pas endnu. Det første logger du under "I dag".</p>';
+  let h='<p class="tom">'+data.sessions.length+' pas · seneste '+
+    esc(paenDato(data.sessions[data.sessions.length-1].dato))+'</p>';
+  h+=data.sessions.slice().reverse().slice(0,60).map(s=>{
+    const pr=PROGRAM[s.type];
+    const det=[];
+    if(s.type==="LOEB"){const l=loebLinje(s);if(l)det.push(l)}
+    else if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
+      det.push(oevelsesNavn(id)+" "+v);
+    });
+    const f=FEELS.find(x=>x.id===s.feel);
+    const pp=parathed(data,s.dato);
+    return '<div class="hist"><div class="hrad"><span class="titel">'+
+      '<i class="maerke" style="background:'+serieFarve(s.type)+'"></i>'+esc(pr.navn)+
+      '</span><span class="dato mono">'+esc(paenDato(s.dato))+'</span></div>'+
+      '<div class="detaljer mono">'+esc(det.join(" · "))+'</div>'+
+      '<div class="detaljer mono">load '+sessionLoad(s,data.profil)+' AU · RPE '+
+        num(anstrengelse(s,data.profil),1)+' · '+num(varighed(s),0)+' min'+
+        (f?" · "+esc(f.label):"")+
+        (pp.score!=null?" · parathed "+pp.score:"")+'</div>'+
+      (s.note?'<div class="note">'+esc(s.note)+'</div>':"")+
+      '<div style="text-align:right;margin-top:6px"><button class="tandhjul" data-slet="'+
+        esc(s.id)+'" style="width:auto;height:auto;padding:3px 9px;font-size:11px">SLET</button>'+
+      '</div></div>';
+  }).join("");
+  return h;
 }
 
-function gemSession(){
-  laesInputs();
-  const erLoeb=type==="LOEB";
-  const session={date:dagsdato(),type,feel,
-    note:(laesInputs._note||"").trim()||undefined};
-  if(erLoeb){session.minutter=(laesInputs._min||"").trim()||undefined}
-  else{
-    session.entries={};
-    Object.entries(draft).forEach(([k,v])=>{if(v.done)session.entries[k]=(v.saet+" × "+v.reps+" · "+(v.vaegt||"–"))});
-    Object.entries(draft).forEach(([k,v])=>{if(v.done&&v.vaegt&&v.vaegt!=="–")data.lastWeights[k]=v.vaegt});
+/* ---------- CLAUDE ---------- */
+
+function visClaude(){
+  const harNoegle=!!(data.ui.apiNoegle&&data.ui.apiNoegle.trim());
+  let h="";
+
+  if(harNoegle){
+    h+='<div class="kort"><div class="kort-top"><h2>Din træner</h2>'+
+      '<span>'+(claudeTravl?(claudeTilstand==="taenker"?"tænker …":"skriver …"):"klar")+
+      '</span></div>';
+    if(!samtale.length){
+      h+='<p class="hint">Claude får hele din status med hver gang – parathed, belastning, '+
+        'morgental og de seneste pas. Du behøver ikke forklare noget.</p>';
+    }
+    h+=samtale.map(b=>'<div class="boble '+(b.rolle==="user"?"mig":"claude")+'">'+
+      esc(b.tekst)+'</div>').join("");
+    if(claudeTravl)
+      h+='<div class="boble claude" id="udkastBoble"'+
+        (claudeUdkast?"":' style="color:var(--daempet)"')+'>'+
+        (claudeUdkast?esc(claudeUdkast):"Kigger tallene igennem …")+'</div>';
+    if(claudeFejl)h+='<div class="boble fejl">'+esc(claudeFejl)+'</div>';
+    h+='<div class="forslag">'+SPOERGSMAAL.map(s=>
+      '<button data-spoerg="'+esc(s)+'">'+esc(s)+'</button>').join("")+'</div>';
+    h+='<div class="skriv"><textarea id="chatInput" rows="1" placeholder="Spørg om noget …" '+
+      (claudeTravl?"disabled":"")+'></textarea>'+
+      '<button id="chatSend" aria-label="Send"'+(claudeTravl?" disabled":"")+'>↑</button></div>';
+    if(samtale.length)h+='<button class="gem sek" id="chatRyd">Ryd samtalen</button>';
+    h+='</div>';
+  }else{
+    h+='<div class="kort"><div class="kort-top"><h2>To veje til Claude</h2></div>'+
+      '<p class="hint" style="margin-top:10px"><b style="color:var(--tekst)">1. Kopiér og indsæt.</b> '+
+      'Virker altid, koster ingenting. Tag statusteksten nedenfor med over i Claude-appen '+
+      'sammen med eventuelle filer.</p>'+
+      '<p class="hint"><b style="color:var(--tekst)">2. Direkte i appen.</b> Læg en API-nøgle '+
+      'ind under ⚙ Data, så kan du spørge herinde – Claude får hele statussen med automatisk. '+
+      'Nøglen bliver på telefonen og sendes kun til Anthropic.</p>'+
+      '<button class="gem sek" data-visning="data">Åbn Data</button></div>';
   }
-  data.sessions.push(session);
-  gemData(data);
-  gemt=true;laesInputs._note="";laesInputs._min="";
+
+  h+='<h3 class="afsnit">STATUS TIL KOPIERING</h3>';
+  h+='<div class="kort"><p class="hint" style="margin-top:0">Tag den med over i Claude hver '+
+    'anden uge – eller når noget føles galt. Sammen med GPX-filerne fra dine ture er det '+
+    'alt, der skal til.</p>'+
+    '<textarea class="udtraek" readonly rows="10" id="briefTekst">'+esc(briefing(data))+
+    '</textarea>'+
+    '<div class="knaprad" style="margin-top:12px">'+
+    '<button class="gem" id="briefKopi">Kopiér</button>'+
+    '<button class="gem sek" id="briefDel">Del</button></div>'+
+    '<button class="gem sek" id="briefFil">Gem som fil</button></div>';
+  return h;
+}
+
+/* ---------- DATA ---------- */
+
+function visData(){
+  let h='<h3 class="afsnit">DIG</h3><div class="kort">'+
+    '<div class="to"><label>Maxpuls<input type="number" inputmode="numeric" '+
+      'data-profil="maxPuls" value="'+esc(data.profil.maxPuls)+'"></label>'+
+    '<label>Hvilepuls<input type="number" inputmode="numeric" data-profil="hvilePuls" '+
+      'value="'+esc(data.profil.hvilePuls)+'"></label></div>'+
+    '<label>Søvnbehov (timer)<input type="number" inputmode="decimal" step="0.25" '+
+      'data-profil="soevnBehov" value="'+esc(data.profil.soevnBehov)+'"></label>'+
+    '<p class="hint">Maxpuls og hvilepuls bruges til at oversætte løbepuls til anstrengelse. '+
+    'Er de forkerte, bliver din løbeload det også. Kender du ikke din maxpuls, så lad den stå '+
+    '– følelsen efter passet korrigerer alligevel.</p></div>';
+
+  h+='<h3 class="afsnit">HELBREDSDATA FRA URET</h3><div class="kort">'+
+    '<div class="drop" id="helbredDrop"><b>Læg en eksport ind</b>'+
+    'Health Auto Export (JSON/CSV), Apples export.xml, eller en CSV med dato, HRV, hvilepuls og søvn.'+
+    '<input type="file" id="helbredInput" accept=".json,.csv,.xml,.txt" style="display:none"></div>';
+  if(importStatus){
+    h+='<div class="bom"><i style="width:'+Math.round((importStatus.pct||0)*100)+'%"></i></div>'+
+      '<p class="hint">'+esc(importStatus.tekst)+'</p>';
+  }
+  h+='<p class="hint">Health Auto Export er den nemme vej: sæt den til at eksportere HRV, '+
+    'hvilepuls og søvn, og læg filen herind en gang om ugen. Apples egen export.xml virker også '+
+    '– den er bare stor, så det tager et øjeblik.</p>'+
+    '<p class="lille">'+data.morgener.length+' dage med morgental gemt'+
+    (data.morgener.length?" · seneste "+esc(data.morgener[data.morgener.length-1].dato):"")+
+    '</p></div>';
+
+  h+='<h3 class="afsnit">CLAUDE I APPEN</h3><div class="kort">'+
+    '<label>API-nøgle fra console.anthropic.com<input type="password" data-apinoegle '+
+      'value="'+esc(data.ui.apiNoegle||"")+'" placeholder="sk-ant-…" autocomplete="off"></label>'+
+    '<label style="display:flex;align-items:center;gap:9px;margin-top:12px">'+
+      '<input type="checkbox" id="gemNoegle" style="width:auto"'+
+      (data.ui.gemNoegle?" checked":"")+'>Husk nøglen på denne telefon</label>'+
+    '<p class="hint">Uden flueben ligger nøglen kun i hukommelsen, indtil du lukker appen. '+
+    'Med flueben gemmes den i telefonens lokale lager – lige så sikkert som resten af appen, '+
+    'hvilket vil sige: sikkert nok til din egen telefon, ikke til en delt.</p>'+
+    '<p class="hint">Kaldene går direkte fra telefonen til Anthropic og koster efter forbrug. '+
+    'Et spørgsmål med hele din status fylder typisk under en krone.</p></div>';
+
+  h+='<h3 class="afsnit">SIKKERHEDSKOPI</h3><div class="kort">'+
+    '<p class="hint" style="margin-top:0">Alt ligger i telefonen og forsvinder ikke, når appen '+
+    'opdateres. Men skifter du telefon eller rydder browserdata, er det væk.</p>'+
+    '<button class="gem sek" id="backupNed">Gem sikkerhedskopi</button>'+
+    '<label style="margin-top:12px">Gendan fra fil<input type="file" id="backupOp" '+
+      'accept="application/json,.json"></label>'+
+    '<p class="lille">'+data.sessions.length+' pas · '+data.morgener.length+' morgener'+
+    (gemFejl?' · <span style="color:var(--st-kritisk)">kunne ikke gemme sidst – '+
+      'lageret er måske fuldt</span>':"")+'</p></div>';
+
+  h+='<div class="backup"><h3>Ryd op</h3>'+
+    '<p class="hint" style="margin-top:0">Sletter alt: pas, morgental, plan og nøgle. '+
+    'Tag en sikkerhedskopi først.</p>'+
+    '<button class="gem sek" id="sletAlt" style="border-color:var(--st-kritisk);'+
+    'color:var(--st-kritisk)">Slet alt</button></div>';
+  return h;
+}
+
+/* ==========================================================================
+   13. HANDLINGER
+   ========================================================================== */
+
+function gemMorgen(){
+  const k=morgenKladde||{};
+  const felter=["hrv","hvilePuls","soevnT","soevnKval","oemhed","energi","stress"];
+  if(!felter.some(f=>erTal(k[f]))){
+    systemBesked="Morgentjekket blev ikke gemt – der var ingen tal i det.";
+    morgenAaben=false;render();return;
+  }
+  let m=morgenFor(data,idag());
+  if(!m){m={dato:idag()};data.morgener.push(m)}
+  felter.forEach(f=>{if(erTal(k[f]))m[f]=k[f];else delete m[f]});
+  oprydData(data);gemData(data);
+  morgenAaben=false;morgenKladde=null;
   render();
+}
+
+function gemPas(){
+  const s={id:nyId(),dato:idag(),type:type,feel:feel||undefined,
+    note:(note||"").trim()||undefined};
+  if(type==="LOEB"){
+    s.loebType=loebType;
+    if(loebFil){
+      const l=Object.assign({},loebFil);
+      if(l.startTid){const d=new Date(l.startTid);if(!isNaN(d))s.dato=iso(d)}
+      delete l.startTid;
+      s.loeb=l;
+      s.minutter=Math.round((l.bevaegSek||l.tidSek||0)/60)||undefined;
+    }else{
+      const km=loebManuel.distanceKm, min=loebManuel.minutter;
+      s.loeb={kilde:"manuel"};
+      if(erTal(km))s.loeb.distanceKm=km;
+      if(erTal(min)){s.loeb.tidSek=min*60;s.loeb.bevaegSek=min*60;s.minutter=min}
+      if(erTal(km)&&erTal(min)&&km>0)s.loeb.tempoSekPrKm=(min*60)/km;
+      if(erTal(loebManuel.gnsPuls))s.loeb.gnsPuls=loebManuel.gnsPuls;
+    }
+  }else{
+    s.entries={};
+    Object.keys(kladde).forEach(id=>{
+      const k=kladde[id];
+      if(!k.done)return;
+      s.entries[id]=k.saet+" × "+k.reps+" · "+(k.vaegt||"–");
+      if(k.vaegt&&k.vaegt!=="–")data.sidsteVaegte[id]=k.vaegt;
+    });
+  }
+  data.sessions.push(s);
+  oprydData(data);gemData(data);
+  gemt=true;loebFil=null;loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
+  render();
+}
+
+function sletPas(id){
+  const s=data.sessions.find(x=>x.id===id);
+  if(!s)return;
+  if(!confirm("Slet "+typeNavn(s.type)+" den "+paenDato(s.dato)+"?"))return;
+  data.sessions=data.sessions.filter(x=>x.id!==id);
+  gemData(data);render();
+}
+
+function bytDage(i){
+  const a=(i+1)%7, b=(i+2)%7;
+  const t=data.ugeplan[a];data.ugeplan[a]=data.ugeplan[b];data.ugeplan[b]=t;
+  gemData(data);render();
+}
+
+function laesFilSomTekst(fil){
+  return new Promise((ok,fejl)=>{
+    const l=new FileReader();
+    l.onload=()=>ok(String(l.result));
+    l.onerror=()=>fejl(new Error("Filen kunne ikke læses."));
+    l.readAsText(fil);
+  });
+}
+
+async function haandterLoebefil(fil){
+  if(!fil)return;
+  systemBesked=null;
+  try{
+    const tekst=await laesFilSomTekst(fil);
+    const r=laesLoebefil(tekst,fil.name);
+    if(r.fejl){systemBesked=r.fejl;render();return}
+    loebFil=r.loeb;
+    if(!feel)feel=null;
+    render();
+  }catch(e){systemBesked=e.message;render()}
+}
+
+async function haandterHelbredsfil(fil){
+  if(!fil)return;
+  const navn=fil.name.toLowerCase();
+  importStatus={pct:0,tekst:"Læser "+fil.name+" …"};render();
+  try{
+    let nye=null;
+    if(navn.endsWith(".xml")){
+      nye=await laesAppleEksport(fil,(pct,antal)=>{
+        importStatus={pct:pct,tekst:"Læser Apple-eksport … "+Math.round(pct*100)+
+          " % · "+antal+" målinger fundet"};
+        const b=document.querySelector(".bom i");
+        if(b)b.style.width=Math.round(pct*100)+"%";
+        const p=document.querySelector("#helbredDrop")&&
+          document.querySelector(".bom").nextElementSibling;
+        if(p)p.textContent=importStatus.tekst;
+      });
+    }else{
+      const tekst=await laesFilSomTekst(fil);
+      if(/^\s*[{[]/.test(tekst)){
+        const o=JSON.parse(tekst);
+        if(o&&Array.isArray(o.sessions)){
+          importStatus={pct:1,tekst:"Det er en sikkerhedskopi, ikke helbredsdata. "+
+            "Brug «Gendan fra fil» længere nede."};
+          render();return;
+        }
+        nye=laesHealthAutoExport(o);
+        if(!nye&&Array.isArray(o))nye=o.filter(r=>r&&(r.dato||r.date)).map(r=>({
+          dato:(appleDato(r.dato||r.date)||{}).dato,
+          hrv:erTal(+r.hrv)?+r.hrv:undefined,
+          hvilePuls:erTal(+(r.hvilePuls||r.rhr))?+(r.hvilePuls||r.rhr):undefined,
+          soevnT:erTal(+(r.soevnT||r.sleep))?+(r.soevnT||r.sleep):undefined
+        })).filter(r=>r.dato);
+      }else{
+        nye=laesHelbredCsv(tekst);
+      }
+    }
+    if(!nye||!nye.length){
+      importStatus={pct:1,tekst:"Fandt ingen HRV, hvilepuls eller søvn i filen. "+
+        "Tjek at eksporten indeholder de tre målinger."};
+      render();return;
+    }
+    const r=flet(data,nye);
+    gemData(data);
+    importStatus={pct:1,tekst:"Hentet ind: "+r.nye+" nye dage, "+r.opdateret+" opdaterede. "+
+      "Basislinjen bygger på de seneste 42 dage."};
+    render();
+  }catch(e){
+    importStatus={pct:1,tekst:"Kunne ikke læse filen: "+e.message};
+    render();
+  }
+}
+
+function hentNed(indhold,filnavn,type){
+  const b=new Blob([indhold],{type:type||"text/plain;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=filnavn;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+async function kopier(tekst,knap,gammel){
+  try{await navigator.clipboard.writeText(tekst)}
+  catch(e){
+    const t=document.getElementById("briefTekst");
+    if(t){t.select();try{document.execCommand("copy")}catch(e2){}}
+  }
+  if(knap){knap.textContent="Kopieret ✓";setTimeout(()=>{knap.textContent=gammel},1800)}
+}
+
+function byggBeskeder(){
+  const b=briefing(data);
+  return samtale.map((m,i)=>({
+    role:m.rolle,
+    content:i===0&&m.rolle==="user"
+      ? "Her er min aktuelle status fra appen.\n\n"+b+"\n\n---\n\n"+m.tekst
+      : m.tekst
+  }));
+}
+async function sendTilClaude(tekst){
+  const t=(tekst||"").trim();
+  if(!t||claudeTravl)return;
+  claudeFejl="";claudeUdkast="";claudeTilstand="taenker";
+  samtale.push({rolle:"user",tekst:t});
+  claudeTravl=true;render();
+  try{
+    const svar=await spoergClaude(data.ui.apiNoegle.trim(),byggBeskeder(),
+      (helTekst)=>{
+        claudeUdkast=helTekst;
+        const el=document.getElementById("udkastBoble");
+        if(el){el.textContent=helTekst;el.style.color=""}
+      },
+      (tilstand)=>{claudeTilstand=tilstand});
+    samtale.push({rolle:"assistant",tekst:svar});
+  }catch(e){
+    const m=String(e&&e.message||e);
+    claudeFejl=/Failed to fetch|NetworkError|Load failed/i.test(m)
+      ? "Kunne ikke nå Anthropic. Tjek forbindelsen. Bliver den ved, så brug kopiér-og-indsæt "+
+        "nedenfor – den vej virker altid."
+      : m;
+  }
+  claudeTravl=false;claudeUdkast="";claudeTilstand="";
+  render();
+}
+
+/* ==========================================================================
+   14. TEGN OG BIND
+   ========================================================================== */
+
+let sidsteVisning=null;
+function render(){
+  const app=document.getElementById("app");
+  const y=window.scrollY, sammeVisning=(sidsteVisning===visning);
+  let h=topDel()+ugeStribe()+navDel();
+  if(systemBesked)h+='<div class="vagt stop">'+esc(systemBesked)+'</div>';
+  h+= visning==="idag"?visIdag()
+    : visning==="balance"?visBalance()
+    : visning==="plan"?visPlan()
+    : visning==="log"?visLog()
+    : visning==="claude"?visClaude()
+    : visData();
+  app.innerHTML=h;
+  bind();
+  sidsteVisning=visning;
+  if(sammeVisning)window.scrollTo(0,y); else window.scrollTo(0,0);
+}
+
+function paa(vaelg,haendelse,f){
+  document.querySelectorAll(vaelg).forEach(el=>el.addEventListener(haendelse,f));
+}
+function tal(v){
+  const s=String(v).replace(",",".").trim();
+  if(!s)return null;
+  const n=parseFloat(s);
+  return isFinite(n)?n:null;
+}
+
+function bind(){
+  paa("[data-visning]","click",e=>{
+    visning=e.currentTarget.dataset.visning;systemBesked=null;valgtDag=null;render();
+  });
+  paa("[data-type]","click",e=>{
+    type=e.currentTarget.dataset.type;nyKladde();
+    loebFil=null;loebManuel={distanceKm:null,minutter:null,gnsPuls:null};render();
+  });
+  paa("[data-oev]","click",e=>{
+    const k=kladde[e.currentTarget.dataset.oev];
+    if(k){k.done=!k.done;render()}
+  });
+  paa("[data-feel]","click",e=>{
+    const v=e.currentTarget.dataset.feel;feel=(feel===v)?null:v;render();
+  });
+  paa("[data-skala]","click",e=>{
+    if(!morgenKladde)morgenKladde={dato:idag()};
+    const f=e.currentTarget.dataset.skala,v=+e.currentTarget.dataset.v;
+    morgenKladde[f]=(morgenKladde[f]===v)?undefined:v;render();
+  });
+  ["saet","reps","vaegt"].forEach(f=>{
+    paa("[data-"+f+"]","change",e=>{
+      const id=e.currentTarget.dataset[f];
+      if(kladde[id])kladde[id][f]=e.currentTarget.value;
+    });
+  });
+  paa("[data-kladde='note']","input",e=>{note=e.currentTarget.value});
+  paa("[data-morgen]","input",e=>{
+    if(!morgenKladde)morgenKladde={dato:idag()};
+    morgenKladde[e.currentTarget.dataset.morgen]=tal(e.currentTarget.value);
+  });
+  paa("[data-loebm]","input",e=>{
+    loebManuel[e.currentTarget.dataset.loebm]=tal(e.currentTarget.value);
+    const g=document.getElementById("gemPas");
+    if(g)g.disabled=!(erTal(loebManuel.distanceKm)||erTal(loebManuel.minutter));
+  });
+  paa("[data-loebtype]","change",e=>{loebType=e.currentTarget.value});
+  paa("[data-plan]","change",e=>{
+    data.ugeplan[+e.currentTarget.dataset.plan]=e.currentTarget.value;gemData(data);render();
+  });
+  paa("[data-byt]","click",e=>bytDage(+e.currentTarget.dataset.byt));
+  paa("[data-slet]","click",e=>sletPas(e.currentTarget.dataset.slet));
+  paa("[data-profil]","input",e=>{
+    const v=tal(e.currentTarget.value);
+    if(v!=null){data.profil[e.currentTarget.dataset.profil]=v;gemData(data)}
+  });
+  paa("[data-apinoegle]","input",e=>{
+    data.ui.apiNoegle=e.currentTarget.value.trim();gemData(data);
+  });
+  paa("[data-spoerg]","click",e=>sendTilClaude(e.currentTarget.dataset.spoerg));
+  paa(".soejle","click",e=>{
+    const bt=belastningsTal(data,idag()),s=bt.serie.slice(-28);
+    const p=s[+e.currentTarget.dataset.i];
+    if(!p)return;
+    const pas=sessionerFor(data,p.dato);
+    valgtDag=paenDato(p.dato)+": "+(p.load||0)+" AU"+
+      (pas.length?" · "+pas.map(x=>typeNavn(x.type)).join(" + "):" · ingen pas")+
+      " · grundform "+num(p.ctl,0);
+    const u=document.getElementById("soejleUdlaes");
+    if(u)u.textContent=valgtDag;
+  });
+
+  const id=(x)=>document.getElementById(x);
+  const klik=(x,f)=>{const el=id(x);if(el)el.onclick=f};
+
+  klik("morgenStart",()=>{aabnMorgen();render()});
+  klik("morgenRet",()=>{aabnMorgen();render()});
+  klik("morgenAnnuller",()=>{morgenAaben=false;morgenKladde=null;render()});
+  klik("morgenGem",gemMorgen);
+  klik("gemPas",gemPas);
+  klik("loebRyd",()=>{loebFil=null;render()});
+
+  const drop=id("loebDrop"),filInd=id("loebInput");
+  if(drop&&filInd){
+    drop.onclick=()=>filInd.click();
+    filInd.onchange=e=>haandterLoebefil(e.target.files[0]);
+    ["dragenter","dragover"].forEach(h=>drop.addEventListener(h,e=>{
+      e.preventDefault();drop.classList.add("over")}));
+    ["dragleave","drop"].forEach(h=>drop.addEventListener(h,e=>{
+      e.preventDefault();drop.classList.remove("over")}));
+    drop.addEventListener("drop",e=>{
+      if(e.dataTransfer&&e.dataTransfer.files[0])haandterLoebefil(e.dataTransfer.files[0])});
+  }
+  const hDrop=id("helbredDrop"),hInd=id("helbredInput");
+  if(hDrop&&hInd){
+    hDrop.onclick=()=>hInd.click();
+    hInd.onchange=e=>haandterHelbredsfil(e.target.files[0]);
+    ["dragenter","dragover"].forEach(h=>hDrop.addEventListener(h,e=>{
+      e.preventDefault();hDrop.classList.add("over")}));
+    ["dragleave","drop"].forEach(h=>hDrop.addEventListener(h,e=>{
+      e.preventDefault();hDrop.classList.remove("over")}));
+    hDrop.addEventListener("drop",e=>{
+      if(e.dataTransfer&&e.dataTransfer.files[0])haandterHelbredsfil(e.dataTransfer.files[0])});
+  }
+
+  const gn=id("gemNoegle");
+  if(gn)gn.onchange=e=>{
+    data.ui.gemNoegle=e.target.checked;gemData(data);
+  };
+
+  klik("briefKopi",e=>kopier(briefing(data),e.currentTarget,"Kopiér"));
+  klik("briefFil",()=>hentNed(briefing(data),"morgenlog-status-"+idag()+".md","text/markdown"));
+  klik("briefDel",async()=>{
+    const t=briefing(data);
+    if(navigator.share){try{await navigator.share({title:"Morgenlog – status",text:t})}catch(e){}}
+    else kopier(t,id("briefDel"),"Del");
+  });
+
+  klik("backupNed",()=>hentNed(JSON.stringify(data,null,2),
+    "morgenlog-"+idag()+".json","application/json"));
+  const bop=id("backupOp");
+  if(bop)bop.onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{
+      const ny=JSON.parse(await laesFilSomTekst(f));
+      if(!Array.isArray(ny.sessions))throw new Error("forkert format");
+      if(!confirm("Gendan "+ny.sessions.length+" pas og "+
+        ((ny.morgener||[]).length)+" morgener? Det, der ligger nu, bliver erstattet."))return;
+      const d=tomtData();
+      if(ny.profil)Object.assign(d.profil,ny.profil);
+      if(Array.isArray(ny.ugeplan)&&ny.ugeplan.length===7)d.ugeplan=ny.ugeplan;
+      d.sessions=ny.sessions;d.morgener=ny.morgener||[];
+      d.sidsteVaegte=ny.sidsteVaegte||ny.lastWeights||{};
+      data=oprydData(d);gemData(data);
+      systemBesked=null;visning="log";render();
+    }catch(err){systemBesked="Kunne ikke læse sikkerhedskopien.";render()}
+  };
+  klik("sletAlt",()=>{
+    if(!confirm("Slette alt? Det kan ikke fortrydes."))return;
+    if(!confirm("Helt sikker? Tag en sikkerhedskopi først, hvis du er i tvivl."))return;
+    try{localStorage.removeItem(KEY);localStorage.removeItem(GAMMELKEY)}catch(e){}
+    data=tomtData();samtale=[];nyKladde();visning="idag";render();
+  });
+
+  const ci=id("chatInput");
+  if(ci){
+    ci.oninput=()=>{ci.style.height="auto";ci.style.height=Math.min(ci.scrollHeight,140)+"px"};
+    ci.onkeydown=e=>{
+      if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();sendTilClaude(ci.value);}
+    };
+  }
+  klik("chatSend",()=>{const el=id("chatInput");if(el)sendTilClaude(el.value)});
+  klik("chatRyd",()=>{samtale=[];claudeFejl="";render()});
 }
 
 render();
