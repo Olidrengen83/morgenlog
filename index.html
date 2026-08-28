@@ -324,7 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=6;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=7;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -397,9 +397,14 @@ function nyId(){return Date.now().toString(36)+Math.random().toString(36).slice(
 
 const STDPROFIL={maxPuls:186,hvilePuls:52,soevnBehov:7.5,foedselsaar:null};
 
+function dbxStd(){
+  return {appKey:"",refresh:"",access:"",udloeb:0,mappe:"",verifier:"",
+    set:{},senest:null};
+}
 function tomtData(){
   return {v:2,profil:Object.assign({},STDPROFIL),ugeplan:STDPLAN.slice(),
-    sessions:[],morgener:[],sidsteVaegte:{},ui:{apiNoegle:"",gemNoegle:false}};
+    sessions:[],morgener:[],sidsteVaegte:{},ui:{apiNoegle:"",gemNoegle:false},
+    dropbox:dbxStd()};
 }
 function hentData(){
   const d=tomtData();
@@ -414,6 +419,7 @@ function hentData(){
         if(Array.isArray(p.morgener))d.morgener=p.morgener;
         if(p.sidsteVaegte)d.sidsteVaegte=p.sidsteVaegte;
         if(p.ui)Object.assign(d.ui,p.ui);
+        if(p.dropbox)Object.assign(d.dropbox,p.dropbox);
       }
       return oprydData(d);
     }
@@ -1978,10 +1984,7 @@ function visIdag(){
       'står fast; sæt flueben ved det, du lavede.'+
       '<button class="gem sek" style="margin-top:10px" id="redigerFortryd">Fortryd</button></div>';
   }
-  if(!redigerId&&!gemt){
-    h+='<button class="gem sek" id="udklipHent" style="margin-top:10px">'+
-      '\ud83d\udccb Hent pas, som genvejen har kopieret</button>';
-  }
+
   h+='<div class="nav mono" style="margin-top:10px">'+["A","B","C","MOB","LOEB"].map(t=>
     '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+
     (t==="LOEB"?"LØB":t==="MOB"?"MOBIL":t)+'</button>').join("")+'</div>';
@@ -2402,22 +2405,61 @@ function visData(){
     data.sessions.filter(x=>ERSTYRKE(x.type)&&x.ur&&(!x.entries||!Object.keys(x.entries).length)).length+
     ' mangler øvelser</p></div>';
 
+  h+='<h3 class="afsnit">AUTOMATISK IMPORT FRA DROPBOX</h3><div class="kort">';
+  if(dbxForbundet()){
+    h+='<p class="hint" style="margin-top:0"><b style="color:var(--ok)">Forbundet ✓</b> '+
+      'Appen kigger i mappen, hver gang du åbner den, og henter nye træninger selv.</p>'+
+      '<label>Mappe i Dropbox<input data-dbx="mappe" value="'+esc(data.dropbox.mappe||"")+
+      '" placeholder="/apps/healthfit"></label>'+
+      '<div class="knaprad" style="margin-top:12px">'+
+      '<button class="gem sek" id="dbxFind">Find mappen</button>'+
+      '<button class="gem" id="dbxSyncNu"'+(dbxTravl?" disabled":"")+'>'+
+        (dbxTravl?"Henter …":"Hent nu")+'</button></div>'+
+      (dbxStatus?'<p class="hint">'+esc(dbxStatus)+'</p>':"")+
+      (data.dropbox.senest?'<p class="lille">'+
+        Object.keys(data.dropbox.set).length+' filer set i alt</p>':"")+
+      '<button class="gem sek" id="dbxAfbryd" style="margin-top:12px;'+
+      'border-color:var(--kant);color:var(--daempet)">Afbryd forbindelsen</button>';
+  }else{
+    h+='<p class="hint" style="margin-top:0">Målet: du træner, HealthFit lægger selv '+
+      'filen i Dropbox, og passet ligger i appen, næste gang du åbner den. '+
+      'Opsætningen tager fem minutter og gøres én gang:</p>'+
+      '<p class="hint"><b style="color:var(--tekst)">1.</b> Gå til '+
+      '<a href="https://www.dropbox.com/developers/apps" target="_blank" rel="noopener" '+
+      'style="color:var(--gry)">dropbox.com/developers/apps</a> → Create app → '+
+      '«Scoped access» → «Full Dropbox» → kald den fx Morgenlog → Create.</p>'+
+      '<p class="hint"><b style="color:var(--tekst)">2.</b> Fanen «Permissions»: sæt hak i '+
+      '<span class="mono">files.metadata.read</span> og '+
+      '<span class="mono">files.content.read</span> → Submit.</p>'+
+      '<p class="hint"><b style="color:var(--tekst)">3.</b> Fanen «Settings»: kopiér '+
+      '«App key» og sæt den ind her:</p>'+
+      '<label>App key<input data-dbx="appKey" value="'+esc(data.dropbox.appKey||"")+
+      '" placeholder="fx a1b2c3d4e5f6g7h" autocomplete="off"></label>'+
+      '<button class="gem" id="dbxForbind" style="margin-top:12px">Forbind Dropbox</button>'+
+      '<p class="hint"><b style="color:var(--tekst)">4.</b> Dropbox viser en kode – '+
+      'kopiér den, kom tilbage hertil og sæt den ind:</p>'+
+      '<label>Kode fra Dropbox<input id="dbxKode" placeholder="sæt koden ind her" '+
+      'autocomplete="off"></label>'+
+      '<button class="gem" id="dbxFaerdig" style="margin-top:12px"'+
+      (dbxTravl?" disabled":"")+'>Færdiggør forbindelsen</button>'+
+      (dbxStatus?'<p class="hint">'+esc(dbxStatus)+'</p>':"")+
+      '<p class="lille">Nøglerne bliver i telefonen og sendes kun til Dropbox. '+
+      'Appen beder kun om læseadgang: den kan hente dine filer, ikke ændre dem.</p>';
+  }
+  h+='</div>';
+
   h+='<h3 class="afsnit">SÅ LIDT MANUELT SOM MULIGT</h3><div class="kort">'+
     '<p class="hint" style="margin-top:0"><b style="color:var(--tekst)">1. Lad HealthFit '+
     'lægge filerne af sig selv.</b> I HealthFit: Settings → Auto Export → vælg iCloud '+
     'Drive eller Dropbox. Så ligger hver træning i mappen, uden at du rører den. '+
     'Herinde trykker du på feltet ovenfor og markerer dem – filerne bliver i telefonen.</p>'+
-    '<p class="hint"><b style="color:var(--tekst)">2. Lad en genvej lægge passet '+
-    'i udklipsholderen.</b> Genveje → Automatisering → Apple Watch træning → Når en '+
-    'træning slutter → Kør med det samme. Som eneste handling: «Kopiér til '+
-    'udklipsholder» med træningen (Input til genvej) som indhold. Når du bagefter '+
-    'åbner Morgenlog, trykker du på «Hent pas, som genvejen har kopieret» under '+
-    'I dag – så læser appen varighed, puls og distance ud af det kopierede.</p>'+
-    '<p class="lille">Hvorfor ikke bare åbne appen automatisk? Fordi iOS åbner '+
-    'adresser i Safari, som har sit eget adskilte lager – passet ville lande i den '+
-    'forkerte udgave af appen. Udklipsholderen går på tværs.</p>'+
-    '<p class="lille">Genvejen kender kun totalerne. Løbeturens splits og afkobling '+
-    'kommer først med, når du henter selve filen.</p></div>';
+    '<p class="hint"><b style="color:var(--tekst)">2. Kobl HealthFit til samme '+
+    'Dropbox.</b> Inde i HealthFit: find Eksport/Auto Export-delen under '+
+    'indstillingerne, vælg Dropbox, og slå automatisk eksport til for dine '+
+    'træningstyper. Fra da af lægger hver træning sig selv i mappen – og Morgenlog '+
+    'samler den op derfra.</p>'+
+    '<p class="lille">Filerne har alt med: løbeture får splits, kadence og '+
+    'afkobling; styrkepas får varighed, puls og forbrænding.</p></div>';
 
   h+='<h3 class="afsnit">HELBREDSDATA FRA URET</h3><div class="kort">'+
     '<div class="drop" id="helbredDrop"><b>Læg en eksport ind</b>'+
@@ -2809,6 +2851,193 @@ async function sendTilClaude(tekst){
 }
 
 /* ==========================================================================
+   13b. DROPBOX
+   HealthFit lægger selv hver træning som fil i Dropbox. Herfra henter appen
+   dem, hver gang den åbnes. Nøglerne bliver i telefonen; kaldene går direkte
+   fra browseren til Dropbox – der er stadig ingen server imellem.
+   ========================================================================== */
+
+let dbxTravl=false, dbxStatus="";
+
+function b64url(buf){
+  return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)))
+    .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function dbxForbundet(){return !!(data.dropbox&&data.dropbox.refresh)}
+
+async function dbxStartForbind(){
+  const key=(data.dropbox.appKey||"").trim();
+  if(!key){systemBesked="Indsæt App key fra Dropbox først.";render();return}
+  const raa=new Uint8Array(32);crypto.getRandomValues(raa);
+  const verifier=b64url(raa.buffer);
+  data.dropbox.verifier=verifier;gemData(data);
+  const ch=b64url(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier)));
+  // Ingen redirect: Dropbox viser koden på skærmen, og den sættes ind her.
+  // Det undgår hele Safari-mod-hjemmeskærms-forviklingen.
+  window.open("https://www.dropbox.com/oauth2/authorize?client_id="+
+    encodeURIComponent(key)+"&response_type=code&code_challenge="+ch+
+    "&code_challenge_method=S256&token_access_type=offline","_blank");
+  dbxStatus="Log ind hos Dropbox, kopiér koden, og sæt den ind nedenfor.";
+  render();
+}
+
+async function dbxTokenKald(krop){
+  const svar=await fetch("https://api.dropboxapi.com/oauth2/token",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:Object.entries(krop).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&")
+  });
+  const j=await svar.json().catch(()=>({}));
+  if(!svar.ok)throw new Error(j.error_description||j.error||("Dropbox svarede "+svar.status));
+  return j;
+}
+
+async function dbxFaerdiggoer(kode){
+  const k=(kode||"").trim();
+  if(!k){systemBesked="Sæt koden fra Dropbox ind først.";render();return}
+  dbxTravl=true;dbxStatus="Bytter koden til en nøgle …";render();
+  try{
+    const j=await dbxTokenKald({code:k,grant_type:"authorization_code",
+      code_verifier:data.dropbox.verifier,client_id:data.dropbox.appKey.trim()});
+    data.dropbox.refresh=j.refresh_token||"";
+    data.dropbox.access=j.access_token||"";
+    data.dropbox.udloeb=Date.now()+((j.expires_in||14000)-120)*1000;
+    data.dropbox.verifier="";
+    gemData(data);
+    dbxTravl=false;                 // ellers blokerer vi vores egen synkronisering
+    dbxStatus="Forbundet. Leder efter HealthFit-mappen …";render();
+    await dbxFindMappe();
+    await dbxSync(false);
+  }catch(e){
+    dbxTravl=false;
+    dbxStatus="";systemBesked="Dropbox sagde nej: "+e.message+
+      " – tjek at koden er sat ind hel, og prøv «Forbind» igen.";
+  }
+  render();
+}
+
+async function dbxAdgang(){
+  const d=data.dropbox;
+  if(d.access&&Date.now()<d.udloeb)return d.access;
+  const j=await dbxTokenKald({grant_type:"refresh_token",refresh_token:d.refresh,
+    client_id:d.appKey.trim()});
+  d.access=j.access_token;
+  d.udloeb=Date.now()+((j.expires_in||14000)-120)*1000;
+  gemData(data);
+  return d.access;
+}
+
+async function dbxKald(sti,krop){
+  const token=await dbxAdgang();
+  const svar=await fetch("https://api.dropboxapi.com/2/"+sti,{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+    body:JSON.stringify(krop)
+  });
+  if(svar.status===401){
+    data.dropbox.access="";
+    return dbxKald(sti,krop);
+  }
+  const j=await svar.json().catch(()=>({}));
+  if(!svar.ok)throw new Error(j.error_summary||("Dropbox svarede "+svar.status));
+  return j;
+}
+
+async function dbxHentFil(id){
+  const token=await dbxAdgang();
+  const svar=await fetch("https://content.dropboxapi.com/2/files/download",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+token,
+      "Dropbox-API-Arg":JSON.stringify({path:id})}
+  });
+  if(!svar.ok)throw new Error("Kunne ikke hente filen ("+svar.status+")");
+  return svar.arrayBuffer();
+}
+
+/* Find den mappe, HealthFit lægger filerne i, ved at lede efter .fit-filer. */
+async function dbxFindMappe(){
+  for(const endelse of ["fit","gpx","tcx"]){
+    try{
+      const j=await dbxKald("files/search_v2",{query:"."+endelse,
+        options:{max_results:25,filename_only:true,file_extensions:[endelse]}});
+      const taeller={};
+      (j.matches||[]).forEach(m=>{
+        const md=m.metadata&&m.metadata.metadata;
+        if(!md||!md.path_lower)return;
+        const mappe=md.path_lower.slice(0,md.path_lower.lastIndexOf("/"))||"/";
+        taeller[mappe]=(taeller[mappe]||0)+1;
+      });
+      const bedste=Object.entries(taeller).sort((a,b)=>b[1]-a[1])[0];
+      if(bedste){data.dropbox.mappe=bedste[0];gemData(data);
+        dbxStatus="Fandt mappen: "+bedste[0];return bedste[0]}
+    }catch(e){/* prøv næste endelse */}
+  }
+  dbxStatus="Fandt ingen træningsfiler endnu. Slå eksporten til i HealthFit, "+
+    "eller skriv mappens sti i feltet.";
+  return null;
+}
+
+async function dbxSync(stille){
+  const d=data.dropbox;
+  if(!dbxForbundet()||dbxTravl)return;
+  if(!d.mappe){if(!stille)await dbxFindMappe();if(!d.mappe)return}
+  dbxTravl=true;
+  if(!stille){dbxStatus="Kigger i "+d.mappe+" …";render()}
+  try{
+    let filer=[],j=await dbxKald("files/list_folder",{path:d.mappe,limit:500});
+    for(;;){
+      filer=filer.concat((j.entries||[]).filter(e=>e[".tag"]==="file"&&
+        /\.(fit|gpx|tcx)$/i.test(e.name)));
+      if(!j.has_more)break;
+      j=await dbxKald("files/list_folder/continue",{cursor:j.cursor});
+    }
+    let nye=filer.filter(f=>d.set[f.id]!==f.rev);
+    nye.sort((a,b)=>new Date(a.server_modified||0)-new Date(b.server_modified||0));
+    // Første gang: tag kun de nyeste 90 – historikken før i dag kom fra
+    // Sundhed-eksporten, og hundredvis af gamle filer skal ikke hentes én for én.
+    const foersteGang=!d.senest;
+    if(foersteGang&&nye.length>90){
+      nye.slice(0,nye.length-90).forEach(f=>{d.set[f.id]=f.rev});
+      nye=nye.slice(-90);
+    }
+    let antalNy=0,antalBeriget=0,fejl=0;
+    for(const f of nye){
+      try{
+        const buf=await dbxHentFil(f.id);
+        const r=laesTraeningsfil(buf,f.name);
+        if(r.traening){
+          const udfald=indsaetTraening(r.traening);
+          if(udfald==="ny")antalNy++;else if(udfald==="beriget")antalBeriget++;
+        }
+      }catch(e){fejl++}
+      d.set[f.id]=f.rev;
+    }
+    d.senest={tid:Date.now(),filer:filer.length,ny:antalNy};
+    gemData(data);
+    const dele=[];
+    if(antalNy)dele.push(antalNy+(antalNy===1?" nyt pas":" nye pas"));
+    if(antalBeriget)dele.push(antalBeriget+" udbygget");
+    dbxStatus="Senest kigget: lige nu · "+filer.length+" filer i mappen"+
+      (dele.length?" · "+dele.join(" · "):"")+(fejl?" · "+fejl+" kunne ikke læses":"");
+    if(dele.length){
+      systemRo="Hentet fra Dropbox: "+dele.join(" · ")+".";
+    }
+    dbxTravl=false;
+    render();
+  }catch(e){
+    dbxTravl=false;
+    dbxStatus="Dropbox-fejl: "+e.message;
+    if(!stille){systemBesked="Kunne ikke hente fra Dropbox: "+e.message;render()}
+    else render();
+  }
+}
+
+function dbxAfbryd(){
+  if(!confirm("Afbryd forbindelsen til Dropbox? Allerede hentede pas bliver stående."))return;
+  data.dropbox=dbxStd();gemData(data);dbxStatus="";render();
+}
+
+/* ==========================================================================
    14. AUTOMATIK
    En iOS-genvej kan ikke skrive i appens lager, men den kan åbne en adresse.
    Så det er vejen: genvejen bygger en URL med passets tal, og appen læser dem
@@ -3096,7 +3325,6 @@ function bind(){
   klik("gemPas",gemPas);
   klik("loebRyd",()=>{urPas=null;render()});
   klik("redigerFortryd",()=>{redigerId=null;nyKladde();render()});
-  klik("udklipHent",hentFraUdklip);
 
   const drop=id("loebDrop"),filInd=id("loebInput");
   if(drop&&filInd){
@@ -3133,6 +3361,15 @@ function bind(){
       if(e.dataTransfer&&e.dataTransfer.files[0])haandterHelbredsfil(e.dataTransfer.files[0])});
   }
 
+  paa("[data-dbx]","input",e=>{
+    data.dropbox[e.currentTarget.dataset.dbx]=e.currentTarget.value;gemData(data);
+  });
+  klik("dbxForbind",()=>{dbxStartForbind()});
+  klik("dbxFaerdig",()=>{const k=id("dbxKode");dbxFaerdiggoer(k?k.value:"")});
+  klik("dbxSyncNu",()=>{dbxSync(false)});
+  klik("dbxFind",async()=>{await dbxFindMappe();render()});
+  klik("dbxAfbryd",dbxAfbryd);
+
   const gn=id("gemNoegle");
   if(gn)gn.onchange=e=>{
     data.ui.gemNoegle=e.target.checked;gemData(data);
@@ -3161,6 +3398,7 @@ function bind(){
       if(Array.isArray(ny.ugeplan)&&ny.ugeplan.length===7)d.ugeplan=ny.ugeplan;
       d.sessions=ny.sessions;d.morgener=ny.morgener||[];
       d.sidsteVaegte=ny.sidsteVaegte||ny.lastWeights||{};
+      if(ny.dropbox)Object.assign(d.dropbox,ny.dropbox);
       data=oprydData(d);gemData(data);
       systemBesked=null;visning="log";render();
     }catch(err){systemBesked="Kunne ikke læse sikkerhedskopien.";render()}
@@ -3185,6 +3423,7 @@ function bind(){
 
 tagImodAdresse();
 render();
+if(dbxForbundet())setTimeout(()=>{dbxSync(true).catch(()=>{})},700);
 window.addEventListener("hashchange",()=>{tagImodAdresse();render()});
 </script>
 <script>
