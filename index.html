@@ -328,7 +328,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=12;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=13;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -503,10 +503,11 @@ function varighed(s){
 function sessionLoad(s,profil){
   return Math.round(varighed(s)*anstrengelse(s,profil));
 }
-function dagligeLoads(d,datoer){
+function dagligeLoads(d,datoer,udenAndet){
   const kort={};
   datoer.forEach(dt=>kort[dt]={loeb:0,styrke:0,andet:0,total:0,pas:[]});
   d.sessions.forEach(s=>{
+    if(udenAndet&&(s.type==="GANG"||s.type==="CYKEL"))return;
     if(!kort[s.dato])return;
     const l=sessionLoad(s,d.profil);
     const spand=s.type==="LOEB"?"loeb":(s.type==="GANG"||s.type==="CYKEL")?"andet":"styrke";
@@ -521,14 +522,14 @@ function dagligeLoads(d,datoer){
    Forholdet mellem dem er det tal, der forudsiger overbelastning bedst. */
 let beregnVersion=0, beregnCache={};
 function nulstilBeregning(){beregnVersion++;beregnCache={}}
-function belastningsTal(d,tilDato){
+function belastningsTal(d,tilDato,udenAndet){
   const slut=tilDato||idag();
-  const noegle=beregnVersion+"|"+slut;
+  const noegle=beregnVersion+"|"+slut+(udenAndet?"|uden":"");
   if(beregnCache[noegle])return beregnCache[noegle];
   const start=d.sessions.length?d.sessions[0].dato:slut;
   const spand=klem(dageMellem(start,slut)+1,1,400);
   const datoer=sidsteNDatoer(spand,slut);
-  const kort=dagligeLoads(d,datoer);
+  const kort=dagligeLoads(d,datoer,udenAndet);
   const foerste14=datoer.slice(0,14).map(dt=>kort[dt].total);
   let atl=gennemsnit(foerste14)||0, ctl=atl;
   const serie=[];
@@ -2196,6 +2197,7 @@ function visBalance(){
     h+='<p class="hint"'+(raad.raekker.length?'':' style="margin-top:0"')+'>'+
       esc(raad.anbefaling)+'</p>';
     if(raad.uge)h+='<p class="hint">'+esc(raad.uge)+'</p>';
+    if(raad.kategori)h+='<p class="hint">'+esc(raad.kategori)+'</p>';
     if(raad.ungHistorik)h+='<p class="lille">Din historik er under seks uger gammel, '+
       'så den kroniske side er stadig ved at indhente virkeligheden. Tag den røde '+
       'zone som et gult lys, indtil regnskabet har set en hel opbygningsperiode.</p>';
@@ -2296,20 +2298,54 @@ function balanceRaad(bt,d){
   const foerste=d.sessions.length?d.sessions[0].dato:idag();
   ud.ungHistorik=dageMellem(foerste,idag())<42;
 
+  // Nye kategorier i ugen, som historikken næsten ikke kender, puster
+  // forholdet kunstigt op. Vis forholdet uden dem som sammenligning.
+  const profil=d.profil||STDPROFIL;
+  const uge7=sidsteNDatoer(7);
+  let andetUge=0, andetFoer=0;
+  (d.sessions||[]).forEach(sx=>{
+    if(sx.type!=="GANG"&&sx.type!=="CYKEL")return;
+    if(uge7.indexOf(sx.dato)>=0)andetUge+=sessionLoad(sx,profil);
+    else if(dageMellem(sx.dato,idag())<=28)andetFoer+=sessionLoad(sx,profil);
+  });
+  if(bt.ugeSum>0&&andetUge/bt.ugeSum>0.12&&andetFoer<andetUge*0.5&&d.profil){
+    const uden=belastningsTal(d,idag(),true);
+    if(uden.forhold!=null)
+      ud.kategori="Af ugens "+num(bt.ugeSum,0)+" AU er "+num(andetUge,0)+
+        " gåture og cykling – kategorier, historikken næsten ikke indeholder. "+
+        "Uden dem er forholdet "+num(uden.forhold,2)+". Gik og cyklede du også før, "+
+        "så læg eksport.xml ind igen – så får den kroniske side samme briller på.";
+  }
+
   if(r>1.3){
-    const halv=Math.round(ctl*0.5), fuld=Math.round(ctl);
+    const halv=Math.round(ctl*0.5), fuld=Math.round(ctl), nu=Math.round(atl);
     const dFri=dageTilGroen(atl,ctl,0);
     const dHalv=dageTilGroen(atl,ctl,halv);
     const dFuld=dageTilGroen(atl,ctl,fuld);
+    const dNu=dageTilGroen(atl,ctl,nu);
     ud.raekker=[
       {navn:"Holder du helt fri",dage:dFri},
       {navn:"Halv kraft · ~"+halv+" AU/dag",dage:dHalv},
-      {navn:"Grundform · ~"+fuld+" AU/dag",dage:dFuld}
+      {navn:"Grundform · ~"+fuld+" AU/dag",dage:dFuld},
+      {navn:"Fortsætter du som nu · ~"+nu+" AU/dag",dage:dNu}
     ];
-    ud.anbefaling="Den letteste vej er ikke sofaen: "+
-      (dFuld!=null?dFuld+" dage":"nogle uger")+" på omkring "+fuld+
-      " AU om dagen bringer dig i grøn, mens du stadig træner. "+fuld+" AU er "+
-      auTilPas(fuld)+".";
+    // Er ugen på niveau med sidste uge, er det ikke en ny eskalering – så er
+    // det grundformen, der halter efter et ældre hop (eller huller i regnskabet).
+    const stabil=bt.forrigeUgeSum>0&&
+      Math.abs(bt.ugeSum-bt.forrigeUgeSum)/bt.forrigeUgeSum<=0.15;
+    if(stabil){
+      ud.anbefaling="Din uge ("+num(bt.ugeSum,0)+" AU) er på niveau med sidste uge ("+
+        num(bt.forrigeUgeSum,0)+" AU) – det røde tal er ikke en ny eskalering, men "+
+        "din grundform, der stadig indhenter et hop længere tilbage. Planen er derfor "+
+        "ikke at skære, men at lade være med at lægge mere på: holder du nuværende "+
+        "niveau, er du grøn om ca. "+(dNu!=null?dNu+" dage":"tre uger")+
+        " af sig selv. Skru kun ned, hvis morgentjekket også siger stop.";
+    }else{
+      ud.anbefaling="Den letteste vej er ikke sofaen: "+
+        (dFuld!=null?dFuld+" dage":"nogle uger")+" på omkring "+fuld+
+        " AU om dagen bringer dig i grøn, mens du stadig træner. "+fuld+" AU er "+
+        auTilPas(fuld)+".";
+    }
     ud.uge="Ugekorridoren for grøn zone er ca. "+korridorLav+"–"+korridorHoej+
       " AU. Denne uge står du på "+num(bt.ugeSum,0)+".";
   }else if(r<0.8){
