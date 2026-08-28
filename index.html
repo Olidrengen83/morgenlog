@@ -469,6 +469,7 @@ function anstrengelse(s,profil){
 function varighed(s){
   if(erTal(s.minutter)&&s.minutter>0)return s.minutter;
   if(s.type==="LOEB"&&s.loeb&&erTal(s.loeb.tidSek))return s.loeb.tidSek/60;
+  if(s.ur&&erTal(s.ur.tidSek))return s.ur.tidSek/60;
   if(ERSTYRKE(s.type)){
     const n=s.entries?Object.keys(s.entries).length:0;
     return n?klem(10+n*7,20,90):(s.type==="MOB"?25:45);
@@ -801,14 +802,28 @@ function punkterFraTcx(doc){
   return ud;
 }
 
-function analyserPunkter(pkt){
-  const p=pkt.filter(x=>x.t!=null).sort((a,b)=>a.t-b.t);
-  if(p.length<5)return null;
-  const tidSek=(p[p.length-1].t-p[0].t)/1000;
-  let brugDist=p.some(x=>erTal(x.dist));
+function analyserTraening(pkt,ses,sportVink){
+  const s=ses||{};
+  const p=(pkt||[]).filter(x=>x.t!=null).sort((a,b)=>a.t-b.t);
+
+  // Et pas uden punkter kan stadig have en brugbar opsummering fra uret.
+  if(p.length<5){
+    if(!erTal(s.tidSek))return null;
+    return {
+      sport:sportVink||s.sport||(erTal(s.distanceM)&&s.distanceM>=200?"loeb":"styrke"),
+      distanceKm:erTal(s.distanceM)&&s.distanceM>0?s.distanceM/1000:null,
+      tidSek:Math.round(s.forloebetSek||s.tidSek),
+      bevaegSek:Math.round(s.tidSek),
+      tempoSekPrKm:(erTal(s.distanceM)&&s.distanceM>200)?s.tidSek/(s.distanceM/1000):null,
+      gnsPuls:s.gnsPuls||null, maxPuls:s.maxPuls||null,
+      stigningM:s.stigningM||null, kadence:s.kadence||null, kalorier:s.kalorier||null,
+      kobling:null, splits:[], startTid:s.startMs||null
+    };
+  }
+
+  const brugDist=p.some(x=>erTal(x.dist));
   let samlet=0, bevaegSek=0, stigning=0, sidsteEle=null;
-  const hrDt=[],cadV=[];
-  const kum=[];   // {t, m} kumulativ afstand
+  const hrDt=[],cadV=[],kum=[];
   for(let i=0;i<p.length;i++){
     const a=p[i];
     if(i>0){
@@ -830,81 +845,283 @@ function analyserPunkter(pkt){
     if(erTal(a.cad)&&a.cad>0)cadV.push(a.cad);
     kum.push({t:(a.t-p[0].t)/1000,m:samlet,hr:a.hr});
   }
-  if(samlet<200)return null;
-  const vaegtSum=hrDt.reduce((s,x)=>s+x.dt,0);
-  const gnsPuls=vaegtSum>0?hrDt.reduce((s,x)=>s+x.hr*x.dt,0)/vaegtSum:null;
-  const maxPuls=hrDt.length?Math.max.apply(null,hrDt.map(x=>x.hr)):null;
-  let kadence=cadV.length?gennemsnit(cadV):null;
-  if(kadence!=null&&kadence<120)kadence*=2;   // nogle ure tæller kun ét ben
+  const tidSek=Math.round(s.forloebetSek||(p[p.length-1].t-p[0].t)/1000);
+  if(erTal(s.distanceM)&&s.distanceM>samlet)samlet=s.distanceM;   // uret ved bedst
 
-  // Kilometersplits
+  const harDistance=samlet>=200;
+  const sport=sportVink||s.sport||(harDistance?"loeb":"styrke");
+
+  // Styrke og andet indendørs: man står stille mellem sættene, så
+  // "bevægetid" giver ingen mening – hele passet tæller.
+  if(!harDistance)bevaegSek=tidSek;
+  else if(bevaegSek<tidSek*0.3)bevaegSek=tidSek;
+
+  const vaegtSum=hrDt.reduce((a,x)=>a+x.dt,0);
+  const punktPuls=vaegtSum>0?Math.round(hrDt.reduce((a,x)=>a+x.hr*x.dt,0)/vaegtSum):null;
+  const punktMax=hrDt.length?Math.max.apply(null,hrDt.map(x=>x.hr)):null;
+  // Uret har regnet over hele passet; punkterne i filen er tit tyndet ud.
+  let gnsPuls=erTal(s.gnsPuls)?s.gnsPuls:punktPuls;
+  let maxPuls=erTal(s.maxPuls)?s.maxPuls:punktMax;
+  let kadence=erTal(s.kadence)?s.kadence:(cadV.length?gennemsnit(cadV):null);
+  if(kadence!=null&&kadence<120&&harDistance)kadence*=2;   // nogle ure tæller kun ét ben
+
+  // Kilometersplits – kun meningsfulde når der er tilbagelagt en strækning.
   const splits=[];
-  let naeste=1000,sidsteT=0,sidsteHrIdx=0;
-  for(let i=1;i<kum.length;i++){
-    while(kum[i].m>=naeste&&naeste<=samlet){
-      const a=kum[i-1],b=kum[i];
-      const andel=(b.m-a.m)>0?(naeste-a.m)/(b.m-a.m):0;
-      const tid=a.t+(b.t-a.t)*andel;
-      const pulsIKm=kum.slice(sidsteHrIdx,i).map(x=>x.hr).filter(erTal);
-      splits.push({km:splits.length+1,sek:Math.round(tid-sidsteT),
-        puls:pulsIKm.length?Math.round(gennemsnit(pulsIKm)):null});
-      sidsteT=tid;sidsteHrIdx=i;naeste+=1000;
+  if(harDistance){
+    let naeste=1000,sidsteT=0,sidsteHrIdx=0;
+    for(let i=1;i<kum.length;i++){
+      while(kum[i].m>=naeste&&naeste<=samlet){
+        const a=kum[i-1],b=kum[i];
+        const andel=(b.m-a.m)>0?(naeste-a.m)/(b.m-a.m):0;
+        const tid=a.t+(b.t-a.t)*andel;
+        const pulsIKm=kum.slice(sidsteHrIdx,i).map(x=>x.hr).filter(erTal);
+        splits.push({km:splits.length+1,sek:Math.round(tid-sidsteT),
+          puls:pulsIKm.length?Math.round(gennemsnit(pulsIKm)):null});
+        sidsteT=tid;sidsteHrIdx=i;naeste+=1000;
+      }
     }
   }
 
   // Afkobling: fart pr. hjerteslag i første mod anden halvdel.
   let kobling=null;
-  if(gnsPuls&&kum.length>20){
+  if(harDistance&&gnsPuls&&kum.length>20){
     const midt=Math.floor(kum.length/2);
     const del=(fra,til)=>{
-      const m=kum[til-1].m-kum[fra].m, s=kum[til-1].t-kum[fra].t;
+      const m=kum[til-1].m-kum[fra].m, sek=kum[til-1].t-kum[fra].t;
       const h=kum.slice(fra,til).map(x=>x.hr).filter(erTal);
-      if(s<=0||!h.length)return null;
+      if(sek<=0||!h.length)return null;
       const hm=gennemsnit(h);
-      return hm>0?(m/s)/hm:null;
+      return hm>0?(m/sek)/hm:null;
     };
     const e1=del(0,midt), e2=del(midt,kum.length);
     if(e1&&e2&&e1>0)kobling=(e1-e2)/e1*100;
   }
   return {
-    distanceKm:samlet/1000,
-    tidSek:Math.round(tidSek),
+    sport:sport,
+    distanceKm:harDistance?samlet/1000:null,
+    tidSek:tidSek,
     bevaegSek:Math.round(bevaegSek||tidSek),
-    tempoSekPrKm:samlet>0?(bevaegSek||tidSek)/(samlet/1000):null,
-    gnsPuls:gnsPuls?Math.round(gnsPuls):null,
-    maxPuls:maxPuls?Math.round(maxPuls):null,
-    stigningM:Math.round(stigning),
+    tempoSekPrKm:harDistance?(bevaegSek||tidSek)/(samlet/1000):null,
+    gnsPuls:gnsPuls, maxPuls:maxPuls,
+    stigningM:harDistance?Math.round(erTal(s.stigningM)?s.stigningM:stigning):null,
     kadence:kadence?Math.round(kadence):null,
+    kalorier:erTal(s.kalorier)?s.kalorier:null,
     kobling:kobling,
     splits:splits.slice(0,42),
-    startTid:p[0].t
+    startTid:s.startMs||p[0].t
   };
 }
 
-function laesLoebefil(tekst,filnavn){
-  const navn=(filnavn||"").toLowerCase();
+/* ==========================================================================
+   FIT-FILER
+   HealthFit sender FIT som standard. Formatet er binært, men enkelt: en
+   header, og derefter skiftevis definitions- og databeskeder. Vi henter kun
+   de fem beskedtyper, appen bruger.
+   ========================================================================== */
+
+const FITEPOKE=631065600;                    // FIT tæller sekunder fra 1989-12-31
+const FITTYPER={
+  0:{b:1},            1:{b:1,s:1},        2:{b:1,u:1},        3:{b:2,s:1},
+  4:{b:2,u:1},        5:{b:4,s:1},        6:{b:4,u:1},        7:{b:1,tekst:1},
+  8:{b:4,flyd:1},     9:{b:8,flyd:1},     10:{b:1,u:1,nul:1}, 11:{b:2,u:1,nul:1},
+  12:{b:4,u:1,nul:1}, 13:{b:1,u:1},       14:{b:8,s:1},       15:{b:8,u:1},
+  16:{b:8,u:1,nul:1}
+};
+const FITSPORT={1:"loeb",11:"gang",17:"gang",10:"styrke",4:"styrke",2:"cykel"};
+
+function fitLaesFelt(dv,pos,type,stoerrelse){
+  const t=FITTYPER[type&0x1F];
+  if(!t)return null;
+  if(t.tekst){
+    let s="";
+    for(let i=0;i<stoerrelse;i++){
+      const c=dv.getUint8(pos+i);
+      if(!c)break;
+      s+=String.fromCharCode(c);
+    }
+    return s||null;
+  }
+  // Felter kan være arrays; vi bruger kun første element.
+  let v;
+  const le=true;
+  switch(t.b){
+    case 1: v=t.s?dv.getInt8(pos):dv.getUint8(pos); break;
+    case 2: v=t.s?dv.getInt16(pos,le):dv.getUint16(pos,le); break;
+    case 4: v=t.flyd?dv.getFloat32(pos,le):(t.s?dv.getInt32(pos,le):dv.getUint32(pos,le)); break;
+    case 8: v=t.flyd?dv.getFloat64(pos,le):Number(t.s?dv.getBigInt64(pos,le):dv.getBigUint64(pos,le)); break;
+    default: return null;
+  }
+  if(!isFinite(v))return null;
+  // Ugyldige værdier: FIT bruger den højeste værdi i typen som "ikke målt".
+  if(t.nul&&v===0)return null;
+  if(!t.s&&!t.flyd&&v===Math.pow(2,t.b*8)-1)return null;
+  if(t.s&&!t.flyd&&v===Math.pow(2,t.b*8-1)-1)return null;
+  return v;
+}
+const fitTid=(v)=>v==null?null:(v+FITEPOKE)*1000;
+const fitGrader=(v)=>v==null?null:v*(180/Math.pow(2,31));
+
+function afkodFit(buffer){
+  const dv=new DataView(buffer);
+  if(dv.byteLength<14)return null;
+  const hovedStoerrelse=dv.getUint8(0);
+  if(hovedStoerrelse<12||hovedStoerrelse>dv.byteLength)return null;
+  if(String.fromCharCode(dv.getUint8(8),dv.getUint8(9),dv.getUint8(10),dv.getUint8(11))!==".FIT")
+    return null;
+  const dataStoerrelse=dv.getUint32(4,true);
+  const slut=Math.min(dv.byteLength,hovedStoerrelse+dataStoerrelse);
+  let p=hovedStoerrelse;
+  const defs={};
+  const pkt=[],sessioner=[];
+  let sidsteTid=null, sport=null, underSport=null;
+
+  const laesBesked=(def,tidFraHoved)=>{
+    const felter={};
+    for(const f of def.felter){
+      if(p+f.stoerrelse>slut)return null;
+      felter[f.num]=fitLaesFelt(dv,p,f.base,f.stoerrelse);
+      p+=f.stoerrelse;
+    }
+    p+=def.devStoerrelse;
+    if(felter[253]!=null)sidsteTid=felter[253];
+    else if(tidFraHoved!=null)felter[253]=tidFraHoved;
+    return felter;
+  };
+
+  while(p<slut){
+    const h=dv.getUint8(p++);
+    if(h&0x80){
+      // Komprimeret tidsstempel: kun 5 bit forskydning fra sidste tidsstempel.
+      const lokal=(h>>5)&0x3, forskyd=h&0x1F;
+      const def=defs[lokal];
+      if(!def)break;
+      let t=null;
+      if(sidsteTid!=null){
+        t=(sidsteTid&~0x1F)+forskyd;
+        if(forskyd<(sidsteTid&0x1F))t+=0x20;
+      }
+      const m=laesBesked(def,t);
+      if(!m)break;
+      if(def.global===20)pkt.push(fitPunkt(m));
+      continue;
+    }
+    if(h&0x40){
+      if(p+5>slut)break;
+      p++;                                  // reserveret
+      const arkitektur=dv.getUint8(p++);
+      const global=arkitektur?dv.getUint16(p,false):dv.getUint16(p,true);
+      p+=2;
+      const antal=dv.getUint8(p++);
+      const felter=[];
+      for(let i=0;i<antal;i++){
+        if(p+3>slut)break;
+        felter.push({num:dv.getUint8(p),stoerrelse:dv.getUint8(p+1),base:dv.getUint8(p+2)});
+        p+=3;
+      }
+      let devStoerrelse=0;
+      if(h&0x20){
+        const antalDev=dv.getUint8(p++);
+        for(let i=0;i<antalDev;i++){devStoerrelse+=dv.getUint8(p+1);p+=3}
+      }
+      defs[h&0x0F]={global:global,felter:felter,devStoerrelse:devStoerrelse};
+      continue;
+    }
+    const def=defs[h&0x0F];
+    if(!def)break;
+    const m=laesBesked(def,null);
+    if(!m)break;
+    if(def.global===20)pkt.push(fitPunkt(m));
+    else if(def.global===18)sessioner.push(m);
+    else if(def.global===12){
+      if(m[0]!=null)sport=m[0];
+      if(m[1]!=null)underSport=m[1];
+    }
+  }
+  if(!pkt.length&&!sessioner.length)return null;
+
+  const s=sessioner[0]||{};
+  if(s[5]!=null)sport=s[5];
+  if(s[6]!=null)underSport=s[6];
+  return {
+    pkt:pkt.filter(x=>x.t!=null),
+    ses:{
+      sport:FITSPORT[sport]||null,
+      underSport:underSport,
+      startMs:fitTid(s[2]),
+      tidSek:s[8]!=null?s[8]/1000:(s[7]!=null?s[7]/1000:null),
+      forloebetSek:s[7]!=null?s[7]/1000:null,
+      distanceM:s[9]!=null?s[9]/100:null,
+      gnsPuls:s[16]!=null?s[16]:null,
+      maxPuls:s[17]!=null?s[17]:null,
+      kadence:s[18]!=null?s[18]:null,
+      stigningM:s[22]!=null?s[22]:null,
+      kalorier:s[11]!=null?s[11]:null
+    }
+  };
+}
+function fitPunkt(m){
+  let ele=null;
+  if(m[78]!=null)ele=m[78]/5-500;
+  else if(m[2]!=null)ele=m[2]/5-500;
+  return {
+    t:fitTid(m[253]),
+    lat:fitGrader(m[0]), lon:fitGrader(m[1]),
+    ele:ele,
+    hr:m[3]!=null?m[3]:null,
+    cad:m[4]!=null?m[4]:null,
+    dist:m[5]!=null?m[5]/100:null
+  };
+}
+
+function erFitFil(buffer){
+  if(buffer.byteLength<14)return false;
+  const dv=new DataView(buffer);
+  return String.fromCharCode(dv.getUint8(8),dv.getUint8(9),dv.getUint8(10),dv.getUint8(11))===".FIT";
+}
+function tcxSport(doc){
+  const a=doc.getElementsByTagName("*");
+  for(let i=0;i<a.length;i++){
+    if(lokalNavn(a[i])!=="Activity")continue;
+    const v=String(a[i].getAttribute("Sport")||"").toLowerCase();
+    if(v==="running")return "loeb";
+    if(v==="biking")return "cykel";
+    if(v==="other")return null;      // Apple bruger "Other" til alt indendørs
+  }
+  return null;
+}
+
+/* Én dør ind for alle tre formater. Kaldes med filens bytes; XML afkodes
+   først, når vi ved, at det ikke er en FIT-fil. */
+function laesTraeningsfil(buffer,filnavn){
   try{
-    if(navn.endsWith(".fit")||/^\x0e?.{2}\.FIT/.test(tekst.slice(0,16)))
-      return {fejl:"FIT-filer kan appen ikke læse. Vælg GPX eller TCX i eksporten – "+
-        "HealthFit, RunGap og Strava kan alle sende begge dele."};
+    if(erFitFil(buffer)){
+      const r=afkodFit(buffer);
+      if(!r)return {fejl:"FIT-filen kunne ikke læses."};
+      const t=analyserTraening(r.pkt,r.ses,null);
+      if(!t)return {fejl:"FIT-filen indeholder ingen målinger."};
+      t.kilde="fil";t.filnavn=filnavn||"";t.format="FIT";
+      return {traening:t};
+    }
+    const tekst=new TextDecoder("utf-8").decode(buffer);
     if(/^\s*[{[]/.test(tekst))return {fejl:"Det ser ud til at være en JSON-fil. "+
-      "Løbefiler skal være GPX eller TCX; helbredsdata hører hjemme under Data."};
+      "Træningsfiler skal være FIT, GPX eller TCX; helbredsdata hører hjemme under Data."};
     const doc=new DOMParser().parseFromString(tekst,"application/xml");
     if(doc.getElementsByTagName("parsererror").length)
-      return {fejl:"Filen kunne ikke læses som XML."};
+      return {fejl:"Filen kunne ikke læses. Den er hverken FIT, GPX eller TCX."};
     const rod=lokalNavn(doc.documentElement||{nodeName:""});
-    let pkt=[];
-    if(rod==="gpx")pkt=punkterFraGpx(doc);
-    else if(rod==="TrainingCenterDatabase")pkt=punkterFraTcx(doc);
-    else{
+    let pkt=[],vink=null,format="XML";
+    if(rod==="gpx"){pkt=punkterFraGpx(doc);format="GPX"}
+    else if(rod==="TrainingCenterDatabase"){
+      pkt=punkterFraTcx(doc);vink=tcxSport(doc);format="TCX";
+    }else{
       pkt=punkterFraGpx(doc);
-      if(!pkt.length)pkt=punkterFraTcx(doc);
+      if(!pkt.length){pkt=punkterFraTcx(doc);vink=tcxSport(doc)}
     }
-    if(pkt.length<5)return {fejl:"Fandt ingen brugbare punkter i filen."};
-    const r=analyserPunkter(pkt);
-    if(!r)return {fejl:"Punkterne mangler tid eller position – turen kan ikke regnes ud."};
-    r.kilde="fil"; r.filnavn=filnavn||"";
-    return {loeb:r};
+    if(pkt.length<2)return {fejl:"Fandt ingen brugbare punkter i filen."};
+    const t=analyserTraening(pkt,null,vink);
+    if(!t)return {fejl:"Punkterne mangler tid – passet kan ikke regnes ud."};
+    t.kilde="fil";t.filnavn=filnavn||"";t.format=format;
+    return {traening:t};
   }catch(e){return {fejl:"Kunne ikke læse filen: "+e.message}}
 }
 
@@ -1278,12 +1495,15 @@ function briefing(d){
   const pas=d.sessions.filter(s=>s.dato>graense);
   if(pas.length){
     L.push("## Pas, seneste 28 dage");
-    L.push("| dato | pas | min | RPE | load | følelse |");
-    L.push("|---|---|---|---|---|---|");
+    L.push("Kilde: «ur» = varighed og puls målt af Apple Watch, «tastet» = skrevet ind.");
+    L.push("");
+    L.push("| dato | pas | min | RPE | load | følelse | kilde |");
+    L.push("|---|---|---|---|---|---|---|");
     pas.forEach(s=>{
       const f=FEELS.find(x=>x.id===s.feel);
       L.push("| "+s.dato+" | "+typeNavn(s.type)+" | "+num(varighed(s),0)+" | "+
-        num(anstrengelse(s,d.profil),1)+" | "+sessionLoad(s,d.profil)+" | "+(f?f.label:"–")+" |");
+        num(anstrengelse(s,d.profil),1)+" | "+sessionLoad(s,d.profil)+" | "+(f?f.label:"–")+
+        " | "+(s.urStart?"ur":"tastet")+" |");
     });
     L.push("");
     const medDetalje=pas.filter(s=>ERSTYRKE(s.type)&&s.entries&&Object.keys(s.entries).length);
@@ -1291,9 +1511,20 @@ function briefing(d){
       L.push("### Styrkedetaljer");
       medDetalje.slice(-8).forEach(s=>{
         const pr=PROGRAM[s.type];
-        L.push("- "+s.dato+" "+pr.navn+": "+Object.entries(s.entries)
+        const ur=s.ur&&erTal(s.ur.gnsPuls)?" [uret: "+num(varighed(s),0)+" min, puls "+
+          s.ur.gnsPuls+(erTal(s.ur.kalorier)?", "+s.ur.kalorier+" kcal":"")+"]":"";
+        L.push("- "+s.dato+" "+pr.navn+ur+": "+Object.entries(s.entries)
           .map(([id,v])=>oevelsesNavn(id)+" "+v).join("; ")+(s.note?" — note: "+s.note:""));
       });
+      L.push("");
+    }
+    const kunUr=pas.filter(s=>ERSTYRKE(s.type)&&s.ur&&
+      (!s.entries||!Object.keys(s.entries).length));
+    if(kunUr.length){
+      L.push("### Styrkepas registreret af uret uden noterede øvelser");
+      kunUr.forEach(s=>L.push("- "+s.dato+" "+typeNavn(s.type)+": "+num(varighed(s),0)+
+        " min"+(erTal(s.ur.gnsPuls)?", puls "+s.ur.gnsPuls:"")+
+        (erTal(s.ur.kalorier)?", "+s.ur.kalorier+" kcal":"")));
       L.push("");
     }
     const loeb=pas.filter(s=>s.type==="LOEB"&&s.loeb).slice(-6);
@@ -1405,18 +1636,43 @@ let data=hentData();
 let visning="idag";
 let type=(()=>{const t=data.ugeplan[new Date().getDay()];return t==="FRI"?"A":t})();
 let kladde={},feel=null,gemt=false,note="",minutter="";
-let loebType="rolig", loebFil=null, loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
+let loebType="rolig", urPas=null, loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
 let morgenKladde=null, morgenAaben=false;
 let samtale=[], claudeTravl=false, claudeTilstand="", claudeUdkast="", claudeFejl="";
-let importStatus=null, valgtDag=null, systemBesked=null;
+let importStatus=null, valgtDag=null, systemBesked=null, redigerId=null;
 
-function nyKladde(){
+function nyKladde(fra){
   kladde={};
   (PROGRAM[type]&&PROGRAM[type].oevelser||[]).forEach(o=>{
     kladde[o.id]={vaegt:data.sidsteVaegte[o.id]||"–",saet:stdSaet(o.maal),
       reps:stdReps(o.id,o.maal),done:false};
   });
   feel=null;gemt=false;note="";minutter="";
+  if(fra){
+    // Læs et allerede gemt pas tilbage ind i kladden: "3 × 10 · 24 kg"
+    Object.keys(fra.entries||{}).forEach(id=>{
+      if(!kladde[id])return;
+      const m=/^(\S+)\s*×\s*(.+?)\s*·\s*(.+)$/.exec(String(fra.entries[id]));
+      if(m){kladde[id].saet=m[1];kladde[id].reps=m[2];kladde[id].vaegt=m[3]}
+      kladde[id].done=true;
+    });
+    feel=fra.feel||null;
+    note=fra.note||"";
+    if(fra.loebType)loebType=fra.loebType;
+  }
+}
+/* Et pas, uret har lagt ind, men som mangler øvelserne. */
+function ufaerdigtPas(dato){
+  return data.sessions.find(s=>s.dato===dato&&ERSTYRKE(s.type)&&s.ur&&
+    (!s.entries||!Object.keys(s.entries).length))||null;
+}
+function aabnTilRedigering(id){
+  const s=data.sessions.find(x=>x.id===id);
+  if(!s)return;
+  redigerId=id;type=s.type;urPas=null;
+  nyKladde(s);
+  visning="idag";systemBesked=null;
+  render();
 }
 function stdSaet(maal){const m=/^(\d)/.exec(maal);return m?m[1]:"3"}
 function stdReps(id,maal){const l=REPS[id]||[];return l.length?l[Math.min(1,l.length-1)]:maal}
@@ -1493,7 +1749,8 @@ function visIdag(){
   if(p.dele.length){
     h+='<div class="udlaes">'+p.dele.map(x=>
       '<b>'+esc(x.navn)+'</b> '+Math.round(x.score)).join(" · ")+
-      ' <span style="color:var(--svag)">· hver af 100</span></div>';
+      (p.dele.length>1?' <span style="color:var(--svag)">· hver af 100</span>':
+        ' <span style="color:var(--svag)">af 100</span>')+'</div>';
   }
   h+='</div>';
 
@@ -1546,6 +1803,20 @@ function visIdag(){
 
   // Dagens pas
   h+='<h3 class="afsnit">DAGENS PAS</h3>';
+  const ufaerdigt=redigerId?null:ufaerdigtPas(idag());
+  if(ufaerdigt){
+    h+='<div class="vagt">Uret har allerede lagt et pas ind i dag: '+
+      esc(typeNavn(ufaerdigt.type))+', '+num(varighed(ufaerdigt),0)+' min'+
+      (erTal(ufaerdigt.ur.gnsPuls)?', puls '+ufaerdigt.ur.gnsPuls:"")+
+      '. Der mangler kun øvelserne.<br>'+
+      '<button class="gem" style="margin-top:10px" data-rediger="'+esc(ufaerdigt.id)+
+      '">Tilføj øvelserne</button></div>';
+  }
+  if(redigerId){
+    h+='<div class="vagt ro">Du retter et pas, uret har logget. Varighed og puls '+
+      'står fast; sæt flueben ved det, du lavede.'+
+      '<button class="gem sek" style="margin-top:10px" id="redigerFortryd">Fortryd</button></div>';
+  }
   h+='<div class="nav mono" style="margin-top:10px">'+["A","B","C","MOB","LOEB"].map(t=>
     '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+
     (t==="LOEB"?"LØB":t==="MOB"?"MOBIL":t)+'</button>').join("")+'</div>';
@@ -1563,20 +1834,20 @@ function visIdag(){
       '<p>Så er det ud af døren. Resten passer sig selv.</p></div>';
   }else{
     if(type==="LOEB")h+=loebFelter();
-    else h+=styrkeFelter(pr);
+    else h+=styrkeUrFelt()+styrkeFelter(pr);
     h+='<div class="feels">'+FEELS.map(f=>
       '<button data-feel="'+f.id+'" class="'+(feel===f.id?"aktiv":"")+'">'+esc(f.label)+
       '</button>').join("")+'</div>';
     h+='<input data-kladde="note" value="'+esc(note)+
       '" placeholder="Note (valgfri – fx &quot;forfod øm&quot;)" style="margin-top:12px">';
     const kan=type==="LOEB"
-      ? !!(loebFil||erTal(loebManuel.distanceKm)||erTal(loebManuel.minutter))
-      : Object.keys(kladde).some(k=>kladde[k].done);
+      ? !!(urPas||erTal(loebManuel.distanceKm)||erTal(loebManuel.minutter))
+      : (!!urPas||Object.keys(kladde).some(k=>kladde[k].done));
     h+='<button class="gem" id="gemPas" '+(kan?"":"disabled")+'>Gem '+
       (type==="LOEB"?"løbeturen":"morgenpas")+'</button>';
     if(!kan)h+='<p class="hint">'+(type==="LOEB"
       ? "Læg filen fra uret ind, eller tast distance og tid."
-      : "Sæt flueben ved mindst én øvelse.")+'</p>';
+      : "Sæt flueben ved mindst én øvelse – eller læg passet fra uret ind.")+'</p>';
   }
   h+='</div>';
 
@@ -1587,6 +1858,27 @@ function visIdag(){
   return h;
 }
 
+function styrkeUrFelt(){
+  if(urPas&&urPas.sport!=="loeb"){
+    const l=urPas;
+    return '<div class="kort" style="margin-top:12px;background:var(--nat)">'+
+      '<div class="kort-top"><h2 style="font-size:14px">'+esc(l.filnavn||"Fra uret")+'</h2>'+
+      '<span><button class="tandhjul" id="loebRyd" style="width:auto;height:auto;'+
+      'padding:4px 9px;font-size:11px">FJERN</button></span></div>'+
+      '<div class="fliser" style="margin-top:10px">'+
+        flise("VARIGHED",num(l.tidSek/60,0),"minutter")+
+        flise("PULS",erTal(l.gnsPuls)?String(l.gnsPuls):"–",
+          erTal(l.maxPuls)?"max "+l.maxPuls:"gennemsnit")+
+        flise("FORBRÆNDING",erTal(l.kalorier)?String(l.kalorier):"–","kcal")+
+      '</div><p class="hint">Uret har varigheden og pulsen. Vægt og gentagelser '+
+      'taster du nedenfor – det er det eneste, det ikke kan måle.</p></div>';
+  }
+  if(urPas)return "";
+  return '<div class="drop" id="loebDrop" style="margin-top:12px"><b>Hent passet fra uret</b>'+
+    'FIT, GPX eller TCX. Så er varighed og puls på plads.'+
+    '<input type="file" id="loebInput" accept=".fit,.gpx,.tcx,.xml" multiple '+
+    'style="display:none"></div>';
+}
 function styrkeFelter(pr){
   return pr.oevelser.map(o=>{
     const k=kladde[o.id]||{saet:"3",reps:o.maal,vaegt:"–",done:false};
@@ -1611,8 +1903,8 @@ function loebFelter(){
   let h='<label>Type løb<select class="bred" data-loebtype>'+LOEBTYPER.map(t=>
     '<option value="'+t.id+'"'+(loebType===t.id?" selected":"")+'>'+esc(t.navn)+
     '</option>').join("")+'</select></label>';
-  if(loebFil){
-    const l=loebFil;
+  if(urPas){
+    const l=urPas;
     h+='<div class="kort" style="margin-top:14px;background:var(--nat)">'+
       '<div class="kort-top"><h2 style="font-size:14px">'+esc(l.filnavn||"Turen")+'</h2>'+
       '<span><button class="tandhjul" id="loebRyd" style="width:auto;height:auto;'+
@@ -1641,11 +1933,12 @@ function loebFelter(){
     h+='</div>';
   }else{
     h+='<div class="drop" id="loebDrop"><b>Læg turen ind</b>'+
-      'GPX eller TCX fra uret. Filen bliver i telefonen.'+
-      '<input type="file" id="loebInput" accept=".gpx,.tcx,.xml,application/gpx+xml" '+
+      'FIT, GPX eller TCX fra uret. Filen bliver i telefonen.'+
+      '<input type="file" id="loebInput" accept=".fit,.gpx,.tcx,.xml" multiple '+
       'style="display:none"></div>'+
-      '<p class="hint">Apple Watch kommer ud gennem HealthFit, RunGap, WorkOutDoors eller '+
-      'Strava – vælg GPX eller TCX i eksporten. Har du ikke filen, så tast det vigtigste:</p>'+
+      '<p class="hint">HealthFit lægger selv hver træning i din iCloud- eller Dropbox-mappe. '+
+      'Herfra henter du den bare – FIT virker direkte, du behøver ikke skifte format. '+
+      'Har du ikke filen, så tast det vigtigste:</p>'+
       '<div class="to"><label>Distance (km)<input type="number" inputmode="decimal" step="0.01" '+
         'data-loebm="distanceKm" value="'+(erTal(loebManuel.distanceKm)?loebManuel.distanceKm:"")+
         '" placeholder="8,2"></label>'+
@@ -1810,9 +2103,19 @@ function visLog(){
     const pr=PROGRAM[s.type];
     const det=[];
     if(s.type==="LOEB"){const l=loebLinje(s);if(l)det.push(l)}
-    else if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
-      det.push(oevelsesNavn(id)+" "+v);
-    });
+    else{
+      if(s.ur){
+        const u=[];
+        if(erTal(s.ur.gnsPuls))u.push("puls "+s.ur.gnsPuls+
+          (erTal(s.ur.maxPuls)?"/"+s.ur.maxPuls:""));
+        if(erTal(s.ur.kalorier))u.push(s.ur.kalorier+" kcal");
+        if(u.length)det.push("fra uret: "+u.join(" · "));
+      }
+      if(s.entries)Object.entries(s.entries).forEach(([id,v])=>{
+        det.push(oevelsesNavn(id)+" "+v);
+      });
+      if(s.ur&&(!s.entries||!Object.keys(s.entries).length))det.push("øvelser ikke noteret");
+    }
     const f=FEELS.find(x=>x.id===s.feel);
     const pp=parathed(data,s.dato);
     return '<div class="hist"><div class="hrad"><span class="titel">'+
@@ -1824,7 +2127,12 @@ function visLog(){
         (f?" · "+esc(f.label):"")+
         (pp.score!=null?" · parathed "+pp.score:"")+'</div>'+
       (s.note?'<div class="note">'+esc(s.note)+'</div>':"")+
-      '<div style="text-align:right;margin-top:6px"><button class="tandhjul" data-slet="'+
+      '<div style="text-align:right;margin-top:6px">'+
+      (ERSTYRKE(s.type)&&(!s.entries||!Object.keys(s.entries).length)
+        ? '<button class="tandhjul" data-rediger="'+esc(s.id)+'" style="width:auto;'+
+          'height:auto;padding:3px 9px;font-size:11px;margin-right:6px;'+
+          'border-color:var(--gry);color:var(--gry)">TILFØJ ØVELSER</button>':"")+
+      '<button class="tandhjul" data-slet="'+
         esc(s.id)+'" style="width:auto;height:auto;padding:3px 9px;font-size:11px">SLET</button>'+
       '</div></div>';
   }).join("");
@@ -1885,6 +2193,11 @@ function visClaude(){
 
 /* ---------- DATA ---------- */
 
+function importLinje(hvor){
+  if(!importStatus||importStatus.hvor!==hvor)return "";
+  return '<div class="bom"><i style="width:'+Math.round((importStatus.pct||0)*100)+
+    '%"></i></div><p class="hint">'+esc(importStatus.tekst)+'</p>';
+}
 function visData(){
   let h='<h3 class="afsnit">DIG</h3><div class="kort">'+
     '<div class="to"><label>Maxpuls<input type="number" inputmode="numeric" '+
@@ -1897,14 +2210,43 @@ function visData(){
     'Er de forkerte, bliver din løbeload det også. Kender du ikke din maxpuls, så lad den stå '+
     '– følelsen efter passet korrigerer alligevel.</p></div>';
 
+  h+='<h3 class="afsnit">TRÆNINGER FRA URET</h3><div class="kort">'+
+    '<div class="drop" id="passerDrop" style="margin-top:0"><b>Hent en hel bunke ind</b>'+
+    'Marker alle filerne i din HealthFit-mappe. Appen sorterer dem selv på dato, '+
+    'lægger nye pas ind og springer dem over, den allerede kender.'+
+    '<input type="file" id="passerInput" accept=".fit,.gpx,.tcx,.xml" multiple '+
+    'style="display:none"></div>'+
+    importLinje("pas")+
+    '<p class="hint">FIT, GPX og TCX. Løbeture får splits, kadence og afkobling med; '+
+    'styrkepas får varighed og puls, og så mangler kun øvelserne, som du tilføjer '+
+    'under LOG.</p>'+
+    '<p class="lille">'+data.sessions.filter(x=>x.urStart).length+' pas hentet fra uret · '+
+    data.sessions.filter(x=>ERSTYRKE(x.type)&&x.ur&&(!x.entries||!Object.keys(x.entries).length)).length+
+    ' mangler øvelser</p></div>';
+
+  h+='<h3 class="afsnit">SÅ LIDT MANUELT SOM MULIGT</h3><div class="kort">'+
+    '<p class="hint" style="margin-top:0"><b style="color:var(--tekst)">1. Lad HealthFit '+
+    'lægge filerne af sig selv.</b> I HealthFit: Settings → Auto Export → vælg iCloud '+
+    'Drive eller Dropbox. Så ligger hver træning i mappen, uden at du rører den. '+
+    'Herinde trykker du på feltet ovenfor og markerer dem – filerne bliver i telefonen.</p>'+
+    '<p class="hint"><b style="color:var(--tekst)">2. Lad en genvej logge styrken '+
+    'automatisk.</b> Genveje → Automatisering → Personlig → Træning → Når en træning '+
+    'slutter → Kør straks. Tilføj «Hent træninger», dernæst «Åbn URL» med adressen '+
+    'nedenfor, hvor du erstatter felterne i kantede parenteser med variabler fra '+
+    'træningen. Så åbner Morgenlog med passet lagt ind, og du skal kun sætte flueben '+
+    'ved øvelserne.</p>'+
+    '<textarea class="udtraek" readonly rows="3" id="genvejTekst">'+
+      esc(genvejsSkabelon())+'</textarea>'+
+    '<button class="gem sek" id="genvejKopi">Kopiér adressen</button>'+
+    '<p class="lille">Til løb sætter du sport=loeb og tilføjer &km=[Distance]. '+
+    'Løbeturens splits og afkobling kommer først med, når du henter selve filen – '+
+    'genvejen kender kun totalerne.</p></div>';
+
   h+='<h3 class="afsnit">HELBREDSDATA FRA URET</h3><div class="kort">'+
     '<div class="drop" id="helbredDrop"><b>Læg en eksport ind</b>'+
     'Health Auto Export (JSON/CSV), Apples export.xml, eller en CSV med dato, HRV, hvilepuls og søvn.'+
     '<input type="file" id="helbredInput" accept=".json,.csv,.xml,.txt" style="display:none"></div>';
-  if(importStatus){
-    h+='<div class="bom"><i style="width:'+Math.round((importStatus.pct||0)*100)+'%"></i></div>'+
-      '<p class="hint">'+esc(importStatus.tekst)+'</p>';
-  }
+  h+=importLinje("helbred");
   h+='<p class="hint">Health Auto Export er den nemme vej: sæt den til at eksportere HRV, '+
     'hvilepuls og søvn, og læg filen herind en gang om ugen. Apples egen export.xml virker også '+
     '– den er bare stor, så det tager et øjeblik.</p>'+
@@ -1962,14 +2304,18 @@ function gemMorgen(){
 }
 
 function gemPas(){
-  const s={id:nyId(),dato:idag(),type:type,feel:feel||undefined,
-    note:(note||"").trim()||undefined};
+  const eksisterende=redigerId?data.sessions.find(x=>x.id===redigerId):null;
+  const s=eksisterende
+    ? Object.assign({},eksisterende,{type:type,feel:feel||undefined,
+        note:(note||"").trim()||undefined})
+    : {id:nyId(),dato:idag(),type:type,feel:feel||undefined,
+        note:(note||"").trim()||undefined};
   if(type==="LOEB"){
     s.loebType=loebType;
-    if(loebFil){
-      const l=Object.assign({},loebFil);
-      if(l.startTid){const d=new Date(l.startTid);if(!isNaN(d))s.dato=iso(d)}
-      delete l.startTid;
+    if(urPas){
+      const l=Object.assign({},urPas);
+      if(l.startTid){const d=new Date(l.startTid);if(!isNaN(d))s.dato=iso(d);s.urStart=l.startTid}
+      delete l.startTid;delete l.sport;
       s.loeb=l;
       s.minutter=Math.round((l.bevaegSek||l.tidSek||0)/60)||undefined;
     }else{
@@ -1988,10 +2334,24 @@ function gemPas(){
       s.entries[id]=k.saet+" × "+k.reps+" · "+(k.vaegt||"–");
       if(k.vaegt&&k.vaegt!=="–")data.sidsteVaegte[id]=k.vaegt;
     });
+    if(urPas){
+      // Uret måler varigheden og pulsen; vægtene taster du selv.
+      if(urPas.startTid){
+        const d=new Date(urPas.startTid);
+        if(!isNaN(d))s.dato=iso(d);
+        s.urStart=urPas.startTid;
+      }
+      s.minutter=Math.round((urPas.tidSek||0)/60)||undefined;
+      s.ur={kilde:urPas.kilde,filnavn:urPas.filnavn,format:urPas.format,
+        gnsPuls:urPas.gnsPuls,maxPuls:urPas.maxPuls,kalorier:urPas.kalorier,
+        tidSek:urPas.tidSek};
+    }
   }
-  data.sessions.push(s);
+  if(eksisterende)data.sessions=data.sessions.map(x=>x.id===s.id?s:x);
+  else data.sessions.push(s);
   oprydData(data);gemData(data);
-  gemt=true;loebFil=null;loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
+  gemt=true;redigerId=null;urPas=null;
+  loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
   render();
 }
 
@@ -2018,28 +2378,130 @@ function laesFilSomTekst(fil){
   });
 }
 
-async function haandterLoebefil(fil){
-  if(!fil)return;
+function laesFilSomBytes(fil){
+  return new Promise((ok,fejl)=>{
+    const l=new FileReader();
+    l.onload=()=>ok(l.result);
+    l.onerror=()=>fejl(new Error("Filen kunne ikke læses."));
+    l.readAsArrayBuffer(fil);
+  });
+}
+
+/* Ét pas ind i dagens kort: du får lov at rette og tilføje vægte, før det gemmes. */
+async function haandterTraeningsfil(filer){
+  const liste=Array.from(filer||[]);
+  if(!liste.length)return;
+  if(liste.length>1)return batchImport(liste);       // flere filer = hent alt ind
   systemBesked=null;
   try{
-    const tekst=await laesFilSomTekst(fil);
-    const r=laesLoebefil(tekst,fil.name);
+    const bytes=await laesFilSomBytes(liste[0]);
+    const r=laesTraeningsfil(bytes,liste[0].name);
     if(r.fejl){systemBesked=r.fejl;render();return}
-    loebFil=r.loeb;
-    if(!feel)feel=null;
+    urPas=r.traening;
+    // Lagde du et styrkepas ind, mens LØB var valgt (eller omvendt), så skift.
+    if(urPas.sport==="loeb"&&type!=="LOEB")type="LOEB";
+    else if(urPas.sport!=="loeb"&&type==="LOEB"){
+      const planlagt=data.ugeplan[fraIso(iso(new Date(urPas.startTid||Date.now()))).getDay()];
+      type=ERSTYRKE(planlagt)?planlagt:"A";
+      nyKladde();
+    }
+    if(!PROGRAM[type])type="A";
     render();
   }catch(e){systemBesked=e.message;render()}
+}
+
+/* Flere pas på én gang: læg hele ugens mappe ind, appen sorterer selv. */
+async function batchImport(filer){
+  const liste=Array.from(filer||[]);
+  if(!liste.length)return;
+  importStatus={hvor:"pas",pct:0,tekst:"Læser "+liste.length+" filer …"};render();
+  let nye=0,beriget=0,sprunget=0;
+  const fejl=[];
+  for(let i=0;i<liste.length;i++){
+    try{
+      const bytes=await laesFilSomBytes(liste[i]);
+      const r=laesTraeningsfil(bytes,liste[i].name);
+      if(r.fejl){fejl.push(liste[i].name+": "+r.fejl);continue}
+      const udfald=indsaetTraening(r.traening);
+      if(udfald==="ny")nye++;else if(udfald==="beriget")beriget++;else sprunget++;
+    }catch(e){fejl.push(liste[i].name+": "+e.message)}
+    importStatus={hvor:"pas",pct:(i+1)/liste.length,
+      tekst:"Læser "+(i+1)+" af "+liste.length+" …"};
+    const b=document.querySelector(".bom i");
+    if(b)b.style.width=Math.round((i+1)/liste.length*100)+"%";
+    await new Promise(r=>setTimeout(r,0));
+  }
+  gemData(data);
+  const dele=[];
+  if(nye)dele.push(nye+(nye===1?" nyt pas":" nye pas"));
+  if(beriget)dele.push(beriget+" udbygget med data fra uret");
+  if(sprunget)dele.push(sprunget+" var logget i forvejen");
+  importStatus={hvor:"pas",pct:1,tekst:(dele.length?"Hentet ind: "+dele.join(" · ")+"."
+    :"Ingenting nyt at hente.")+(fejl.length?" "+fejl.length+" fil"+
+    (fejl.length===1?"":"er")+" kunne ikke læses: "+fejl[0]:"")};
+  render();
+}
+
+/* Samme pas må ikke lande to gange, uanset hvilken vej det kom ind. */
+function findMage(traening){
+  const start=traening.startTid;
+  if(!start)return null;
+  const dato=iso(new Date(start));
+  const nyErLoeb=traening.sport==="loeb";
+  return data.sessions.find(s=>{
+    if((s.type==="LOEB")!==nyErLoeb)return false;   // løb og styrke er aldrig samme pas
+    // Samme pas eksporteret i to formater: starttiderne ligger oven i hinanden.
+    if(s.urStart)return Math.abs(s.urStart-start)<20*60000;
+    return s.dato===dato;
+  })||null;
+}
+function indsaetTraening(t){
+  const mage=findMage(t);
+  if(mage){
+    // Har passet allerede rigtige tal fra uret, rører vi det ikke.
+    if(mage.urStart)return "sprunget";
+    mage.urStart=t.startTid;
+    mage.minutter=Math.round((t.bevaegSek||t.tidSek||0)/60)||mage.minutter;
+    if(t.sport==="loeb"){
+      const gammel=mage.loeb||{};
+      mage.loeb=Object.assign({},gammel,t);
+      delete mage.loeb.startTid;delete mage.loeb.sport;
+    }else{
+      mage.ur={kilde:t.kilde,filnavn:t.filnavn,format:t.format,gnsPuls:t.gnsPuls,
+        maxPuls:t.maxPuls,kalorier:t.kalorier,tidSek:t.tidSek};
+    }
+    return "beriget";
+  }
+  const dato=t.startTid?iso(new Date(t.startTid)):idag();
+  const s={id:nyId(),dato:dato,urStart:t.startTid||undefined,
+    minutter:Math.round((t.bevaegSek||t.tidSek||0)/60)||undefined};
+  if(t.sport==="loeb"){
+    s.type="LOEB";
+    s.loebType=(t.distanceKm&&t.distanceKm>=10)?"lang":"rolig";
+    s.loeb=Object.assign({},t);
+    delete s.loeb.startTid;delete s.loeb.sport;
+  }else{
+    // Uret ved ikke, hvilket program det var. Vi bruger ugeplanens.
+    const planlagt=data.ugeplan[fraIso(dato).getDay()];
+    s.type=ERSTYRKE(planlagt)?planlagt:"A";
+    s.entries={};
+    s.ur={kilde:t.kilde,filnavn:t.filnavn,format:t.format,gnsPuls:t.gnsPuls,
+      maxPuls:t.maxPuls,kalorier:t.kalorier,tidSek:t.tidSek};
+  }
+  data.sessions.push(s);
+  oprydData(data);
+  return "ny";
 }
 
 async function haandterHelbredsfil(fil){
   if(!fil)return;
   const navn=fil.name.toLowerCase();
-  importStatus={pct:0,tekst:"Læser "+fil.name+" …"};render();
+  importStatus={hvor:"helbred",pct:0,tekst:"Læser "+fil.name+" …"};render();
   try{
     let nye=null;
     if(navn.endsWith(".xml")){
       nye=await laesAppleEksport(fil,(pct,antal)=>{
-        importStatus={pct:pct,tekst:"Læser Apple-eksport … "+Math.round(pct*100)+
+        importStatus={hvor:"helbred",pct:pct,tekst:"Læser Apple-eksport … "+Math.round(pct*100)+
           " % · "+antal+" målinger fundet"};
         const b=document.querySelector(".bom i");
         if(b)b.style.width=Math.round(pct*100)+"%";
@@ -2052,7 +2514,7 @@ async function haandterHelbredsfil(fil){
       if(/^\s*[{[]/.test(tekst)){
         const o=JSON.parse(tekst);
         if(o&&Array.isArray(o.sessions)){
-          importStatus={pct:1,tekst:"Det er en sikkerhedskopi, ikke helbredsdata. "+
+          importStatus={hvor:"helbred",pct:1,tekst:"Det er en sikkerhedskopi, ikke helbredsdata. "+
             "Brug «Gendan fra fil» længere nede."};
           render();return;
         }
@@ -2068,17 +2530,17 @@ async function haandterHelbredsfil(fil){
       }
     }
     if(!nye||!nye.length){
-      importStatus={pct:1,tekst:"Fandt ingen HRV, hvilepuls eller søvn i filen. "+
+      importStatus={hvor:"helbred",pct:1,tekst:"Fandt ingen HRV, hvilepuls eller søvn i filen. "+
         "Tjek at eksporten indeholder de tre målinger."};
       render();return;
     }
     const r=flet(data,nye);
     gemData(data);
-    importStatus={pct:1,tekst:"Hentet ind: "+r.nye+" nye dage, "+r.opdateret+" opdaterede. "+
+    importStatus={hvor:"helbred",pct:1,tekst:"Hentet ind: "+r.nye+" nye dage, "+r.opdateret+" opdaterede. "+
       "Basislinjen bygger på de seneste 42 dage."};
     render();
   }catch(e){
-    importStatus={pct:1,tekst:"Kunne ikke læse filen: "+e.message};
+    importStatus={hvor:"helbred",pct:1,tekst:"Kunne ikke læse filen: "+e.message};
     render();
   }
 }
@@ -2090,10 +2552,10 @@ function hentNed(indhold,filnavn,type){
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
-async function kopier(tekst,knap,gammel){
+async function kopier(tekst,knap,gammel,feltId){
   try{await navigator.clipboard.writeText(tekst)}
   catch(e){
-    const t=document.getElementById("briefTekst");
+    const t=document.getElementById(feltId||"briefTekst");
     if(t){t.select();try{document.execCommand("copy")}catch(e2){}}
   }
   if(knap){knap.textContent="Kopieret ✓";setTimeout(()=>{knap.textContent=gammel},1800)}
@@ -2135,7 +2597,80 @@ async function sendTilClaude(tekst){
 }
 
 /* ==========================================================================
-   14. TEGN OG BIND
+   14. AUTOMATIK
+   En iOS-genvej kan ikke skrive i appens lager, men den kan åbne en adresse.
+   Så det er vejen: genvejen bygger en URL med passets tal, og appen læser dem
+   ud af adressen og lægger passet ind.
+   ========================================================================== */
+
+function grundadresse(){
+  return location.origin+location.pathname;
+}
+function genvejsSkabelon(){
+  return grundadresse()+"#ind=1&sport=styrke&start=[Startdato]&min=[Varighed]"+
+    "&puls=[Gnspuls]&kcal=[Energi]";
+}
+function laesAdresse(){
+  const h=(location.hash||"").replace(/^#/,"");
+  if(!h||h.indexOf("ind=")<0)return null;
+  const p={};
+  h.split("&").forEach(par=>{
+    const i=par.indexOf("=");
+    if(i<0)return;
+    try{p[decodeURIComponent(par.slice(0,i))]=decodeURIComponent(par.slice(i+1))}
+    catch(e){p[par.slice(0,i)]=par.slice(i+1)}
+  });
+  // Adressen ryddes med det samme, så en genindlæsning ikke lægger passet ind igen.
+  try{history.replaceState(null,"",grundadresse())}catch(e){location.hash=""}
+  const tal=(v)=>{
+    if(v==null||v==="")return null;
+    const n=parseFloat(String(v).replace(",","."));
+    return isFinite(n)?n:null;
+  };
+  let start=Date.parse(p.start||"");
+  if(!isFinite(start))start=Date.now();
+  const min=tal(p.min);
+  if(!erTal(min)||min<=0)return {fejl:"Genvejen sendte ingen varighed med."};
+  const km=tal(p.km);
+  const erLoeb=String(p.sport||"").toLowerCase().indexOf("l")===0||
+    (km!=null&&km>=0.5&&String(p.sport||"").toLowerCase()!=="styrke");
+  return {traening:{
+    sport:erLoeb?"loeb":"styrke",
+    kilde:"genvej", filnavn:"", format:"Genvej",
+    startTid:start,
+    tidSek:Math.round(min*60), bevaegSek:Math.round(min*60),
+    distanceKm:(erLoeb&&km)?km:null,
+    tempoSekPrKm:(erLoeb&&km&&km>0)?(min*60)/km:null,
+    gnsPuls:tal(p.puls), maxPuls:tal(p.maxpuls),
+    kalorier:tal(p.kcal), stigningM:null, kadence:null, kobling:null, splits:[]
+  }};
+}
+function tagImodAdresse(){
+  const r=laesAdresse();
+  if(!r)return;
+  if(r.fejl){systemBesked=r.fejl;return}
+  const udfald=indsaetTraening(r.traening);
+  gemData(data);
+  const t=r.traening;
+  if(udfald==="sprunget"){
+    systemBesked="Det pas var allerede logget – intet nyt lagt ind.";
+    return;
+  }
+  const mage=findMage(t);
+  if(mage&&ERSTYRKE(mage.type)&&(!mage.entries||!Object.keys(mage.entries).length)){
+    // Styrke: uret har varighed og puls, du mangler kun at sætte flueben.
+    redigerId=mage.id;type=mage.type;nyKladde(mage);
+    visning="idag";
+    systemBesked=null;
+  }else{
+    visning="log";
+    systemBesked=(udfald==="ny"?"Passet er lagt ind":"Passet er udbygget med data fra uret")+
+      ": "+num(t.tidSek/60,0)+" min"+(erTal(t.gnsPuls)?", puls "+t.gnsPuls:"")+".";
+  }
+}
+
+/* ==========================================================================
+   15. TEGN OG BIND
    ========================================================================== */
 
 let sidsteVisning=null;
@@ -2171,8 +2706,11 @@ function bind(){
     visning=e.currentTarget.dataset.visning;systemBesked=null;valgtDag=null;render();
   });
   paa("[data-type]","click",e=>{
-    type=e.currentTarget.dataset.type;nyKladde();
-    loebFil=null;loebManuel={distanceKm:null,minutter:null,gnsPuls:null};render();
+    type=e.currentTarget.dataset.type;
+    const r=redigerId?data.sessions.find(x=>x.id===redigerId):null;
+    nyKladde(r);
+    if(!r){urPas=null;loebManuel={distanceKm:null,minutter:null,gnsPuls:null}}
+    render();
   });
   paa("[data-oev]","click",e=>{
     const k=kladde[e.currentTarget.dataset.oev];
@@ -2208,6 +2746,7 @@ function bind(){
   });
   paa("[data-byt]","click",e=>bytDage(+e.currentTarget.dataset.byt));
   paa("[data-slet]","click",e=>sletPas(e.currentTarget.dataset.slet));
+  paa("[data-rediger]","click",e=>aabnTilRedigering(e.currentTarget.dataset.rediger));
   paa("[data-profil]","input",e=>{
     const v=tal(e.currentTarget.value);
     if(v!=null){data.profil[e.currentTarget.dataset.profil]=v;gemData(data)}
@@ -2236,19 +2775,33 @@ function bind(){
   klik("morgenAnnuller",()=>{morgenAaben=false;morgenKladde=null;render()});
   klik("morgenGem",gemMorgen);
   klik("gemPas",gemPas);
-  klik("loebRyd",()=>{loebFil=null;render()});
+  klik("loebRyd",()=>{urPas=null;render()});
+  klik("redigerFortryd",()=>{redigerId=null;nyKladde();render()});
 
   const drop=id("loebDrop"),filInd=id("loebInput");
   if(drop&&filInd){
     drop.onclick=()=>filInd.click();
-    filInd.onchange=e=>haandterLoebefil(e.target.files[0]);
+    filInd.onchange=e=>haandterTraeningsfil(e.target.files);
     ["dragenter","dragover"].forEach(h=>drop.addEventListener(h,e=>{
       e.preventDefault();drop.classList.add("over")}));
     ["dragleave","drop"].forEach(h=>drop.addEventListener(h,e=>{
       e.preventDefault();drop.classList.remove("over")}));
     drop.addEventListener("drop",e=>{
-      if(e.dataTransfer&&e.dataTransfer.files[0])haandterLoebefil(e.dataTransfer.files[0])});
+      if(e.dataTransfer&&e.dataTransfer.files.length)haandterTraeningsfil(e.dataTransfer.files)});
   }
+  const pDrop=id("passerDrop"),pInd=id("passerInput");
+  if(pDrop&&pInd){
+    pDrop.onclick=()=>pInd.click();
+    pInd.onchange=e=>batchImport(e.target.files);
+    ["dragenter","dragover"].forEach(h=>pDrop.addEventListener(h,e=>{
+      e.preventDefault();pDrop.classList.add("over")}));
+    ["dragleave","drop"].forEach(h=>pDrop.addEventListener(h,e=>{
+      e.preventDefault();pDrop.classList.remove("over")}));
+    pDrop.addEventListener("drop",e=>{
+      if(e.dataTransfer&&e.dataTransfer.files.length)batchImport(e.dataTransfer.files)});
+  }
+  klik("genvejKopi",e=>kopier(genvejsSkabelon(),e.currentTarget,"Kopiér adressen","genvejTekst"));
+
   const hDrop=id("helbredDrop"),hInd=id("helbredInput");
   if(hDrop&&hInd){
     hDrop.onclick=()=>hInd.click();
@@ -2311,7 +2864,9 @@ function bind(){
   klik("chatRyd",()=>{samtale=[];claudeFejl="";render()});
 }
 
+tagImodAdresse();
 render();
+window.addEventListener("hashchange",()=>{tagImodAdresse();render()});
 </script>
 <script>
 if("serviceWorker" in navigator)

@@ -20,7 +20,8 @@ tabel med de samme tal.
 **PLAN** — ugens skelet. Byt rundt på dagene, eller vælg bare et andet pas under
 I dag; appen regner på det, du faktisk lavede.
 
-**LOG** — hvert pas med load, RPE og parathed den dag.
+**LOG** — hvert pas med load, RPE og parathed den dag. Pas, uret har logget uden
+øvelser, kan færdiggøres herfra.
 
 **CLAUDE** — hele din status som struktureret tekst, klar til at kopiere. Eller,
 med en API-nøgle, en samtale inde i appen hvor Claude automatisk får det hele
@@ -44,11 +45,43 @@ mod en tabel: HRV (28 %), søvn (25 %), krop og hoved (17 %), belastningsbalance
 HRV og hvilepuls læses som 7-dages snit mod en 42-dages basislinje — enkeltdage
 støjer for meget til at handle på.
 
-**Løbefiler** (GPX og TCX) regnes ud i telefonen: distance, bevægetid, tempo,
-kilometersplits, puls, kadence, stigning og afkobling — fart pr. hjerteslag i
-anden halvdel mod første. Over cirka 5 % kostede turen mere, end tempoet siger.
+**Træningsfiler** (FIT, GPX og TCX) regnes ud i telefonen. Løb: distance,
+bevægetid, tempo, kilometersplits, puls, kadence, stigning og afkobling — fart
+pr. hjerteslag i anden halvdel mod første; over cirka 5 % kostede turen mere,
+end tempoet siger. Styrke og andet indendørs uden GPS: varighed, puls og
+forbrænding, og så taster du vægt og gentagelser, som er det eneste, uret ikke
+kan måle. Hvor uret selv har regnet en total ud, vinder den over appens egen
+udregning fra punktstrømmen.
 
-## Data fra Apple Watch
+## Så lidt manuelt arbejde som muligt
+
+### Træninger
+
+**Lad HealthFit lægge filerne af sig selv.** Settings → Auto Export → iCloud
+Drive eller Dropbox. Så ender hver træning i mappen, uden at du rører den. I
+appen under ⚙ Data trykker du på «Hent en hel bunke ind» og markerer alle
+filerne på én gang: iOS' filvælger åbner direkte i mappen, appen sorterer dem på
+dato, springer dem over den allerede kender, og udbygger et pas, du har tastet i
+forvejen, med urets tal. FIT virker direkte — du behøver ikke skifte format.
+
+**Eller lad en genvej gøre det.** Genveje → Automatisering → Personlig →
+Træning → Når en træning slutter → Kør straks. Tilføj «Hent træninger» og
+dernæst «Åbn URL» med adressen fra ⚙ Data:
+
+```
+https://…/index.html#ind=1&sport=styrke&start=[Startdato]&min=[Varighed]&puls=[Gnspuls]&kcal=[Energi]
+```
+
+Felterne i kantede parenteser erstatter du med variabler fra træningen. Til løb
+sættes `sport=loeb`, og `&km=[Distance]` tilføjes. Så åbner Morgenlog med passet
+lagt ind, og for styrke står den klar til, at du sætter flueben ved øvelserne.
+Adressen ryddes efter læsning, og det samme pas kan ikke lande to gange.
+
+Genvejen kender kun totalerne. Løbeturens splits, kadence og afkobling kommer
+først med, når du henter selve filen — de to veje udelukker ikke hinanden, for
+appen lægger urets fil oven i det pas, genvejen allerede har oprettet.
+
+### Helbredsdata
 
 Tre veje, alle under ⚙ Data:
 
@@ -58,9 +91,6 @@ Tre veje, alle under ⚙ Data:
    `export.xml` ind. Den er stor, så det tager et øjeblik; appen læser den i
    bidder og henter kun de tre målinger.
 3. **En simpel CSV** med kolonnerne dato, HRV, hvilepuls og søvn.
-
-Løbeture kommer ud af uret som GPX eller TCX gennem HealthFit, RunGap,
-WorkOutDoors eller Strava.
 
 ## Claude i appen
 

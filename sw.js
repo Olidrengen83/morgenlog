@@ -3,7 +3,7 @@
 // og din plan ligger et helt andet sted og bliver hverken slettet eller rørt,
 // når appen opdateres.
 
-const CACHE = "morgenlog-v2";
+const CACHE = "morgenlog-v3";
 const FILER = [
   "./",
   "./index.html",
