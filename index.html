@@ -324,7 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=7;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=8;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -2954,42 +2954,72 @@ async function dbxHentFil(id){
   return svar.arrayBuffer();
 }
 
-/* Find den mappe, HealthFit lægger filerne i, ved at lede efter .fit-filer. */
-async function dbxFindMappe(){
+/* Led efter træningsfiler i HELE Dropbox – manuel deling og automatisk
+   eksport lander tit i hver sin mappe, og det skal ikke være appens problem. */
+async function dbxSoegFiler(){
+  const ud=[],set={};
   for(const endelse of ["fit","gpx","tcx"]){
     try{
       const j=await dbxKald("files/search_v2",{query:"."+endelse,
-        options:{max_results:25,filename_only:true,file_extensions:[endelse]}});
-      const taeller={};
+        options:{max_results:100,filename_only:true,file_extensions:[endelse]}});
       (j.matches||[]).forEach(m=>{
         const md=m.metadata&&m.metadata.metadata;
-        if(!md||!md.path_lower)return;
-        const mappe=md.path_lower.slice(0,md.path_lower.lastIndexOf("/"))||"/";
-        taeller[mappe]=(taeller[mappe]||0)+1;
+        if(!md||!md.id||set[md.id])return;
+        set[md.id]=1;ud.push(md);
       });
-      const bedste=Object.entries(taeller).sort((a,b)=>b[1]-a[1])[0];
-      if(bedste){data.dropbox.mappe=bedste[0];gemData(data);
-        dbxStatus="Fandt mappen: "+bedste[0];return bedste[0]}
     }catch(e){/* prøv næste endelse */}
   }
-  dbxStatus="Fandt ingen træningsfiler endnu. Slå eksporten til i HealthFit, "+
-    "eller skriv mappens sti i feltet.";
-  return null;
+  return ud;
+}
+async function dbxFindMappe(){
+  const fundne=await dbxSoegFiler();
+  if(!fundne.length){
+    dbxStatus="Fandt ingen træningsfiler endnu. Læg én i Dropbox fra HealthFit, "+
+      "eller skriv mappens sti i feltet.";
+    return null;
+  }
+  const taeller={};
+  fundne.forEach(md=>{
+    if(!md.path_lower)return;
+    const mappe=md.path_lower.slice(0,md.path_lower.lastIndexOf("/"))||"/";
+    taeller[mappe]=(taeller[mappe]||0)+1;
+  });
+  const bedste=Object.entries(taeller).sort((a,b)=>b[1]-a[1])[0];
+  data.dropbox.mappe=bedste[0];gemData(data);
+  dbxStatus="Fandt mappen: "+bedste[0];
+  return bedste[0];
 }
 
 async function dbxSync(stille){
   const d=data.dropbox;
   if(!dbxForbundet()||dbxTravl)return;
-  if(!d.mappe){if(!stille)await dbxFindMappe();if(!d.mappe)return}
   dbxTravl=true;
-  if(!stille){dbxStatus="Kigger i "+d.mappe+" …";render()}
+  if(!stille){dbxStatus="Kigger i Dropbox …";render()}
   try{
-    let filer=[],j=await dbxKald("files/list_folder",{path:d.mappe,limit:500});
-    for(;;){
-      filer=filer.concat((j.entries||[]).filter(e=>e[".tag"]==="file"&&
-        /\.(fit|gpx|tcx)$/i.test(e.name)));
-      if(!j.has_more)break;
-      j=await dbxKald("files/list_folder/continue",{cursor:j.cursor});
+    if(!d.mappe)await dbxFindMappe();
+    // Mappen listes direkte (søgningen kan halte lidt efter en helt ny fil),
+    // og hele Dropbox gennemsøges som supplement, så en fil i en anden mappe
+    // også bliver fundet.
+    let filer=[];
+    if(d.mappe){
+      let j=await dbxKald("files/list_folder",{path:d.mappe,limit:500});
+      for(;;){
+        filer=filer.concat((j.entries||[]).filter(e=>e[".tag"]==="file"&&
+          /\.(fit|gpx|tcx)$/i.test(e.name)));
+        if(!j.has_more)break;
+        j=await dbxKald("files/list_folder/continue",{cursor:j.cursor});
+      }
+    }
+    const kendte={};filer.forEach(f=>{kendte[f.id]=1});
+    (await dbxSoegFiler()).forEach(md=>{
+      if(!kendte[md.id]&&/\.(fit|gpx|tcx)$/i.test(md.name||""))filer.push(md);
+    });
+    // Den nyeste fils mappe bliver den primære fremover.
+    const nyeste=filer.slice().sort((a,b)=>
+      new Date(b.server_modified||0)-new Date(a.server_modified||0))[0];
+    if(nyeste&&nyeste.path_lower){
+      const m=nyeste.path_lower.slice(0,nyeste.path_lower.lastIndexOf("/"))||"/";
+      if(m&&m!==d.mappe)d.mappe=m;
     }
     let nye=filer.filter(f=>d.set[f.id]!==f.rev);
     nye.sort((a,b)=>new Date(a.server_modified||0)-new Date(b.server_modified||0));
