@@ -235,6 +235,12 @@
   textarea.udtraek{font-family:ui-monospace,monospace;font-size:11px;margin-top:12px;
     line-height:1.5}
 
+  .forslagslinje{font-size:12px;color:var(--daempet);margin-top:10px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .forslagslinje b{color:var(--tekst);font-weight:600}
+  .forslagslinje .brug{font-size:11px;letter-spacing:.08em;padding:4px 10px;
+    border-radius:5px;background:transparent;border:1px solid var(--gry);
+    color:var(--gry);cursor:pointer}
   .backup{margin-top:26px;padding-top:20px;border-top:1px solid var(--kant)}
   .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
   .lille{font-size:11px;color:var(--svag);margin-top:6px;line-height:1.5}
@@ -318,6 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
+const APPVERSION=4;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -372,6 +379,11 @@ function tempoTekst(sekPrKm){
   return m+":"+String(s).padStart(2,"0")+"/km";
 }
 function gennemsnit(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function median(a){
+  if(!a.length)return null;
+  const s=a.slice().sort((x,y)=>x-y), m=Math.floor(s.length/2);
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;
+}
 function spredning(a){
   if(a.length<2)return null;
   const m=gennemsnit(a);
@@ -711,6 +723,28 @@ function loeftestangsRaad(del,d,dt,bt){
     return "Belastningen er i balance. Fortsæt.";
   }
   return "";
+}
+
+/* De to pulstal behøver du ikke kende på forhånd: uret har allerede målt dem.
+   Maxpulsen tages fra det højeste, dine pas har vist. For at én fejlmåling
+   ikke skal sætte den, bruger vi næsthøjeste, så snart der er nok pas. */
+function foreslaaMaxPuls(d){
+  const set=[];
+  d.sessions.forEach(s=>{
+    const v=(s.loeb&&s.loeb.maxPuls)||(s.ur&&s.ur.maxPuls);
+    if(erTal(v)&&v>=100&&v<=225)set.push(v);
+  });
+  if(!set.length)return null;
+  set.sort((a,b)=>b-a);
+  const v=set.length>=3?set[1]:set[0];
+  return {v:Math.round(v),n:set.length};
+}
+function foreslaaHvilePuls(d){
+  const graense=plusDage(idag(),-30);
+  const v=d.morgener.filter(m=>m.dato>graense&&erTal(m.hvilePuls)&&
+    m.hvilePuls>=30&&m.hvilePuls<=100).map(m=>m.hvilePuls);
+  if(v.length<5)return null;
+  return {v:Math.round(median(v)),n:v.length};
 }
 
 /* Anbefaling for dagens pas – konkret, ikke en formaning. */
@@ -1192,19 +1226,144 @@ function laesHealthAutoExport(objekt){
   return ud.length?ud:null;
 }
 
+/* HealthKit-træningstyper, appen kan bruge. Resten springes over med tælling,
+   så du kan se, at de er set og fravalgt – ikke tabt i stilhed. */
+const HKTRAENING={
+  HKWorkoutActivityTypeRunning:"loeb",
+  HKWorkoutActivityTypeTraditionalStrengthTraining:"styrke",
+  HKWorkoutActivityTypeFunctionalStrengthTraining:"styrke",
+  HKWorkoutActivityTypeCoreTraining:"styrke"
+};
+const appleTid=(s)=>{
+  const t=Date.parse(String(s).replace(" ","T").replace(/ ([+-]\d{2})(\d{2})$/,"$1:$2"));
+  return isFinite(t)?t:null;
+};
+function tilKm(v,enhed){
+  if(!erTal(v))return null;
+  const e=String(enhed||"km").toLowerCase();
+  if(e==="mi")return v*1.609344;
+  if(e==="m")return v/1000;
+  return v;
+}
+function attr(tekst,navn){
+  const m=new RegExp(navn+'="([^"]*)"').exec(tekst);
+  return m?m[1]:null;
+}
+function laesTraeningsblok(blok){
+  const type=attr(blok,"workoutActivityType");
+  const sport=HKTRAENING[type];
+  if(!sport)return {sprunget:true};
+  const startMs=appleTid(attr(blok,"startDate"));
+  if(!startMs)return {sprunget:true};
+  let min=parseFloat(attr(blok,"duration"));
+  if(String(attr(blok,"durationUnit")||"min").toLowerCase()==="sec")min=min/60;
+  let km=tilKm(parseFloat(attr(blok,"totalDistance")),attr(blok,"totalDistanceUnit"));
+  let kcal=parseFloat(attr(blok,"totalEnergyBurned"));
+  let gnsPuls=null,maxPuls=null;
+  // Nyere eksporter flytter tallene ned i WorkoutStatistics.
+  const reStat=/<WorkoutStatistics\b[^>]*\/?>/g;
+  let sm;
+  while((sm=reStat.exec(blok))){
+    const st=sm[0], t=attr(st,"type");
+    if(t==="HKQuantityTypeIdentifierHeartRate"){
+      const a=parseFloat(attr(st,"average")), x=parseFloat(attr(st,"maximum"));
+      if(isFinite(a))gnsPuls=Math.round(a);
+      if(isFinite(x))maxPuls=Math.round(x);
+    }else if(t==="HKQuantityTypeIdentifierDistanceWalkingRunning"){
+      const d=tilKm(parseFloat(attr(st,"sum")),attr(st,"unit"));
+      if(erTal(d)&&(!erTal(km)||km<=0))km=d;
+    }else if(t==="HKQuantityTypeIdentifierActiveEnergyBurned"){
+      const k=parseFloat(attr(st,"sum"));
+      if(isFinite(k)&&!isFinite(kcal))kcal=k;
+    }
+  }
+  if(!isFinite(min)||min<=0){
+    const slutMs=appleTid(attr(blok,"endDate"));
+    if(slutMs&&slutMs>startMs)min=(slutMs-startMs)/60000;
+  }
+  if(!isFinite(min)||min<3)return {sprunget:true};   // under tre minutter er ikke et pas
+  const sek=Math.round(min*60);
+  return {traening:{
+    sport:sport, kilde:"health", filnavn:"export.xml", format:"Apple Health",
+    startTid:startMs, tidSek:sek, bevaegSek:sek,
+    distanceKm:(sport==="loeb"&&erTal(km)&&km>0.2)?km:null,
+    tempoSekPrKm:(sport==="loeb"&&erTal(km)&&km>0.2)?sek/km:null,
+    gnsPuls:gnsPuls, maxPuls:maxPuls, kalorier:isFinite(kcal)?Math.round(kcal):null,
+    stigningM:null, kadence:null, kobling:null, splits:[]
+  }};
+}
+
 async function laesAppleEksport(fil,paaFremdrift){
-  // export.xml er tit hundredvis af megabyte. Vi læser den i skiver og
-  // fisker kun de tre linjetyper op, appen faktisk bruger.
+  // export.xml er tit hundredvis af megabyte. Vi læser den i skiver og fisker
+  // kun det op, appen bruger.
   const samler=samlerNy();
-  const SKIVE=4*1024*1024, OVERLAP=600;
+  const traeninger=[];
+  const SKIVE=4*1024*1024, MAXREST=1024*1024;
   const reRecord=/<Record\s+type="(HK[A-Za-z]+)"[^>]*?startDate="([^"]+)"\s+endDate="([^"]+)"\s+value="([^"]*)"/g;
-  let pos=0, fundet=0;
+  const reTag=/<Workout\b[^>]*>/g;
+  // Skiverne skæres på bytes, men teksten er UTF-8: et flerbyte-tegn kan ligge
+  // hen over grænsen. En strømmende afkoder holder på den halve sekvens, så
+  // tegnet ikke bliver ødelagt.
+  const afkoder=new TextDecoder("utf-8");
+  let pos=0, fundet=0, sprunget=0, rest="";
+
   while(pos<fil.size){
     const slut=Math.min(fil.size,pos+SKIVE);
-    const tekst=await fil.slice(pos,Math.min(fil.size,slut+OVERLAP)).text();
+    const sidsteSkive=slut>=fil.size;
+    const tekst=rest+afkoder.decode(await fil.slice(pos,slut).arrayBuffer(),
+      {stream:!sidsteSkive});
+
+    // Find et sted at klippe, hvor ingen konstruktion er halveret. En <Workout>
+    // fylder flere linjer, så den skal med hel over i næste skive.
+    let graense=tekst.length;
+    if(!sidsteSkive){
+      // Må ikke være lastIndexOf("<Workout"): det rammer også <WorkoutStatistics
+      // og <WorkoutEvent inde i en træning, og så ryger det omsluttende
+      // åbningstag med over klippet og træningen tabes.
+      const reFind=/<Workout\b/g;
+      let aabn=-1,f;
+      while((f=reFind.exec(tekst)))aabn=f.index;
+      if(aabn>=0){
+        const halen=tekst.slice(aabn);
+        const tag=/^<Workout\b[^>]*>/.exec(halen);
+        const selvlukket=tag&&/\/>$/.test(tag[0]);
+        if(!tag||(!selvlukket&&halen.indexOf("</Workout>")<0))graense=aabn;
+      }
+      if(graense===tekst.length){
+        const gt=tekst.lastIndexOf(">");
+        graense=gt>=0?gt+1:0;
+      }
+      // Sikkerhedsventil: et enkelt element må aldrig få resten til at vokse
+      // ubegrænset. Sker det, klipper vi ved sidste hele tag i stedet.
+      if(tekst.length-graense>MAXREST){
+        const gt=tekst.lastIndexOf(">");
+        graense=gt>=0?gt+1:tekst.length;
+      }
+    }
+    const brugbar=tekst.slice(0,graense);
+
+    // Træninger: tagget scannes eksplicit, fordi et selvlukkende <Workout .../>
+    // ellers bliver læst som et åbnende tag og sluger alt frem til næste </Workout>.
+    reTag.lastIndex=0;
+    let w;
+    while((w=reTag.exec(brugbar))){
+      let blok;
+      if(/\/>$/.test(w[0])){
+        blok=w[0];
+      }else{
+        const luk=brugbar.indexOf("</Workout>",reTag.lastIndex);
+        if(luk<0)break;
+        blok=brugbar.slice(w.index,luk+10);
+        reTag.lastIndex=luk+10;
+      }
+      const r=laesTraeningsblok(blok);
+      if(r.traening){traeninger.push(r.traening);fundet++}
+      else sprunget++;
+    }
+
     reRecord.lastIndex=0;
     let m;
-    while((m=reRecord.exec(tekst))){
+    while((m=reRecord.exec(brugbar))){
       const type=m[1], start=appleDato(m[2]), slutD=appleDato(m[3]), v=parseFloat(m[4]);
       if(!start)continue;
       if(type==="HKQuantityTypeIdentifierHeartRateVariabilitySDNN"&&isFinite(v)){
@@ -1213,9 +1372,8 @@ async function laesAppleEksport(fil,paaFremdrift){
         tilfoej(samler,start.dato,"hvilePuls",v);fundet++;
       }else if(type==="HKCategoryTypeIdentifierSleepAnalysis"&&slutD){
         if(/Asleep/i.test(m[4])){
-          const t0=Date.parse(m[2].replace(" ","T").replace(/ ([+-]\d{2})(\d{2})$/,"$1:$2"));
-          const t1=Date.parse(m[3].replace(" ","T").replace(/ ([+-]\d{2})(\d{2})$/,"$1:$2"));
-          if(isFinite(t0)&&isFinite(t1)&&t1>t0){
+          const t0=appleTid(m[2]), t1=appleTid(m[3]);
+          if(t0&&t1&&t1>t0){
             // Natten hører til den morgen, den ender på.
             const dato=slutD.time<18?slutD.dato:plusDage(slutD.dato,1);
             tilfoej(samler,dato,"soevnMin",(t1-t0)/60000);
@@ -1224,12 +1382,15 @@ async function laesAppleEksport(fil,paaFremdrift){
         }
       }
     }
+
+    rest=sidsteSkive?"":tekst.slice(graense);
     pos=slut;
     if(paaFremdrift)paaFremdrift(pos/fil.size,fundet);
     await new Promise(r=>setTimeout(r,0));   // giv skærmen lov til at tegne
   }
-  const ud=samlerTilMorgener(samler);
-  return ud.length?ud:null;
+  const morgener=samlerTilMorgener(samler);
+  if(!morgener.length&&!traeninger.length)return null;
+  return {morgener:morgener,traeninger:traeninger,sprunget:sprunget};
 }
 
 function laesHelbredCsv(tekst){
@@ -2199,16 +2360,29 @@ function importLinje(hvor){
     '%"></i></div><p class="hint">'+esc(importStatus.tekst)+'</p>';
 }
 function visData(){
+  const fMax=foreslaaMaxPuls(data), fHvile=foreslaaHvilePuls(data);
+  const forslag=(felt,f,tekst)=>{
+    if(!f||f.v===data.profil[felt])return "";
+    return '<div class="forslagslinje">Uret siger <b>'+f.v+'</b> '+esc(tekst)+
+      ' <button class="brug" data-brug="'+felt+'" data-v="'+f.v+'">brug</button></div>';
+  };
   let h='<h3 class="afsnit">DIG</h3><div class="kort">'+
     '<div class="to"><label>Maxpuls<input type="number" inputmode="numeric" '+
       'data-profil="maxPuls" value="'+esc(data.profil.maxPuls)+'"></label>'+
     '<label>Hvilepuls<input type="number" inputmode="numeric" data-profil="hvilePuls" '+
       'value="'+esc(data.profil.hvilePuls)+'"></label></div>'+
+    forslag("maxPuls",fMax,"som det højeste i dine "+(fMax?fMax.n:0)+" pas")+
+    forslag("hvilePuls",fHvile,"i snit over "+(fHvile?fHvile.n:0)+" morgener")+
     '<label>Søvnbehov (timer)<input type="number" inputmode="decimal" step="0.25" '+
       'data-profil="soevnBehov" value="'+esc(data.profil.soevnBehov)+'"></label>'+
-    '<p class="hint">Maxpuls og hvilepuls bruges til at oversætte løbepuls til anstrengelse. '+
-    'Er de forkerte, bliver din løbeload det også. Kender du ikke din maxpuls, så lad den stå '+
-    '– følelsen efter passet korrigerer alligevel.</p></div>';
+    '<p class="hint">De to pulstal bruges kun til at oversætte løbepuls til anstrengelse. '+
+    'Du behøver ikke kende dem på forhånd: hent dine træninger og helbredsdata ind '+
+    'længere nede, så regner appen forslag ud af det, uret allerede har målt.</p>'+
+    '<p class="hint">Belastningen regnes forfra, hver gang du åbner appen. Retter du '+
+    'tallene om en måned, bliver hele historikken regnet om – der er intet, der låser sig fast.</p>'+
+    (fMax?'<p class="lille">Den højest målte puls er et gulv, ikke et loft: man rammer '+
+      'sjældent sin sande maxpuls til daglig. Ser du et højere tal efter et bakkeløb, '+
+      'så ret den op.</p>':"")+'</div>';
 
   h+='<h3 class="afsnit">TRÆNINGER FRA URET</h3><div class="kort">'+
     '<div class="drop" id="passerDrop" style="margin-top:0"><b>Hent en hel bunke ind</b>'+
@@ -2244,12 +2418,17 @@ function visData(){
 
   h+='<h3 class="afsnit">HELBREDSDATA FRA URET</h3><div class="kort">'+
     '<div class="drop" id="helbredDrop"><b>Læg en eksport ind</b>'+
-    'Health Auto Export (JSON/CSV), Apples export.xml, eller en CSV med dato, HRV, hvilepuls og søvn.'+
+    'Apples export.xml giver både morgental og hele din træningshistorik. '+
+    'Health Auto Export (JSON/CSV) og en simpel CSV med dato, HRV, hvilepuls og søvn virker også.'+
     '<input type="file" id="helbredInput" accept=".json,.csv,.xml,.txt" style="display:none"></div>';
   h+=importLinje("helbred");
-  h+='<p class="hint">Health Auto Export er den nemme vej: sæt den til at eksportere HRV, '+
-    'hvilepuls og søvn, og læg filen herind en gang om ugen. Apples egen export.xml virker også '+
-    '– den er bare stor, så det tager et øjeblik.</p>'+
+  h+='<p class="hint">Health → dit profilbillede → «Eksportér alle data». Du får en zip; '+
+    'hold fingeren på den i Filer og vælg Udpak, og læg så export.xml herind. Den er stor, '+
+    'så det tager et øjeblik – appen læser den i bidder.</p>'+
+    '<p class="hint">Den giver dig både HRV, hvilepuls og søvn <b style="color:var(--tekst)">og '+
+    'alle dine løbe- og styrkepas</b> med varighed, puls, distance og forbrænding. '+
+    'Til den løbende opdatering er Health Auto Export nemmere: sæt den til HRV, hvilepuls '+
+    'og søvn, og læg filen herind en gang om ugen.</p>'+
     '<p class="lille">'+data.morgener.length+' dage med morgental gemt'+
     (data.morgener.length?" · seneste "+esc(data.morgener[data.morgener.length-1].dato):"")+
     '</p></div>';
@@ -2281,6 +2460,8 @@ function visData(){
     'Tag en sikkerhedskopi først.</p>'+
     '<button class="gem sek" id="sletAlt" style="border-color:var(--st-kritisk);'+
     'color:var(--st-kritisk)">Slet alt</button></div>';
+  h+='<p class="lille" style="text-align:center;margin-top:20px">Morgenlog · version '+
+    APPVERSION+'</p>';
   return h;
 }
 
@@ -2498,9 +2679,9 @@ async function haandterHelbredsfil(fil){
   const navn=fil.name.toLowerCase();
   importStatus={hvor:"helbred",pct:0,tekst:"Læser "+fil.name+" …"};render();
   try{
-    let nye=null;
+    let nye=null, fraHealth=null;
     if(navn.endsWith(".xml")){
-      nye=await laesAppleEksport(fil,(pct,antal)=>{
+      fraHealth=await laesAppleEksport(fil,(pct,antal)=>{
         importStatus={hvor:"helbred",pct:pct,tekst:"Læser Apple-eksport … "+Math.round(pct*100)+
           " % · "+antal+" målinger fundet"};
         const b=document.querySelector(".bom i");
@@ -2509,6 +2690,7 @@ async function haandterHelbredsfil(fil){
           document.querySelector(".bom").nextElementSibling;
         if(p)p.textContent=importStatus.tekst;
       });
+      nye=fraHealth?fraHealth.morgener:null;
     }else{
       const tekst=await laesFilSomTekst(fil);
       if(/^\s*[{[]/.test(tekst)){
@@ -2529,15 +2711,34 @@ async function haandterHelbredsfil(fil){
         nye=laesHelbredCsv(tekst);
       }
     }
-    if(!nye||!nye.length){
-      importStatus={hvor:"helbred",pct:1,tekst:"Fandt ingen HRV, hvilepuls eller søvn i filen. "+
-        "Tjek at eksporten indeholder de tre målinger."};
+    const traeninger=fraHealth?fraHealth.traeninger:[];
+    if((!nye||!nye.length)&&!traeninger.length){
+      importStatus={hvor:"helbred",pct:1,tekst:"Fandt hverken målinger eller træninger i filen. "+
+        "Tjek at eksporten er den fulde export.xml fra Health."};
       render();return;
     }
-    const r=flet(data,nye);
+    const dele=[];
+    if(nye&&nye.length){
+      const r=flet(data,nye);
+      dele.push(r.nye+" nye dage med morgental"+(r.opdateret?", "+r.opdateret+" opdaterede":""));
+    }
+    if(traeninger.length){
+      let nyePas=0,beriget=0,kendte=0;
+      // Ældst først, så dubletcheck og ugeplan rammer rigtigt.
+      traeninger.sort((a,b)=>a.startTid-b.startTid).forEach(t=>{
+        const u=indsaetTraening(t);
+        if(u==="ny")nyePas++;else if(u==="beriget")beriget++;else kendte++;
+      });
+      const p=[];
+      if(nyePas)p.push(nyePas+" nye pas");
+      if(beriget)p.push(beriget+" udbygget");
+      if(kendte)p.push(kendte+" kendt i forvejen");
+      dele.push(p.join(", ")||"ingen nye pas");
+    }
     gemData(data);
-    importStatus={hvor:"helbred",pct:1,tekst:"Hentet ind: "+r.nye+" nye dage, "+r.opdateret+" opdaterede. "+
-      "Basislinjen bygger på de seneste 42 dage."};
+    importStatus={hvor:"helbred",pct:1,tekst:"Hentet ind: "+dele.join(" · ")+"."+
+      (fraHealth&&fraHealth.sprunget?" "+fraHealth.sprunget+" træninger sprunget over "+
+        "(gang, cykling og andet, appen ikke regner på).":"")};
     render();
   }catch(e){
     importStatus={hvor:"helbred",pct:1,tekst:"Kunne ikke læse filen: "+e.message};
@@ -2747,6 +2948,10 @@ function bind(){
   paa("[data-byt]","click",e=>bytDage(+e.currentTarget.dataset.byt));
   paa("[data-slet]","click",e=>sletPas(e.currentTarget.dataset.slet));
   paa("[data-rediger]","click",e=>aabnTilRedigering(e.currentTarget.dataset.rediger));
+  paa("[data-brug]","click",e=>{
+    data.profil[e.currentTarget.dataset.brug]=+e.currentTarget.dataset.v;
+    gemData(data);render();
+  });
   paa("[data-profil]","input",e=>{
     const v=tal(e.currentTarget.value);
     if(v!=null){data.profil[e.currentTarget.dataset.profil]=v;gemData(data)}

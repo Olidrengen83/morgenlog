@@ -57,6 +57,17 @@ udregning fra punktstrømmen.
 
 ### Træninger
 
+**Hurtigste vej til hele historikken: Apples egen eksport.** Health → dit
+profilbillede → «Eksportér alle data» → udpak zip'en → læg `export.xml` ind
+under ⚙ Data. Den indeholder ikke bare HRV, hvilepuls og søvn, men også alle
+dine løbe- og styrkepas med varighed, puls, distance og forbrænding. Ét træk, og
+både restitutionsbilledet og belastningskurven er på plads. Gang, cykling og
+andet, appen ikke regner på, springes over og tælles, så du kan se det.
+
+Bemærk: HealthFit *gemmer* ikke dine træninger. Den læser dem fra Apple Health og
+laver filen i det øjeblik, du eksporterer — så der ligger ingen mappe med din
+historik, og slår du auto-upload til, gælder det kun fremtidige træninger.
+
 **Lad HealthFit lægge filerne af sig selv.** Settings → Auto Export → iCloud
 Drive eller Dropbox. Så ender hver træning i mappen, uden at du rører den. I
 appen under ⚙ Data trykker du på «Hent en hel bunke ind» og markerer alle
@@ -92,6 +103,10 @@ Tre veje, alle under ⚙ Data:
    bidder og henter kun de tre målinger.
 3. **En simpel CSV** med kolonnerne dato, HRV, hvilepuls og søvn.
 
+`export.xml` kan være hundredvis af megabyte. Appen læser den i skiver af 4 MB
+med en strømmende UTF-8-afkoder, og klipper kun på steder, hvor ingen
+`<Workout>` er halveret — så intet går tabt på skivegrænserne.
+
 ## Claude i appen
 
 Under ⚙ Data kan du lægge en API-nøgle fra `console.anthropic.com` ind. Så går
@@ -100,6 +115,25 @@ der ikke er nogen server. Nøglen bliver på telefonen, og kun hvis du sætter
 fluebenet; ellers ligger den i hukommelsen indtil appen lukkes.
 
 Uden nøgle virker kopiér-og-indsæt lige så godt. Det er den samme tekst.
+
+## De to pulstal
+
+Maxpuls og hvilepuls bruges kun til at oversætte løbepuls til anstrengelse. Du
+behøver ikke kende dem på forhånd. Når du har hentet træninger og helbredsdata
+ind, foreslår appen selv begge tal under ⚙ Data: maxpulsen ud fra det højeste,
+dine pas har vist (næsthøjeste, så snart der er tre pas, så én fejlmåling ikke
+sætter den), og hvilepulsen som medianen af de seneste 30 morgener. Ét tryk på
+«brug», og de står der.
+
+Belastningen regnes forfra ved hver visning — der ligger ikke et fastfrosset
+tal på det enkelte pas. Retter du tallene om en måned, bliver hele historikken
+regnet om med det samme.
+
+Den højest målte puls er et gulv, ikke et loft: man rammer sjældent sin sande
+maxpuls til daglig. Sætter du den for lavt, ser alle løbeture lidt hårdere ud —
+men konsekvent, og da akut/kronisk-forholdet sammenligner dig med dig selv,
+flytter det næsten ikke på advarslerne. Det, der skævvrides, er balancen mellem
+løb og styrke.
 
 ## Kør den
 
