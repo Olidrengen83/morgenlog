@@ -55,7 +55,33 @@ udregning fra punktstrømmen.
 
 ## Så lidt manuelt arbejde som muligt
 
-### Træninger
+### Fuld automatik: Dropbox som bro
+
+Den korteste vej fra træning til app: HealthFit lægger selv hver træning som
+FIT-fil i Dropbox i sekundet, den er slut — og Morgenlog kigger selv i mappen,
+hver gang appen åbnes, og henter nye filer. Ingen filvælger, ingen tryk.
+
+Engangsopsætning (⚙ Data → «Automatisk import fra Dropbox» guider igennem):
+
+1. Opret en app på dropbox.com/developers/apps (Scoped access → Full Dropbox),
+   giv den `files.metadata.read` + `files.content.read`, og kopiér dens App key
+   ind i Morgenlog. Det lyder teknisk, men er fem tryk — og nødvendigt, fordi
+   Morgenlog ingen server har: din telefon taler direkte med din Dropbox.
+2. Tryk «Forbind Dropbox» → log ind → Dropbox viser en kode → sæt den ind i
+   appen. (Kode frem for omdirigering, fordi iOS ellers åbner Safari, som har
+   sit eget lager adskilt fra hjemmeskærms-appen.)
+3. Slå Dropbox-eksport til i HealthFit.
+
+Appen finder selv mappen ved at lede efter FIT-filer, gemmer et fingeraftryk af
+hver fil den har set (så intet hentes to gange), og tager kun de nyeste 90 filer
+med i første omgang — historikken kommer fra Sundhed-eksporten. Nøglerne bliver
+i telefonen; adgangen er læse-kun.
+
+Genveje-appen bruges ikke: på afprøvede iOS-versioner nægter den at udlevere
+træningens data (ingen egenskaber på variablen, ingen «Find træninger»-handling),
+så den vej er droppet med vilje.
+
+### Træninger (manuelt)
 
 **Hurtigste vej til hele historikken: Apples egen eksport.** Health → dit
 profilbillede → «Eksportér alle data» → udpak zip'en → læg `export.xml` ind
