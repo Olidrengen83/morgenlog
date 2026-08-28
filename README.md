@@ -101,6 +101,25 @@ fluebenet; ellers ligger den i hukommelsen indtil appen lukkes.
 
 Uden nøgle virker kopiér-og-indsæt lige så godt. Det er den samme tekst.
 
+## De to pulstal
+
+Maxpuls og hvilepuls bruges kun til at oversætte løbepuls til anstrengelse. Du
+behøver ikke kende dem på forhånd. Når du har hentet træninger og helbredsdata
+ind, foreslår appen selv begge tal under ⚙ Data: maxpulsen ud fra det højeste,
+dine pas har vist (næsthøjeste, så snart der er tre pas, så én fejlmåling ikke
+sætter den), og hvilepulsen som medianen af de seneste 30 morgener. Ét tryk på
+«brug», og de står der.
+
+Belastningen regnes forfra ved hver visning — der ligger ikke et fastfrosset
+tal på det enkelte pas. Retter du tallene om en måned, bliver hele historikken
+regnet om med det samme.
+
+Den højest målte puls er et gulv, ikke et loft: man rammer sjældent sin sande
+maxpuls til daglig. Sætter du den for lavt, ser alle løbeture lidt hårdere ud —
+men konsekvent, og da akut/kronisk-forholdet sammenligner dig med dig selv,
+flytter det næsten ikke på advarslerne. Det, der skævvrides, er balancen mellem
+løb og styrke.
+
 ## Kør den
 
 Læg filerne på en hvilken som helst statisk webserver — GitHub Pages virker

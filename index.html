@@ -235,6 +235,12 @@
   textarea.udtraek{font-family:ui-monospace,monospace;font-size:11px;margin-top:12px;
     line-height:1.5}
 
+  .forslagslinje{font-size:12px;color:var(--daempet);margin-top:10px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .forslagslinje b{color:var(--tekst);font-weight:600}
+  .forslagslinje .brug{font-size:11px;letter-spacing:.08em;padding:4px 10px;
+    border-radius:5px;background:transparent;border:1px solid var(--gry);
+    color:var(--gry);cursor:pointer}
   .backup{margin-top:26px;padding-top:20px;border-top:1px solid var(--kant)}
   .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
   .lille{font-size:11px;color:var(--svag);margin-top:6px;line-height:1.5}
@@ -372,6 +378,11 @@ function tempoTekst(sekPrKm){
   return m+":"+String(s).padStart(2,"0")+"/km";
 }
 function gennemsnit(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null}
+function median(a){
+  if(!a.length)return null;
+  const s=a.slice().sort((x,y)=>x-y), m=Math.floor(s.length/2);
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;
+}
 function spredning(a){
   if(a.length<2)return null;
   const m=gennemsnit(a);
@@ -711,6 +722,28 @@ function loeftestangsRaad(del,d,dt,bt){
     return "Belastningen er i balance. Fortsæt.";
   }
   return "";
+}
+
+/* De to pulstal behøver du ikke kende på forhånd: uret har allerede målt dem.
+   Maxpulsen tages fra det højeste, dine pas har vist. For at én fejlmåling
+   ikke skal sætte den, bruger vi næsthøjeste, så snart der er nok pas. */
+function foreslaaMaxPuls(d){
+  const set=[];
+  d.sessions.forEach(s=>{
+    const v=(s.loeb&&s.loeb.maxPuls)||(s.ur&&s.ur.maxPuls);
+    if(erTal(v)&&v>=100&&v<=225)set.push(v);
+  });
+  if(!set.length)return null;
+  set.sort((a,b)=>b-a);
+  const v=set.length>=3?set[1]:set[0];
+  return {v:Math.round(v),n:set.length};
+}
+function foreslaaHvilePuls(d){
+  const graense=plusDage(idag(),-30);
+  const v=d.morgener.filter(m=>m.dato>graense&&erTal(m.hvilePuls)&&
+    m.hvilePuls>=30&&m.hvilePuls<=100).map(m=>m.hvilePuls);
+  if(v.length<5)return null;
+  return {v:Math.round(median(v)),n:v.length};
 }
 
 /* Anbefaling for dagens pas – konkret, ikke en formaning. */
@@ -2199,16 +2232,29 @@ function importLinje(hvor){
     '%"></i></div><p class="hint">'+esc(importStatus.tekst)+'</p>';
 }
 function visData(){
+  const fMax=foreslaaMaxPuls(data), fHvile=foreslaaHvilePuls(data);
+  const forslag=(felt,f,tekst)=>{
+    if(!f||f.v===data.profil[felt])return "";
+    return '<div class="forslagslinje">Uret siger <b>'+f.v+'</b> '+esc(tekst)+
+      ' <button class="brug" data-brug="'+felt+'" data-v="'+f.v+'">brug</button></div>';
+  };
   let h='<h3 class="afsnit">DIG</h3><div class="kort">'+
     '<div class="to"><label>Maxpuls<input type="number" inputmode="numeric" '+
       'data-profil="maxPuls" value="'+esc(data.profil.maxPuls)+'"></label>'+
     '<label>Hvilepuls<input type="number" inputmode="numeric" data-profil="hvilePuls" '+
       'value="'+esc(data.profil.hvilePuls)+'"></label></div>'+
+    forslag("maxPuls",fMax,"som det højeste i dine "+(fMax?fMax.n:0)+" pas")+
+    forslag("hvilePuls",fHvile,"i snit over "+(fHvile?fHvile.n:0)+" morgener")+
     '<label>Søvnbehov (timer)<input type="number" inputmode="decimal" step="0.25" '+
       'data-profil="soevnBehov" value="'+esc(data.profil.soevnBehov)+'"></label>'+
-    '<p class="hint">Maxpuls og hvilepuls bruges til at oversætte løbepuls til anstrengelse. '+
-    'Er de forkerte, bliver din løbeload det også. Kender du ikke din maxpuls, så lad den stå '+
-    '– følelsen efter passet korrigerer alligevel.</p></div>';
+    '<p class="hint">De to pulstal bruges kun til at oversætte løbepuls til anstrengelse. '+
+    'Du behøver ikke kende dem på forhånd: hent dine træninger og helbredsdata ind '+
+    'længere nede, så regner appen forslag ud af det, uret allerede har målt.</p>'+
+    '<p class="hint">Belastningen regnes forfra, hver gang du åbner appen. Retter du '+
+    'tallene om en måned, bliver hele historikken regnet om – der er intet, der låser sig fast.</p>'+
+    (fMax?'<p class="lille">Den højest målte puls er et gulv, ikke et loft: man rammer '+
+      'sjældent sin sande maxpuls til daglig. Ser du et højere tal efter et bakkeløb, '+
+      'så ret den op.</p>':"")+'</div>';
 
   h+='<h3 class="afsnit">TRÆNINGER FRA URET</h3><div class="kort">'+
     '<div class="drop" id="passerDrop" style="margin-top:0"><b>Hent en hel bunke ind</b>'+
@@ -2747,6 +2793,10 @@ function bind(){
   paa("[data-byt]","click",e=>bytDage(+e.currentTarget.dataset.byt));
   paa("[data-slet]","click",e=>sletPas(e.currentTarget.dataset.slet));
   paa("[data-rediger]","click",e=>aabnTilRedigering(e.currentTarget.dataset.rediger));
+  paa("[data-brug]","click",e=>{
+    data.profil[e.currentTarget.dataset.brug]=+e.currentTarget.dataset.v;
+    gemData(data);render();
+  });
   paa("[data-profil]","input",e=>{
     const v=tal(e.currentTarget.value);
     if(v!=null){data.profil[e.currentTarget.dataset.profil]=v;gemData(data)}
