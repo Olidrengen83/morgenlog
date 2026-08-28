@@ -57,6 +57,17 @@ udregning fra punktstrømmen.
 
 ### Træninger
 
+**Hurtigste vej til hele historikken: Apples egen eksport.** Health → dit
+profilbillede → «Eksportér alle data» → udpak zip'en → læg `export.xml` ind
+under ⚙ Data. Den indeholder ikke bare HRV, hvilepuls og søvn, men også alle
+dine løbe- og styrkepas med varighed, puls, distance og forbrænding. Ét træk, og
+både restitutionsbilledet og belastningskurven er på plads. Gang, cykling og
+andet, appen ikke regner på, springes over og tælles, så du kan se det.
+
+Bemærk: HealthFit *gemmer* ikke dine træninger. Den læser dem fra Apple Health og
+laver filen i det øjeblik, du eksporterer — så der ligger ingen mappe med din
+historik, og slår du auto-upload til, gælder det kun fremtidige træninger.
+
 **Lad HealthFit lægge filerne af sig selv.** Settings → Auto Export → iCloud
 Drive eller Dropbox. Så ender hver træning i mappen, uden at du rører den. I
 appen under ⚙ Data trykker du på «Hent en hel bunke ind» og markerer alle
@@ -91,6 +102,10 @@ Tre veje, alle under ⚙ Data:
    `export.xml` ind. Den er stor, så det tager et øjeblik; appen læser den i
    bidder og henter kun de tre målinger.
 3. **En simpel CSV** med kolonnerne dato, HRV, hvilepuls og søvn.
+
+`export.xml` kan være hundredvis af megabyte. Appen læser den i skiver af 4 MB
+med en strømmende UTF-8-afkoder, og klipper kun på steder, hvor ingen
+`<Workout>` er halveret — så intet går tabt på skivegrænserne.
 
 ## Claude i appen
 
