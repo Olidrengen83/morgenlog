@@ -328,7 +328,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=11;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=12;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -545,7 +545,9 @@ function belastningsTal(d,tilDato){
   const forrigeSum=forrige7.reduce((a,b)=>a+b,0);
   const sd=spredning(sidste7);
   const m=gennemsnit(sidste7);
-  const monotoni=(sd&&sd>0.0001)?m/sd:(ugeSum>0?3.0:null);
+  // Loftet på 5: ved næsten identiske dage går brøken mod uendelig,
+  // men Fosters skala er reelt udtømt deromkring.
+  const monotoni=(sd&&sd>0.0001)?Math.min(m/sd,5):(ugeSum>0?3.0:null);
   const svar={
     serie:serie,
     atl:atl, ctl:ctl,
@@ -2181,6 +2183,25 @@ function visBalance(){
     '<div class="udlaes"><b style="color:'+zone.farve+'">'+zone.ikon+' '+esc(zone.navn)+
       '</b> – '+esc(forholdsTekst(bt))+'</div></div>';
 
+  const raad=balanceRaad(bt,data);
+  if(raad){
+    h+='<h3 class="afsnit">'+(raad.zone==="god"?"SÅDAN BLIVER DU I BALANCE"
+      :"SÅDAN KOMMER DU I BALANCE")+'</h3><div class="kort">';
+    if(raad.raekker.length){
+      h+=raad.raekker.map(x=>'<div class="planraekke"><span>'+esc(x.navn)+
+        '</span><span class="mono" style="color:'+
+        (x.dage!=null&&x.dage<=7?"var(--st-god)":"var(--tekst)")+'">'+
+        (x.dage!=null?x.dage+" dage til grøn":"over 6 uger")+'</span></div>').join("");
+    }
+    h+='<p class="hint"'+(raad.raekker.length?'':' style="margin-top:0"')+'>'+
+      esc(raad.anbefaling)+'</p>';
+    if(raad.uge)h+='<p class="hint">'+esc(raad.uge)+'</p>';
+    if(raad.ungHistorik)h+='<p class="lille">Din historik er under seks uger gammel, '+
+      'så den kroniske side er stadig ved at indhente virkeligheden. Tag den røde '+
+      'zone som et gult lys, indtil regnskabet har set en hel opbygningsperiode.</p>';
+    h+='</div>';
+  }
+
   h+='<div class="kort"><div class="kort-top"><h2>Belastning pr. dag</h2>'+
     '<span>28 dage · AU</span></div>'+
     '<div class="diagram">'+belastningsDiagram(bt,28)+'</div>'+
@@ -2248,6 +2269,66 @@ function visBalance(){
   }
   return h;
 }
+/* Kør belastningsformlerne forlæns: hvor mange dage på et givet dagligt
+   niveau, før forholdet er tilbage i grøn zone (0,8–1,3)? */
+function dageTilGroen(atl,ctl,dagligLoad){
+  let a=atl,c=ctl;
+  for(let dag=1;dag<=42;dag++){
+    a=a+(dagligLoad-a)/7;
+    c=c+(dagligLoad-c)/28;
+    if(c>5&&a/c<=1.3)return dag;
+    if(c<=5&&a<=10)return dag;
+  }
+  return null;
+}
+function auTilPas(au){
+  const r=(v)=>Math.max(5,Math.round(v/5)*5);
+  return "en rolig løbetur på ~"+r(au/4)+" min, styrke i ~"+r(au/6)+
+    " min eller en rask gåtur på ~"+r(au/3)+" min";
+}
+function balanceRaad(bt,d){
+  if(bt.forhold==null||bt.ctl<=5)return null;
+  const r=bt.forhold, atl=bt.atl, ctl=bt.ctl;
+  const korridorLav=Math.round(ctl*7*0.8), korridorHoej=Math.round(ctl*7*1.3);
+  const ud={zone:forholdZone(r).id,linjer:[],raekker:[]};
+
+  // Ung historik: kronisk side er stadig ved at indhente virkeligheden.
+  const foerste=d.sessions.length?d.sessions[0].dato:idag();
+  ud.ungHistorik=dageMellem(foerste,idag())<42;
+
+  if(r>1.3){
+    const halv=Math.round(ctl*0.5), fuld=Math.round(ctl);
+    const dFri=dageTilGroen(atl,ctl,0);
+    const dHalv=dageTilGroen(atl,ctl,halv);
+    const dFuld=dageTilGroen(atl,ctl,fuld);
+    ud.raekker=[
+      {navn:"Holder du helt fri",dage:dFri},
+      {navn:"Halv kraft · ~"+halv+" AU/dag",dage:dHalv},
+      {navn:"Grundform · ~"+fuld+" AU/dag",dage:dFuld}
+    ];
+    ud.anbefaling="Den letteste vej er ikke sofaen: "+
+      (dFuld!=null?dFuld+" dage":"nogle uger")+" på omkring "+fuld+
+      " AU om dagen bringer dig i grøn, mens du stadig træner. "+fuld+" AU er "+
+      auTilPas(fuld)+".";
+    ud.uge="Ugekorridoren for grøn zone er ca. "+korridorLav+"–"+korridorHoej+
+      " AU. Denne uge står du på "+num(bt.ugeSum,0)+".";
+  }else if(r<0.8){
+    const maal=Math.round(Math.min(bt.ugeSum*1.15||korridorLav,korridorHoej));
+    ud.anbefaling="Du ligger under din grundform og taber langsomt det, du har bygget op. "+
+      "Læg roligt til: sigt efter ca. "+Math.max(maal,korridorLav)+
+      " AU i næste uge – hellere en ekstra rolig tur end en hårdere.";
+    ud.uge="Ugekorridoren for grøn zone er ca. "+korridorLav+"–"+korridorHoej+" AU.";
+  }else{
+    ud.anbefaling="Du er i balance. Hold ugen mellem ca. "+korridorLav+" og "+
+      korridorHoej+" AU, så vokser grundformen støt uden at akutten stikker af. "+
+      "Vil du bygge op, så læg højst ~10 % til om ugen.";
+    if(bt.monotoni!=null&&bt.monotoni>2)
+      ud.anbefaling+=" Din monotoni er dog "+num(bt.monotoni,1)+
+        " – gør de hårde dage hårdere og de lette lettere, uden at ændre summen.";
+  }
+  return ud;
+}
+
 function forholdsTekst(bt){
   if(bt.forhold==null)return "Appen skal bruge et par ugers pas, før forholdet betyder noget.";
   const r=bt.forhold;
