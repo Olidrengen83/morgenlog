@@ -328,7 +328,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=13;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=14;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -2612,6 +2612,11 @@ function visData(){
     'lægge filerne af sig selv.</b> I HealthFit: Settings → Auto Export → vælg iCloud '+
     'Drive eller Dropbox. Så ligger hver træning i mappen, uden at du rører den. '+
     'Herinde trykker du på feltet ovenfor og markerer dem – filerne bliver i telefonen.</p>'+
+    '<p class="hint"><b style="color:var(--tekst)">1b. Lad også morgentallene flyde '+
+    'selv.</b> Installér appen «Health Auto Export – JSON+CSV», og lav en automation '+
+    'derinde: målinger HRV, hvilepuls og søvn → destination Dropbox → format JSON → '+
+    'dagligt. Morgenlog finder selv filerne og opdaterer dine morgental – så er '+
+    'morgentjekket kun de tre skalaer, uret ikke kan måle.</p>'+
     '<p class="hint"><b style="color:var(--tekst)">2. Kobl HealthFit til samme '+
     'Dropbox.</b> Inde i HealthFit: find Eksport/Auto Export-delen under '+
     'indstillingerne, vælg Dropbox, og slå automatisk eksport til for dine '+
@@ -3126,17 +3131,22 @@ async function dbxHentFil(id){
    eksport lander tit i hver sin mappe, og det skal ikke være appens problem. */
 async function dbxSoegFiler(){
   const ud=[],set={};
+  const tag=(j)=>{(j.matches||[]).forEach(m=>{
+    const md=m.metadata&&m.metadata.metadata;
+    if(!md||!md.id||set[md.id])return;
+    set[md.id]=1;ud.push(md);
+  })};
   for(const endelse of ["fit","gpx","tcx"]){
     try{
-      const j=await dbxKald("files/search_v2",{query:"."+endelse,
-        options:{max_results:100,filename_only:true,file_extensions:[endelse]}});
-      (j.matches||[]).forEach(m=>{
-        const md=m.metadata&&m.metadata.metadata;
-        if(!md||!md.id||set[md.id])return;
-        set[md.id]=1;ud.push(md);
-      });
+      tag(await dbxKald("files/search_v2",{query:"."+endelse,
+        options:{max_results:100,filename_only:true,file_extensions:[endelse]}}));
     }catch(e){/* prøv næste endelse */}
   }
+  // Health Auto Export lægger sine filer i sin egen mappe – find dem på navnet.
+  try{
+    tag(await dbxKald("files/search_v2",{query:"HealthAutoExport",
+      options:{max_results:50,filename_only:true}}));
+  }catch(e){}
   return ud;
 }
 async function dbxFindMappe(){
@@ -3173,17 +3183,17 @@ async function dbxSync(stille){
       let j=await dbxKald("files/list_folder",{path:d.mappe,limit:500});
       for(;;){
         filer=filer.concat((j.entries||[]).filter(e=>e[".tag"]==="file"&&
-          /\.(fit|gpx|tcx)$/i.test(e.name)));
+          /\.(fit|gpx|tcx|json|csv)$/i.test(e.name)));
         if(!j.has_more)break;
         j=await dbxKald("files/list_folder/continue",{cursor:j.cursor});
       }
     }
     const kendte={};filer.forEach(f=>{kendte[f.id]=1});
     (await dbxSoegFiler()).forEach(md=>{
-      if(!kendte[md.id]&&/\.(fit|gpx|tcx)$/i.test(md.name||""))filer.push(md);
+      if(!kendte[md.id]&&/\.(fit|gpx|tcx|json|csv)$/i.test(md.name||""))filer.push(md);
     });
     // Den nyeste fils mappe bliver den primære fremover.
-    const nyeste=filer.slice().sort((a,b)=>
+    const nyeste=filer.filter(f=>/\.(fit|gpx|tcx)$/i.test(f.name)).sort((a,b)=>
       new Date(b.server_modified||0)-new Date(a.server_modified||0))[0];
     if(nyeste&&nyeste.path_lower){
       const m=nyeste.path_lower.slice(0,nyeste.path_lower.lastIndexOf("/"))||"/";
@@ -3198,16 +3208,30 @@ async function dbxSync(stille){
       nye.slice(0,nye.length-90).forEach(f=>{d.set[f.id]=f.rev});
       nye=nye.slice(-90);
     }
-    let antalNy=0,antalBeriget=0,antalAndet=0,fejl=0;
+    let antalNy=0,antalBeriget=0,antalAndet=0,fejl=0,morgenDage=0;
     for(const f of nye){
       try{
+        if(erTal(f.size)&&f.size>25*1024*1024){d.set[f.id]=f.rev;continue}
         const buf=await dbxHentFil(f.id);
-        const r=laesTraeningsfil(buf,f.name);
-        if(r.traening){
-          const udfald=indsaetTraening(r.traening);
-          if(udfald==="ny")antalNy++;else if(udfald==="beriget")antalBeriget++;
-        }else if(r.sprunget)antalAndet++;
-        else if(r.fejl)fejl++;
+        if(/\.(json|csv)$/i.test(f.name)){
+          // Helbredsfil fra Health Auto Export: HRV, hvilepuls og søvn.
+          const tekst=new TextDecoder("utf-8").decode(buf);
+          let morgener=null;
+          if(/\.json$/i.test(f.name)){
+            try{morgener=laesHealthAutoExport(JSON.parse(tekst))}catch(e2){}
+          }else morgener=laesHelbredCsv(tekst);
+          if(morgener&&morgener.length){
+            const fr=flet(data,morgener);
+            morgenDage+=fr.nye+fr.opdateret;
+          }else antalAndet++;
+        }else{
+          const r=laesTraeningsfil(buf,f.name);
+          if(r.traening){
+            const udfald=indsaetTraening(r.traening);
+            if(udfald==="ny")antalNy++;else if(udfald==="beriget")antalBeriget++;
+          }else if(r.sprunget)antalAndet++;
+          else if(r.fejl)fejl++;
+        }
       }catch(e){fejl++}
       d.set[f.id]=f.rev;
     }
@@ -3216,6 +3240,7 @@ async function dbxSync(stille){
     const dele=[];
     if(antalNy)dele.push(antalNy+(antalNy===1?" nyt pas":" nye pas"));
     if(antalBeriget)dele.push(antalBeriget+" udbygget");
+    if(morgenDage)dele.push("morgental for "+morgenDage+" dage");
     dbxStatus="Senest kigget: lige nu · "+filer.length+" filer i mappen"+
       (dele.length?" · "+dele.join(" · "):"")+
       (antalAndet?" · "+antalAndet+" sprunget over (gang/andet)":"")+
