@@ -324,7 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=5;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=6;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -1800,7 +1800,7 @@ let kladde={},feel=null,gemt=false,note="",minutter="";
 let loebType="rolig", urPas=null, loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
 let morgenKladde=null, morgenAaben=false;
 let samtale=[], claudeTravl=false, claudeTilstand="", claudeUdkast="", claudeFejl="";
-let importStatus=null, valgtDag=null, systemBesked=null, redigerId=null;
+let importStatus=null, valgtDag=null, systemBesked=null, systemRo=null, redigerId=null;
 
 function nyKladde(fra){
   kladde={};
@@ -1977,6 +1977,10 @@ function visIdag(){
     h+='<div class="vagt ro">Du retter et pas, uret har logget. Varighed og puls '+
       'står fast; sæt flueben ved det, du lavede.'+
       '<button class="gem sek" style="margin-top:10px" id="redigerFortryd">Fortryd</button></div>';
+  }
+  if(!redigerId&&!gemt){
+    h+='<button class="gem sek" id="udklipHent" style="margin-top:10px">'+
+      '\ud83d\udccb Hent pas, som genvejen har kopieret</button>';
   }
   h+='<div class="nav mono" style="margin-top:10px">'+["A","B","C","MOB","LOEB"].map(t=>
     '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+
@@ -2403,18 +2407,17 @@ function visData(){
     'lægge filerne af sig selv.</b> I HealthFit: Settings → Auto Export → vælg iCloud '+
     'Drive eller Dropbox. Så ligger hver træning i mappen, uden at du rører den. '+
     'Herinde trykker du på feltet ovenfor og markerer dem – filerne bliver i telefonen.</p>'+
-    '<p class="hint"><b style="color:var(--tekst)">2. Lad en genvej logge styrken '+
-    'automatisk.</b> Genveje → Automatisering → Personlig → Træning → Når en træning '+
-    'slutter → Kør straks. Tilføj «Hent træninger», dernæst «Åbn URL» med adressen '+
-    'nedenfor, hvor du erstatter felterne i kantede parenteser med variabler fra '+
-    'træningen. Så åbner Morgenlog med passet lagt ind, og du skal kun sætte flueben '+
-    'ved øvelserne.</p>'+
-    '<textarea class="udtraek" readonly rows="3" id="genvejTekst">'+
-      esc(genvejsSkabelon())+'</textarea>'+
-    '<button class="gem sek" id="genvejKopi">Kopiér adressen</button>'+
-    '<p class="lille">Til løb sætter du sport=loeb og tilføjer &km=[Distance]. '+
-    'Løbeturens splits og afkobling kommer først med, når du henter selve filen – '+
-    'genvejen kender kun totalerne.</p></div>';
+    '<p class="hint"><b style="color:var(--tekst)">2. Lad en genvej lægge passet '+
+    'i udklipsholderen.</b> Genveje → Automatisering → Apple Watch træning → Når en '+
+    'træning slutter → Kør med det samme. Som eneste handling: «Kopiér til '+
+    'udklipsholder» med træningen (Input til genvej) som indhold. Når du bagefter '+
+    'åbner Morgenlog, trykker du på «Hent pas, som genvejen har kopieret» under '+
+    'I dag – så læser appen varighed, puls og distance ud af det kopierede.</p>'+
+    '<p class="lille">Hvorfor ikke bare åbne appen automatisk? Fordi iOS åbner '+
+    'adresser i Safari, som har sit eget adskilte lager – passet ville lande i den '+
+    'forkerte udgave af appen. Udklipsholderen går på tværs.</p>'+
+    '<p class="lille">Genvejen kender kun totalerne. Løbeturens splits og afkobling '+
+    'kommer først med, når du henter selve filen.</p></div>';
 
   h+='<h3 class="afsnit">HELBREDSDATA FRA URET</h3><div class="kort">'+
     '<div class="drop" id="helbredDrop"><b>Læg en eksport ind</b>'+
@@ -2908,15 +2911,11 @@ function laesAdresse(){
     stigningM:null, kadence:null, kobling:null, splits:[]
   }};
 }
-function tagImodAdresse(){
-  const r=laesAdresse();
-  if(!r)return;
-  if(r.fejl){systemBesked=r.fejl;return}
-  const udfald=indsaetTraening(r.traening);
+function modtagTraening(t){
+  const udfald=indsaetTraening(t);
   gemData(data);
-  const t=r.traening;
   if(udfald==="sprunget"){
-    systemBesked="Det pas var allerede logget – intet nyt lagt ind.";
+    systemRo="Det pas var allerede logget – intet nyt lagt ind.";
     return;
   }
   const mage=findMage(t);
@@ -2927,9 +2926,61 @@ function tagImodAdresse(){
     systemBesked=null;
   }else{
     visning="log";
-    systemBesked=(udfald==="ny"?"Passet er lagt ind":"Passet er udbygget med data fra uret")+
+    systemRo=(udfald==="ny"?"Passet er lagt ind":"Passet er udbygget med data fra uret")+
       ": "+num(t.tidSek/60,0)+" min"+(erTal(t.gnsPuls)?", puls "+t.gnsPuls:"")+".";
   }
+}
+function tagImodAdresse(){
+  const r=laesAdresse();
+  if(!r)return;
+  if(r.fejl){systemBesked=r.fejl;return}
+  modtagTraening(r.traening);
+}
+
+/* Udklipsholder-vejen: genvejen kopierer træningen som tekst, og den rigtige
+   app (hjemmeskærmen) henter den her. URL-vejen åbner Safari, som på iOS har
+   sit eget adskilte lager – derfor denne omvej. */
+function bygFraGaet(g,raa){
+  const sek=Math.round(g.min*60);
+  const erLoeb=g.sport==="loeb"||(g.sport!=="styrke"&&erTal(g.km)&&g.km>=0.5);
+  return {
+    sport:erLoeb?"loeb":"styrke",
+    kilde:"genvej",filnavn:"",format:"Udklipsholder",
+    startTid:g.start||Date.now(),
+    tidSek:sek,bevaegSek:sek,
+    distanceKm:(erLoeb&&erTal(g.km))?g.km:null,
+    tempoSekPrKm:(erLoeb&&erTal(g.km)&&g.km>0)?sek/g.km:null,
+    gnsPuls:erTal(g.puls)?g.puls:null,maxPuls:null,
+    kalorier:erTal(g.kcal)?g.kcal:null,
+    stigningM:null,kadence:null,kobling:null,splits:[]
+  };
+}
+async function hentFraUdklip(){
+  systemBesked=null;systemRo=null;
+  if(!navigator.clipboard||!navigator.clipboard.readText){
+    systemBesked="Din browser vil ikke dele udklipsholderen med appen.";render();return;
+  }
+  let tekst="";
+  try{tekst=await navigator.clipboard.readText()}
+  catch(e){
+    systemBesked="Telefonen spurgte om lov til at læse udklipsholderen – tryk "+
+      "\u00abTillad\u00bb/\u00abInds\u00e6t\u00bb og pr\u00f8v knappen igen.";
+    render();return;
+  }
+  if(!tekst||!tekst.trim()){systemBesked="Udklipsholderen er tom. Afslut en træning først – "+
+    "genvejen lægger den derind.";render();return}
+  const g=gaetFraRaa(tekst);
+  if(g.sport==="andet"){
+    systemRo="Det kopierede ligner en gåtur eller cykeltur – dem logger appen ikke.";
+    render();return;
+  }
+  if(!erTal(g.min)||g.min<=0){
+    systemBesked="Kunne ikke finde en varighed i det kopierede. Der stod: \u00ab"+
+      tekst.slice(0,180)+"\u00bb \u2013 vis det til Claude, s\u00e5 l\u00e6rer appen formatet.";
+    render();return;
+  }
+  modtagTraening(bygFraGaet(g,tekst));
+  render();
 }
 
 /* ==========================================================================
@@ -2942,6 +2993,7 @@ function render(){
   const y=window.scrollY, sammeVisning=(sidsteVisning===visning);
   let h=topDel()+ugeStribe()+navDel();
   if(systemBesked)h+='<div class="vagt stop">'+esc(systemBesked)+'</div>';
+  if(systemRo)h+='<div class="vagt ro">'+esc(systemRo)+'</div>';
   h+= visning==="idag"?visIdag()
     : visning==="balance"?visBalance()
     : visning==="plan"?visPlan()
@@ -2966,7 +3018,7 @@ function tal(v){
 
 function bind(){
   paa("[data-visning]","click",e=>{
-    visning=e.currentTarget.dataset.visning;systemBesked=null;valgtDag=null;render();
+    visning=e.currentTarget.dataset.visning;systemBesked=null;systemRo=null;valgtDag=null;render();
   });
   paa("[data-type]","click",e=>{
     type=e.currentTarget.dataset.type;
@@ -3044,6 +3096,7 @@ function bind(){
   klik("gemPas",gemPas);
   klik("loebRyd",()=>{urPas=null;render()});
   klik("redigerFortryd",()=>{redigerId=null;nyKladde();render()});
+  klik("udklipHent",hentFraUdklip);
 
   const drop=id("loebDrop"),filInd=id("loebInput");
   if(drop&&filInd){
@@ -3067,7 +3120,6 @@ function bind(){
     pDrop.addEventListener("drop",e=>{
       if(e.dataTransfer&&e.dataTransfer.files.length)batchImport(e.dataTransfer.files)});
   }
-  klik("genvejKopi",e=>kopier(genvejsSkabelon(),e.currentTarget,"Kopiér adressen","genvejTekst"));
 
   const hDrop=id("helbredDrop"),hInd=id("helbredInput");
   if(hDrop&&hInd){
