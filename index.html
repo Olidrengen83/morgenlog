@@ -328,7 +328,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=10;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=11;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -879,10 +879,10 @@ function analyserTraening(pkt,ses,sportVink){
       let dm=0;
       if(brugDist&&erTal(a.dist)&&erTal(f.dist))dm=Math.max(0,a.dist-f.dist);
       else if(a.lat!=null&&f.lat!=null)dm=afstandM(f,a);
-      if(dt>0&&dt<=25){
+      if(dt>0&&dt<=180&&dm/Math.max(dt,1)<12){   // over 43 km/t er det GPS-støj
         samlet+=dm;
-        if(dm/dt>0.5)bevaegSek+=dt;      // under 1,8 km/t er det et stop
-        if(erTal(a.hr))hrDt.push({hr:a.hr,dt:dt});
+        if(dt<=25&&dm/dt>0.5)bevaegSek+=dt;      // under 1,8 km/t er det et stop
+        if(dt<=25&&erTal(a.hr))hrDt.push({hr:a.hr,dt:dt});
       }
     }
     if(erTal(a.ele)){
@@ -897,7 +897,15 @@ function analyserTraening(pkt,ses,sportVink){
   if(erTal(s.distanceM)&&s.distanceM>samlet)samlet=s.distanceM;   // uret ved bedst
 
   const harDistance=samlet>=200;
-  const sport=sportVink||s.sport||(harDistance?"loeb":"styrke");
+  let sport=sportVink||s.sport;
+  if(!sport){
+    if(!harDistance)sport="styrke";
+    else{
+      // Uden sportsangivelse afgør tempoet: langsommere end 8:45/km er gang.
+      const sek=(s.tidSek||((p[p.length-1].t-p[0].t)/1000));
+      sport=(sek/(samlet/1000)>525)?"gang":"loeb";
+    }
+  }
 
   // Styrke og andet indendørs: man står stille mellem sættene, så
   // "bevægetid" giver ingen mening – hele passet tæller.
@@ -1047,6 +1055,7 @@ function afkodFit(buffer){
       if(sidsteTid!=null){
         t=(sidsteTid&~0x1F)+forskyd;
         if(forskyd<(sidsteTid&0x1F))t+=0x20;
+        sidsteTid=t;   // ankeret SKAL rykke med, ellers hopper alle følgende tider
       }
       const m=laesBesked(def,t);
       if(!m)break;
@@ -2446,6 +2455,11 @@ function visData(){
       (dbxStatus?'<p class="hint">'+esc(dbxStatus)+'</p>':"")+
       (data.dropbox.senest?'<p class="lille">'+
         Object.keys(data.dropbox.set).length+' filer set i alt</p>':"")+
+      '<button class="gem sek" id="dbxForfra" style="margin-top:12px">'+
+        'Glem sete filer og hent forfra</button>'+
+      '<p class="lille">Brug den efter en app-rettelse: slet først de forkerte pas '+
+      'under LOG, og tryk så her – alle filer læses igen, og pas, der allerede er '+
+      'rigtige, bliver bare genkendt som kendte.</p>'+
       '<button class="gem sek" id="dbxAfbryd" style="margin-top:12px;'+
       'border-color:var(--kant);color:var(--daempet)">Afbryd forbindelsen</button>';
   }else{
@@ -3438,6 +3452,9 @@ function bind(){
   klik("dbxFaerdig",()=>{const k=id("dbxKode");dbxFaerdiggoer(k?k.value:"")});
   klik("dbxSyncNu",()=>{dbxSync(false)});
   klik("dbxFind",async()=>{await dbxFindMappe();render()});
+  klik("dbxForfra",()=>{
+    data.dropbox.set={};data.dropbox.senest=null;gemData(data);dbxSync(false);
+  });
   klik("dbxAfbryd",dbxAfbryd);
 
   const gn=id("gemNoegle");
