@@ -324,7 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=8;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=9;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -967,7 +967,7 @@ const FITTYPER={
   12:{b:4,u:1,nul:1}, 13:{b:1,u:1},       14:{b:8,s:1},       15:{b:8,u:1},
   16:{b:8,u:1,nul:1}
 };
-const FITSPORT={1:"loeb",11:"gang",17:"gang",10:"styrke",4:"styrke",2:"cykel"};
+const FITSPORT={0:"andet",1:"loeb",2:"cykel",4:"andet",10:"styrke",11:"gang",17:"gang"};
 
 function fitLaesFelt(dv,pos,type,stoerrelse){
   const t=FITTYPER[type&0x1F];
@@ -1139,6 +1139,8 @@ function laesTraeningsfil(buffer,filnavn){
       if(!r)return {fejl:"FIT-filen kunne ikke læses."};
       const t=analyserTraening(r.pkt,r.ses,null);
       if(!t)return {fejl:"FIT-filen indeholder ingen målinger."};
+      if(t.sport!=="loeb"&&t.sport!=="styrke")
+        return {sprunget:"gåtur, cykling eller «anden træning» – dem regner appen ikke på"};
       t.kilde="fil";t.filnavn=filnavn||"";t.format="FIT";
       return {traening:t};
     }
@@ -1160,6 +1162,8 @@ function laesTraeningsfil(buffer,filnavn){
     if(pkt.length<2)return {fejl:"Fandt ingen brugbare punkter i filen."};
     const t=analyserTraening(pkt,null,vink);
     if(!t)return {fejl:"Punkterne mangler tid – passet kan ikke regnes ud."};
+    if(t.sport!=="loeb"&&t.sport!=="styrke")
+      return {sprunget:"cykeltur eller andet – dem regner appen ikke på"};
     t.kilde="fil";t.filnavn=filnavn||"";t.format=format;
     return {traening:t};
   }catch(e){return {fejl:"Kunne ikke læse filen: "+e.message}}
@@ -2623,6 +2627,7 @@ async function haandterTraeningsfil(filer){
     const bytes=await laesFilSomBytes(liste[0]);
     const r=laesTraeningsfil(bytes,liste[0].name);
     if(r.fejl){systemBesked=r.fejl;render();return}
+    if(r.sprunget){systemRo="Filen blev sprunget over: "+r.sprunget+".";render();return}
     urPas=r.traening;
     // Lagde du et styrkepas ind, mens LØB var valgt (eller omvendt), så skift.
     if(urPas.sport==="loeb"&&type!=="LOEB")type="LOEB";
@@ -2641,13 +2646,14 @@ async function batchImport(filer){
   const liste=Array.from(filer||[]);
   if(!liste.length)return;
   importStatus={hvor:"pas",pct:0,tekst:"Læser "+liste.length+" filer …"};render();
-  let nye=0,beriget=0,sprunget=0;
+  let nye=0,beriget=0,sprunget=0,andetSport=0;
   const fejl=[];
   for(let i=0;i<liste.length;i++){
     try{
       const bytes=await laesFilSomBytes(liste[i]);
       const r=laesTraeningsfil(bytes,liste[i].name);
       if(r.fejl){fejl.push(liste[i].name+": "+r.fejl);continue}
+      if(r.sprunget){andetSport++;continue}
       const udfald=indsaetTraening(r.traening);
       if(udfald==="ny")nye++;else if(udfald==="beriget")beriget++;else sprunget++;
     }catch(e){fejl.push(liste[i].name+": "+e.message)}
@@ -2662,6 +2668,7 @@ async function batchImport(filer){
   if(nye)dele.push(nye+(nye===1?" nyt pas":" nye pas"));
   if(beriget)dele.push(beriget+" udbygget med data fra uret");
   if(sprunget)dele.push(sprunget+" var logget i forvejen");
+  if(andetSport)dele.push(andetSport+" sprunget over (gang, cykling og andet)");
   importStatus={hvor:"pas",pct:1,tekst:(dele.length?"Hentet ind: "+dele.join(" · ")+"."
     :"Ingenting nyt at hente.")+(fejl.length?" "+fejl.length+" fil"+
     (fejl.length===1?"":"er")+" kunne ikke læses: "+fejl[0]:"")};
@@ -3030,7 +3037,7 @@ async function dbxSync(stille){
       nye.slice(0,nye.length-90).forEach(f=>{d.set[f.id]=f.rev});
       nye=nye.slice(-90);
     }
-    let antalNy=0,antalBeriget=0,fejl=0;
+    let antalNy=0,antalBeriget=0,antalAndet=0,fejl=0;
     for(const f of nye){
       try{
         const buf=await dbxHentFil(f.id);
@@ -3038,7 +3045,8 @@ async function dbxSync(stille){
         if(r.traening){
           const udfald=indsaetTraening(r.traening);
           if(udfald==="ny")antalNy++;else if(udfald==="beriget")antalBeriget++;
-        }
+        }else if(r.sprunget)antalAndet++;
+        else if(r.fejl)fejl++;
       }catch(e){fejl++}
       d.set[f.id]=f.rev;
     }
@@ -3048,7 +3056,9 @@ async function dbxSync(stille){
     if(antalNy)dele.push(antalNy+(antalNy===1?" nyt pas":" nye pas"));
     if(antalBeriget)dele.push(antalBeriget+" udbygget");
     dbxStatus="Senest kigget: lige nu · "+filer.length+" filer i mappen"+
-      (dele.length?" · "+dele.join(" · "):"")+(fejl?" · "+fejl+" kunne ikke læses":"");
+      (dele.length?" · "+dele.join(" · "):"")+
+      (antalAndet?" · "+antalAndet+" sprunget over (gang/andet)":"")+
+      (fejl?" · "+fejl+" kunne ikke læses":"");
     if(dele.length){
       systemRo="Hentet fra Dropbox: "+dele.join(" · ")+".";
     }
