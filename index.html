@@ -324,7 +324,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=4;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=5;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -2624,13 +2624,20 @@ async function batchImport(filer){
 }
 
 /* Samme pas må ikke lande to gange, uanset hvilken vej det kom ind. */
+function erGenvejsPas(s){
+  return (s.loeb&&s.loeb.kilde==="genvej")||(s.ur&&s.ur.kilde==="genvej");
+}
 function findMage(traening){
   const start=traening.startTid;
   if(!start)return null;
   const dato=iso(new Date(start));
   const nyErLoeb=traening.sport==="loeb";
+  const nyErGenvej=traening.kilde==="genvej";
   return data.sessions.find(s=>{
     if((s.type==="LOEB")!==nyErLoeb)return false;   // løb og styrke er aldrig samme pas
+    // Genvejen kender kun slutningen af passet, filen kender starten – de kan
+    // ligge en hel træningslængde fra hinanden. Så for genvejspas gælder dagen.
+    if(nyErGenvej||erGenvejsPas(s))return s.dato===dato;
     // Samme pas eksporteret i to formater: starttiderne ligger oven i hinanden.
     if(s.urStart)return Math.abs(s.urStart-start)<20*60000;
     return s.dato===dato;
@@ -2639,9 +2646,10 @@ function findMage(traening){
 function indsaetTraening(t){
   const mage=findMage(t);
   if(mage){
-    // Har passet allerede rigtige tal fra uret, rører vi det ikke.
-    if(mage.urStart)return "sprunget";
-    mage.urStart=t.startTid;
+    // Har passet allerede rigtige tal fra uret, rører vi det ikke – medmindre
+    // de kom fra genvejen, som kun kender totalerne. Så vinder filen.
+    if(mage.urStart&&!(erGenvejsPas(mage)&&t.kilde!=="genvej"))return "sprunget";
+    mage.urStart=t.startTid||mage.urStart;
     mage.minutter=Math.round((t.bevaegSek||t.tidSek||0)/60)||mage.minutter;
     if(t.sport==="loeb"){
       const gammel=mage.loeb||{};
@@ -2811,6 +2819,46 @@ function genvejsSkabelon(){
   return grundadresse()+"#ind=1&sport=styrke&start=[Startdato]&min=[Varighed]"+
     "&puls=[Gnspuls]&kcal=[Energi]";
 }
+/* Varighed kan komme som "44", "44,5", "44:03", "1:02:30" eller i sekunder.
+   Over 300 tolkes som sekunder – ingen af hans pas varer fem timer. */
+function laesVarighedTekst(v){
+  if(v==null)return null;
+  const t=String(v).trim();
+  const m=/^(\d+):(\d{2})(?::(\d{2}))?$/.exec(t);
+  if(m)return m[3]!=null?(+m[1])*60+(+m[2])+(+m[3])/60:(+m[1])+(+m[2])/60;
+  const n=parseFloat(t.replace(",","."));
+  if(!isFinite(n)||n<=0)return null;
+  return n>300?n/60:n;
+}
+
+/* Nogle iOS-versioner nægter at udlevere træningens enkeltdele og sender i
+   stedet hele træningen som én klump tekst. Så fisker vi tallene ud af den. */
+function gaetFraRaa(tekst){
+  const t=String(tekst||"");
+  const ud={};
+  const reDur=/(\d+):(\d{2})(?::(\d{2}))?/g;
+  let dur;
+  while((dur=reDur.exec(t))){
+    // Følger der en dato lige før, er det et klokkeslæt – ikke en varighed.
+    if(/\d{4}-\d{2}-\d{2}[T ]$/.test(t.slice(0,dur.index)))continue;
+    ud.min=dur[3]!=null?(+dur[1])*60+(+dur[2])+(+dur[3])/60:(+dur[1])+(+dur[2])/60;
+    break;
+  }
+  const km=/(\d+[.,]\d+)\s*km/i.exec(t);
+  if(km)ud.km=parseFloat(km[1].replace(",","."));
+  const kcal=/(\d+(?:[.,]\d+)?)\s*kcal/i.exec(t);
+  if(kcal)ud.kcal=Math.round(parseFloat(kcal[1].replace(",",".")));
+  const puls=/(\d+)\s*(?:bpm|slag)/i.exec(t);
+  if(puls)ud.puls=+puls[1];
+  if(/l\u00f8b|loeb|running/i.test(t))ud.sport="loeb";
+  else if(/styrke|strength|core|funktionel/i.test(t))ud.sport="styrke";
+  else if(/cykling|cycling|gang|walking|vandring/i.test(t))ud.sport="andet";
+  const dato=/(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/.exec(t);
+  if(dato){const ts=Date.parse(dato[1]+"T"+dato[2]+":"+dato[3]+":00");
+    if(isFinite(ts))ud.start=ts}
+  return ud;
+}
+
 function laesAdresse(){
   const h=(location.hash||"").replace(/^#/,"");
   if(!h||h.indexOf("ind=")<0)return null;
@@ -2828,13 +2876,25 @@ function laesAdresse(){
     const n=parseFloat(String(v).replace(",","."));
     return isFinite(n)?n:null;
   };
+  // Først de pæne, navngivne felter – dernæst den rå klump som reserve.
+  let raaHel="";
+  try{raaHel=decodeURIComponent(h)}catch(e){raaHel=h}
+  const gaet=gaetFraRaa(raaHel);
+  if(gaet.sport==="andet"&&!p.sport&&!p.min)
+    return {fejl:"Det pas ligner hverken løb eller styrke – sprunget over."};
+
   let start=Date.parse(p.start||"");
-  if(!isFinite(start))start=Date.now();
-  const min=tal(p.min);
-  if(!erTal(min)||min<=0)return {fejl:"Genvejen sendte ingen varighed med."};
-  const km=tal(p.km);
-  const erLoeb=String(p.sport||"").toLowerCase().indexOf("l")===0||
-    (km!=null&&km>=0.5&&String(p.sport||"").toLowerCase()!=="styrke");
+  if(!isFinite(start))start=gaet.start||Date.now();
+  let min=laesVarighedTekst(p.min);
+  if(min==null)min=gaet.min||null;
+  if(!erTal(min)||min<=0)
+    return {fejl:"Genvejen sendte ingen brugbar varighed. Den sendte: \u00ab"+
+      raaHel.slice(0,180)+"\u00bb \u2013 vis det til Claude, s\u00e5 l\u00e6rer appen formatet."};
+  let km=tal(p.km);
+  if(km==null&&erTal(gaet.km))km=gaet.km;
+  let sportTekst=String(p.sport||gaet.sport||"").toLowerCase();
+  const erLoeb=sportTekst.indexOf("l")===0||
+    (km!=null&&km>=0.5&&sportTekst!=="styrke");
   return {traening:{
     sport:erLoeb?"loeb":"styrke",
     kilde:"genvej", filnavn:"", format:"Genvej",
@@ -2842,8 +2902,10 @@ function laesAdresse(){
     tidSek:Math.round(min*60), bevaegSek:Math.round(min*60),
     distanceKm:(erLoeb&&km)?km:null,
     tempoSekPrKm:(erLoeb&&km&&km>0)?(min*60)/km:null,
-    gnsPuls:tal(p.puls), maxPuls:tal(p.maxpuls),
-    kalorier:tal(p.kcal), stigningM:null, kadence:null, kobling:null, splits:[]
+    gnsPuls:tal(p.puls)!=null?tal(p.puls):(erTal(gaet.puls)?gaet.puls:null),
+    maxPuls:tal(p.maxpuls),
+    kalorier:tal(p.kcal)!=null?tal(p.kcal):(erTal(gaet.kcal)?gaet.kcal:null),
+    stigningM:null, kadence:null, kobling:null, splits:[]
   }};
 }
 function tagImodAdresse(){
