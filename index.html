@@ -148,6 +148,12 @@
   .kvittering p{font-size:14px;color:var(--daempet);margin:6px 0 0;line-height:1.5}
 
   /* --- parathedsring (heltal + bue) --- */
+  .statusliste{margin-top:14px;border-top:1px solid var(--kant);padding-top:4px}
+  .statuslinje{display:flex;gap:10px;padding:8px 0;font-size:13px;line-height:1.5;
+    border-top:1px solid var(--grid)}
+  .statuslinje:first-child{border-top:none}
+  .statuslinje .mono{flex-shrink:0;width:44px;font-size:10px;letter-spacing:.1em;
+    color:var(--gry);padding-top:3px}
   .ring{display:flex;align-items:center;gap:18px}
   .ring svg{flex-shrink:0}
   .ringtal{font-size:34px;font-weight:600;line-height:1}
@@ -338,7 +344,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=17;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=18;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -811,6 +817,47 @@ function foreslaaHvilePuls(d){
     m.hvilePuls>=30&&m.hvilePuls<=100).map(m=>m.hvilePuls);
   if(v.length<5)return null;
   return {v:Math.round(median(v)),n:v.length};
+}
+
+/* Én samlet stillingtagen på tværs af alt, appen ved: kroppen (morgentjek,
+   HRV, søvn, hvilepuls – og stress-skalaen, der bærer arbejde og familie)
+   afgør DAGEN; belastningsregnskabet afgør UGEN. Divergerer de, siges det
+   højt i stedet for at lade brugeren være dommer. */
+function samletVurdering(d,_p){
+  const p=_p||parathed(d,idag());
+  const bt=p.bt, r=bt.forhold;
+  const ud={p:p,idag:null,uge:null,konklusion:null};
+  if(p.score!=null){
+    ud.idag=p.band.status==="god"
+      ? "Grønt lys – i dag er dagen til fart, bakker eller et kilo mere."
+      : p.band.status==="normal"
+      ? "Kør planen, som den står."
+      : p.band.status==="varsel"
+      ? "Træn gerne, men uden fart – volumen frem for intensitet."
+      : "Hvil eller mobilitet – kroppen beder om en pause.";
+  }
+  if(r!=null&&bt.ctl>5){
+    const stabil=bt.forrigeUgeSum>0&&
+      Math.abs(bt.ugeSum-bt.forrigeUgeSum)/bt.forrigeUgeSum<=0.15;
+    const kHoej=Math.round(bt.ctl*7*1.3), kLav=Math.round(bt.ctl*7*0.8);
+    if(r>1.3)ud.uge=stabil
+      ? "Hold ugen flad – læg ikke mere på, så falder regnskabet i grøn af sig selv."
+      : "Skær ugen ned mod ca. "+kHoej+" AU – du lægger på hurtigere, end du bygger op.";
+    else if(r<0.8)ud.uge="Der er plads til at lægge lidt til – op mod "+kHoej+" AU.";
+    else ud.uge="Ugen er i balance – bliv mellem ca. "+kLav+" og "+kHoej+" AU.";
+  }
+  if(ud.idag&&ud.uge){
+    const kropNed=p.band.status==="varsel"||p.band.status==="kritisk";
+    const ugeNed=r>1.3;
+    ud.konklusion=kropNed&&ugeNed
+      ? "Begge sider peger samme vej: ned i gear – både i dag og resten af ugen."
+      : kropNed&&!ugeNed
+      ? "Kroppen strammer mere end regnskabet. Lyt til kroppen i dag – ugen fejler ikke noget."
+      : !kropNed&&ugeNed
+      ? "Kroppen er med, men regnskabet er foran. Dagens pas må gerne køres – det er ugens sum, der skal holdes i ro."
+      : "Alt peger samme vej: der er frit lejde.";
+  }
+  return ud;
 }
 
 /* Anbefaling for dagens pas – konkret, ikke en formaning. */
@@ -2008,20 +2055,34 @@ function navDel(){
 /* ---------- I DAG ---------- */
 
 function visIdag(){
-  const p=parathed(data,idag());
+  const sv=samletVurdering(data);
+  const p=sv.p;
   const planType=data.ugeplan[new Date().getDay()];
   const raad=dagensRaad(p,type);
   let h="";
 
-  // Parathed
+  // Det samlede svar: alt appen ved, vejet sammen ét sted.
+  h+='<h3 class="afsnit" style="margin-top:18px">STATUS LIGE NU</h3>';
   h+='<div class="kort"><div class="ring">'+parathedsRing(p.score,p.band)+
     '<div style="min-width:0"><div class="ringband" style="color:'+
       (p.band?p.band.farve:"var(--daempet)")+'">'+
       '<span class="ringikon">'+(p.band?p.band.ikon:"○")+'</span>'+
       (p.band?esc(p.band.navn):"Ingen tal endnu")+'</div>'+
-    '<div class="ringund">'+esc(p.score==null
-      ? "Tast et morgentjek, så begynder appen at kende dig."
-      : p.band.raad)+'</div></div></div>';
+    (sv.konklusion
+      ? '<div class="ringund">'+esc(sv.konklusion)+'</div>'
+      : '<div class="ringund">'+esc(p.score==null
+          ? "Tast et morgentjek, så begynder appen at kende dig."
+          : p.band.raad)+'</div>')+
+    '</div></div>';
+
+  if(sv.idag||sv.uge){
+    h+='<div class="statusliste">';
+    if(sv.idag)h+='<div class="statuslinje"><span class="mono">I DAG</span>'+
+      esc(sv.idag)+'</div>';
+    if(sv.uge)h+='<div class="statuslinje"><span class="mono">UGEN</span>'+
+      esc(sv.uge)+'</div>';
+    h+='</div>';
+  }
 
   if(p.dele.length){
     h+='<div class="udlaes">'+p.dele.map(x=>
@@ -2256,6 +2317,10 @@ function visBalance(){
   const zone=forholdZone(bt.forhold);
   const p=parathed(data,idag());
   let h="";
+
+  h+='<p class="hint" style="margin-top:14px">Det samlede svar på «hvor meget kan jeg '+
+    'give den gas?» står øverst under I DAG. Her er maskinrummet: ugens belastning '+
+    'og tallene bag vurderingen.</p>';
 
   h+='<div class="fliser" style="margin-top:16px">'+
     flise("AKUT 7 D",num(bt.atl,0),"AU pr. dag")+
