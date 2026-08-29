@@ -248,6 +248,12 @@
   .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
   .lille{font-size:11px;color:var(--svag);margin-top:6px;line-height:1.5}
 
+  #traekop{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;
+    transform:translateX(-50%) translateY(-60px);z-index:50;
+    background:var(--kort);border:1px solid var(--gry);color:var(--tekst);
+    border-radius:16px;padding:7px 16px;font-size:12px;
+    transition:transform .15s ease-out;pointer-events:none;white-space:nowrap}
+  #traekop.klar{transform:translateX(-50%) translateY(0)}
   @media (prefers-reduced-motion:no-preference){
     .kort{animation:ind .18s ease-out}
     @keyframes ind{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -330,7 +336,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=15;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=16;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -3730,6 +3736,45 @@ function bind(){
 tagImodAdresse();
 render();
 if(dbxForbundet())setTimeout(()=>{dbxSync(true).catch(()=>{})},700);
+
+/* Træk ned fra toppen for at opdatere: genindlæser hele appen, så både nye
+   data og en ny version af appen selv kommer med i ét hug. */
+(function(){
+  const pil=document.createElement("div");
+  pil.id="traekop";pil.textContent="\u2193 Træk for at opdatere";
+  document.body.appendChild(pil);
+  let startY=null,traek=0;
+  const TAERSKEL=80;
+  window.addEventListener("touchstart",(e)=>{
+    startY=(window.scrollY<=0&&e.touches.length===1)?e.touches[0].clientY:null;
+    traek=0;
+  },{passive:true});
+  window.addEventListener("touchmove",(e)=>{
+    if(startY==null)return;
+    traek=e.touches[0].clientY-startY;
+    if(window.scrollY>0){startY=null;pil.classList.remove("klar");return}
+    if(traek>30){
+      pil.classList.add("klar");
+      pil.textContent=traek>TAERSKEL?"\u21bb Slip for at opdatere":"\u2193 Træk for at opdatere";
+    }else pil.classList.remove("klar");
+  },{passive:true});
+  window.addEventListener("touchend",()=>{
+    if(startY!=null&&traek>TAERSKEL&&window.scrollY<=0){
+      pil.textContent="\u21bb Opdaterer …";
+      pil.classList.add("klar");
+      setTimeout(()=>{(window.__reload||(()=>location.reload()))()},150);
+    }else pil.classList.remove("klar");
+    startY=null;traek=0;
+  },{passive:true});
+})();
+
+/* Kommer appen i forgrunden efter en pause, kigger den selv i Dropbox. */
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible")return;
+  if(!dbxForbundet())return;
+  const sidst=data.dropbox.senest&&data.dropbox.senest.tid;
+  if(!sidst||Date.now()-sidst>15*60000)dbxSync(true).catch(()=>{});
+});
 window.addEventListener("hashchange",()=>{tagImodAdresse();render()});
 </script>
 <script>
