@@ -121,6 +121,8 @@
   .tom{font-size:14px;color:var(--daempet);margin-top:20px;line-height:1.5}
 
   /* --- skala 1-5 --- */
+  .forklar{display:block;font-size:11px;color:var(--svag);margin-top:2px;
+    font-weight:400;line-height:1.4}
   .skala{display:flex;gap:6px;margin-top:6px}
   .skala button{flex:1;padding:9px 0;border-radius:6px;font-size:13px;cursor:pointer;
     background:var(--nat);border:1px solid var(--kant);color:var(--daempet)}
@@ -328,7 +330,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=14;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=15;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -614,6 +616,41 @@ function zScore(vaerdi,bl,retning){
 }
 const zTilScore=(z)=>klem(50+z*22,0,100);
 
+/* Søvnscore efter Apples opskrift: varighed op til 50 point, fast sengetid
+   op til 30, få afbrydelser op til 20. Apples egen score kan ikke eksporteres,
+   men ingredienserne kan – så vi regner den selv af de samme dele. */
+function soevnScore(d,dato){
+  const m=morgenFor(d,dato);
+  if(!m||!erTal(m.soevnT))return null;
+  const behov=d.profil.soevnBehov||7.5;
+  const varighed=klem(m.soevnT/behov,0,1)*50;
+  let sum=varighed, max=50;
+  if(erTal(m.soevnVaagen)){
+    sum+=klem(1-(m.soevnVaagen-5)/55,0,1)*20; max+=20;
+  }
+  if(erTal(m.sengetid)){
+    const hist=d.morgener.filter(x=>x.dato<dato&&erTal(x.sengetid))
+      .slice(-14).map(x=>x.sengetid);
+    if(hist.length>=5){
+      sum+=klem(1-Math.abs(m.sengetid-median(hist))/120,0,1)*30; max+=30;
+    }
+  }
+  return Math.round(sum/max*100);
+}
+/* Kvalitetsdelen alene (uden varighed – den tæller allerede som søvngæld). */
+function soevnKvalAuto(d,dato){
+  const m=morgenFor(d,dato);
+  if(!m)return null;
+  const dele=[];
+  if(erTal(m.soevnVaagen))dele.push(klem(1-(m.soevnVaagen-5)/55,0,1)*100);
+  if(erTal(m.sengetid)){
+    const hist=d.morgener.filter(x=>x.dato<dato&&erTal(x.sengetid))
+      .slice(-14).map(x=>x.sengetid);
+    if(hist.length>=5)dele.push(klem(1-Math.abs(m.sengetid-median(hist))/120,0,1)*100);
+  }
+  return dele.length?gennemsnit(dele):null;
+}
+
 const BAND=[
   {min:72,navn:"Klar",farve:"var(--st-god)",ikon:"▲",status:"god",
    raad:"Kør planen. Der er plads til at lægge lidt til i dag."},
@@ -657,7 +694,11 @@ function parathed(d,dato){
     const gaeld=Math.max(0,naetter.reduce((s,t)=>s+(behov-t),0));
     const gaeldScore=klem(100-gaeld*13,0,100);
     const kval=rullende(d,"soevnKval",dt,3).v;
-    const kvalScore=kval!=null?klem((kval-1)/4*100,0,100):null;
+    let kvalScore=kval!=null?klem((kval-1)/4*100,0,100):null;
+    if(kvalScore==null){
+      const auto=sidsteNDatoer(3,dt).map(x=>soevnKvalAuto(d,x)).filter(erTal);
+      if(auto.length)kvalScore=gennemsnit(auto);
+    }
     const score=kvalScore!=null?0.65*gaeldScore+0.35*kvalScore:gaeldScore;
     dele.push({id:"soevn",navn:"Søvn",vaegt:.25,score:score,z:null,
       vaerdi:gennemsnit(naetter),gaeld:gaeld,behov:behov,enhed:"t",n:naetter.length,
@@ -1209,6 +1250,16 @@ function tilfoej(samler,dato,felt,vaerdi){
   if(!samler[dato][felt])samler[dato][felt]=[];
   samler[dato][felt].push(vaerdi);
 }
+/* Sengetid regnes i minutter siden middag, så en nat hen over midnat ikke
+   knækker: 22:45 bliver 645, 00:30 bliver 750. Klokkeslættet læses direkte af
+   strengen – det er den lokale tid, natten blev levet i, uafhængigt af hvilken
+   tidszone telefonen står i, når filen læses. */
+function minutterSidenMiddag(tekst){
+  const m=/[T ](\d{2})[:.](\d{2})/.exec(String(tekst));
+  if(!m)return null;
+  const min=(+m[1])*60+(+m[2]);
+  return min<720?min+720:min-720;
+}
 function samlerTilMorgener(samler){
   return Object.keys(samler).sort().map(dato=>{
     const r={dato:dato};
@@ -1218,6 +1269,10 @@ function samlerTilMorgener(samler){
     });
     if(samler[dato].soevnMin&&samler[dato].soevnMin.length)
       r.soevnT=Math.round(samler[dato].soevnMin.reduce((a,b)=>a+b,0)/60*10)/10;
+    if(samler[dato].vaagenMin&&samler[dato].vaagenMin.length)
+      r.soevnVaagen=Math.round(samler[dato].vaagenMin.reduce((a,b)=>a+b,0));
+    if(samler[dato].sengetidMin&&samler[dato].sengetidMin.length)
+      r.sengetid=Math.round(Math.min.apply(null,samler[dato].sengetidMin));
     return r;
   }).filter(r=>erTal(r.hrv)||erTal(r.hvilePuls)||erTal(r.soevnT));
 }
@@ -1248,6 +1303,10 @@ function laesHealthAutoExport(objekt){
           if(sum>0)timer=sum;
         }
         if(timer!=null)tilfoej(samler,d.dato,"soevnMin",timer*60);
+        if(erTal(+r.awake)&&+r.awake>0)tilfoej(samler,d.dato,"vaagenMin",+r.awake*60);
+        const start=r.sleepStart||r.inBedStart;
+        if(start){const sm=minutterSidenMiddag(start);
+          if(sm!=null)tilfoej(samler,d.dato,"sengetidMin",sm)}
       }
     });
   });
@@ -1405,13 +1464,16 @@ async function laesAppleEksport(fil,paaFremdrift){
       }else if(type==="HKQuantityTypeIdentifierRestingHeartRate"&&isFinite(v)){
         tilfoej(samler,start.dato,"hvilePuls",v);fundet++;
       }else if(type==="HKCategoryTypeIdentifierSleepAnalysis"&&slutD){
-        if(/Asleep/i.test(m[4])){
-          const t0=appleTid(m[2]), t1=appleTid(m[3]);
-          if(t0&&t1&&t1>t0){
-            // Natten hører til den morgen, den ender på.
-            const dato=slutD.time<18?slutD.dato:plusDage(slutD.dato,1);
+        const t0=appleTid(m[2]), t1=appleTid(m[3]);
+        if(t0&&t1&&t1>t0){
+          // Natten hører til den morgen, den ender på.
+          const dato=slutD.time<18?slutD.dato:plusDage(slutD.dato,1);
+          if(/Asleep/i.test(m[4])){
             tilfoej(samler,dato,"soevnMin",(t1-t0)/60000);
+            tilfoej(samler,dato,"sengetidMin",minutterSidenMiddag(m[2]));
             fundet++;
+          }else if(/Awake/i.test(m[4])){
+            tilfoej(samler,dato,"vaagenMin",(t1-t0)/60000);
           }
         }
       }
@@ -1468,7 +1530,8 @@ function flet(d,nyeMorgener){
     let m=d.morgener.find(x=>x.dato===n.dato);
     if(!m){m={dato:n.dato};d.morgener.push(m);nye++}
     else opdateret++;
-    ["hrv","hvilePuls","soevnT"].forEach(f=>{if(erTal(n[f]))m[f]=n[f]});
+    ["hrv","hvilePuls","soevnT","soevnVaagen","sengetid"].forEach(f=>{
+      if(erTal(n[f]))m[f]=n[f]});
   });
   oprydData(d);
   return {nye:nye,opdateret:opdateret};
@@ -1972,27 +2035,41 @@ function visIdag(){
   const m=morgenFor(data,idag());
   if(morgenAaben){
     const k=morgenKladde||{};
+    const maalte=[];
+    if(erTal(k.hrv))maalte.push("HRV "+num(k.hrv,0));
+    if(erTal(k.hvilePuls))maalte.push("hvilepuls "+num(k.hvilePuls,0));
+    if(erTal(k.soevnT))maalte.push("søvn "+num(k.soevnT,1)+" t");
+    const sscore=soevnScore(data,idag());
+    if(sscore!=null)maalte.push("søvnscore "+sscore);
     h+='<div class="kort"><div class="kort-top"><h2>Morgentjek</h2>'+
-      '<span>20 sekunder</span></div>'+
-      '<div class="to"><label>HRV (ms)<input type="number" inputmode="decimal" step="0.1" '+
-        'data-morgen="hrv" value="'+(erTal(k.hrv)?k.hrv:"")+'" placeholder="fx 48"></label>'+
-      '<label>Hvilepuls<input type="number" inputmode="numeric" data-morgen="hvilePuls" '+
-        'value="'+(erTal(k.hvilePuls)?k.hvilePuls:"")+'" placeholder="fx 52"></label></div>'+
-      '<label>Søvn i nat (timer)<input type="number" inputmode="decimal" step="0.25" '+
-        'data-morgen="soevnT" value="'+(erTal(k.soevnT)?k.soevnT:"")+'" placeholder="fx 7,5"></label>'+
-      '<label>Søvnkvalitet</label>'+skala("soevnKval",k.soevnKval,"elendig","perfekt")+
-      '<label>Ømhed i benene</label>'+skala("oemhed",k.oemhed,"ingen","meget")+
-      '<label>Energi</label>'+skala("energi",k.energi,"tom","fuld")+
-      '<label>Stress uden for træning</label>'+skala("stress",k.stress,"ingen","meget")+
+      '<span>10 sekunder</span></div>'+
+      (maalte.length
+        ? '<p class="hint" style="margin-top:10px"><b style="color:var(--ok)">Fra uret ✓</b> '+
+          esc(maalte.join(" · "))+'</p>'
+        : '<p class="hint" style="margin-top:10px">Ingen målinger endnu i dag – de kommer '+
+          'selv med næste kig i Dropbox. Skalaerne her kan intet ur svare på:</p>')+
+      '<label>Søvnkvalitet <span class="forklar">Hvordan var natten at være i – '+
+        'sammenhængende og udhvilende, eller urolig og afbrudt? (Har uret målt '+
+        'sengetid og afbrydelser, regner appen selv en score, hvis du springer over.)'+
+        '</span></label>'+skala("soevnKval",k.soevnKval,"elendig","perfekt")+
+      '<label>Ømhed <span class="forklar">Muskelømhed i ben og krop lige nu – '+
+        'efterveer fra træning. Ikke smerte: gør noget ondt på en skarp måde, er det '+
+        'en anden samtale.</span></label>'+skala("oemhed",k.oemhed,"ingen","meget")+
+      '<label>Energi <span class="forklar">Dit oplevede overskud her til morgen – '+
+        'klar til dagen, eller kører du på reserven?</span></label>'+
+        skala("energi",k.energi,"tom","fuld")+
+      '<label>Stress <span class="forklar">Pres uden for træningen: arbejde, familie, '+
+        'tanker der fylder. Det belaster restitutionen, uden at noget ur opdager det.'+
+        '</span></label>'+skala("stress",k.stress,"ingen","meget")+
       '<div class="knaprad"><button class="gem sek" id="morgenAnnuller">Fortryd</button>'+
-      '<button class="gem" id="morgenGem">Gem morgentjek</button></div>'+
-      '<p class="hint">HRV og hvilepuls kan importeres automatisk under ⚙ Data. '+
-      'De tre skalaer skal du selv svare på – det er dem, uret ikke kan måle.</p></div>';
+      '<button class="gem" id="morgenGem">Gem morgentjek</button></div></div>';
   }else if(m){
     const dele=[];
     if(erTal(m.hrv))dele.push("HRV "+num(m.hrv,0));
     if(erTal(m.hvilePuls))dele.push("puls "+num(m.hvilePuls,0));
     if(erTal(m.soevnT))dele.push("søvn "+num(m.soevnT,1)+" t");
+    const sc=soevnScore(data,idag());
+    if(sc!=null)dele.push("søvnscore "+sc);
     if(erTal(m.energi))dele.push("energi "+m.energi+"/5");
     if(erTal(m.oemhed))dele.push("ømhed "+m.oemhed+"/5");
     h+='<div class="kort"><div class="kort-top"><h2>Morgentjek ✓</h2>'+
@@ -2002,8 +2079,8 @@ function visIdag(){
       '</div></div>';
   }else{
     h+='<div class="kort"><div class="kort-top"><h2>Morgentjek</h2><span>ikke taget i dag</span></div>'+
-      '<p class="hint" style="margin-top:10px">Fire tal og tre skalaer. Det er dem, hele '+
-      'restitutionsbilledet hviler på.</p>'+
+      '<p class="hint" style="margin-top:10px">Tre skalaer – det, intet ur kan måle. '+
+      'Tallene henter appen selv.</p>'+
       '<button class="gem" id="morgenStart">Tag morgentjekket</button></div>';
   }
 
