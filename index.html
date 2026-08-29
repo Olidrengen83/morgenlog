@@ -248,8 +248,10 @@
   .backup h3{font-size:14px;font-weight:600;margin:0 0 6px}
   .lille{font-size:11px;color:var(--svag);margin-top:6px;line-height:1.5}
 
-  #traekop{position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:50%;
-    transform:translateX(-50%) translateY(-60px);z-index:50;
+  /* max(): safe-area-værdien viste sig upålidelig i fuldskærmstilstand, så
+     et fast minimum sikrer, at boksen altid lander UNDER kamerahuset. */
+  #traekop{position:fixed;top:calc(max(env(safe-area-inset-top), 54px) + 12px);left:50%;
+    transform:translateX(-50%) translateY(-140px);z-index:50;
     background:var(--kort);border:1px solid var(--gry);color:var(--tekst);
     border-radius:16px;padding:7px 16px;font-size:12px;
     transition:transform .15s ease-out;pointer-events:none;white-space:nowrap}
@@ -336,7 +338,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=16;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=17;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
