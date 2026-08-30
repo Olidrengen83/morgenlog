@@ -174,4 +174,30 @@ sig som en app og virker uden net.
 
 Dine data ligger i browserens lokale lager. De overlever opdateringer af appen,
 men ikke et telefonskifte eller en rydning af browserdata: tag en
-sikkerhedskopi under ⚙ Data en gang imellem.
+sikkerhedskopi under ⚙ Data en gang imellem. Er Dropbox forbundet, lægger
+appen selv en kopi derop cirka en gang om ugen (uden adgangsnøglerne) —
+det kræver, at Dropbox-appen har tilladelsen `files.content.write`.
+
+## Fremgang, milepæle og skadeslog
+
+Balance-fanen har ud over maskinrummet tre blik fremad og bagud:
+
+- **Aerob motor** — meter pr. hjerteslag på rolige ture (puls ≤ 85 % af max,
+  mindst 3 km), vist som indeks med udgangspunkt 100. Stiger kurven, løber du
+  hurtigere ved samme puls. Intervaller tæller bevidst ikke med.
+- **Styrke: vægten på stangen** — skriv vægten med «kg» i øvelsesfeltet
+  (f.eks. «16 kg»), så tegner appen kurven pr. øvelse af sig selv.
+- **Månedsblik** — 12 ugers belastning som stakke i samme farver som
+  dagsdiagrammet, med parathed og søvn pr. uge i tabellen under.
+
+Loggen indleder med **milepæle**: bedste km, bedste 5 km i træk, længste tur
+og største uge — læst ud af urets kilometertider.
+
+Morgentjekkets ømhedsskala har fået **steder** (SI-led, lænd, hofte, knæ,
+akilles, fod). Prik af, hvor det sidder, og Balance viser mønstret over 28
+dage — med et særskilt varsel, når SI-leddet melder sig flere gange på to uger.
+
+Holder du app-ikonet på hjemmeskærmen inde, tilbyder telefonen genveje direkte
+til morgentjekket og Dropbox-synkroniseringen (hvor styresystemet understøtter
+det — iOS ignorerer i skrivende stund manifest-genveje, dér virker
+adresserne `#tjek=1` og `#sync=1` stadig).

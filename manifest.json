@@ -8,6 +8,22 @@
   "orientation": "portrait",
   "background_color": "#0D1320",
   "theme_color": "#0D1320",
+  "shortcuts": [
+    {
+      "name": "Morgentjek",
+      "short_name": "Morgentjek",
+      "description": "Åbn dagens morgentjek med det samme",
+      "url": "./#tjek=1",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Hent fra Dropbox",
+      "short_name": "Hent nyt",
+      "description": "Synkronisér med Dropbox nu",
+      "url": "./#sync=1",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     {
       "src": "icon-192.png",
