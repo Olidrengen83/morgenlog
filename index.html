@@ -129,6 +129,15 @@
   .skala button.aktiv{background:var(--gryDim);border-color:var(--gry);color:var(--tekst)}
   .skalatekst{font-size:11px;color:var(--svag);margin-top:5px;display:flex;
     justify-content:space-between}
+  .steder{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .steder button{padding:6px 11px;border-radius:14px;font-size:12px;cursor:pointer;
+    background:var(--nat);border:1px solid var(--kant);color:var(--daempet)}
+  .steder button.aktiv{background:rgba(213,81,129,.16);border-color:var(--s-styrke);
+    color:var(--tekst)}
+  .stribe{display:flex;gap:2px;flex:1}
+  .stribe i{flex:1;height:11px;border-radius:2px;background:var(--nat);
+    border:1px solid var(--kant)}
+  .stribe i.ondt{background:var(--s-styrke);border-color:var(--s-styrke)}
 
   .feels{display:flex;gap:8px;margin-top:16px}
   .feels button{flex:1;padding:9px 0;border-radius:6px;font-size:14px;cursor:pointer;
@@ -332,6 +341,9 @@ const VAEGT=["–","Kropsvægt","8 kg","12 kg","16 kg","20 kg","24 kg","28 kg","
   "Elastik let","Elastik middel","Elastik hård"];
 const FEELS=[{id:"let",label:"For let",rpe:4},{id:"tilpas",label:"Tilpas",rpe:6},
   {id:"haardt",label:"For hårdt",rpe:8.5}];
+/* Skadeslog: de steder, en løber med SI-fortid faktisk får brug for at prikke af. */
+const STEDER=[["si","SI-led"],["laend","Lænd"],["hofte","Hofte"],
+  ["knae","Knæ"],["akilles","Akilles"],["fod","Fod"]];
 const LOEBTYPER=[
   {id:"rolig",navn:"Roligt / snakketempo",rpe:4},
   {id:"lang",navn:"Langtur",rpe:5},
@@ -344,7 +356,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=19;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=20;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -419,7 +431,7 @@ const STDPROFIL={maxPuls:186,hvilePuls:52,soevnBehov:7.5,foedselsaar:null};
 
 function dbxStd(){
   return {appKey:"",refresh:"",access:"",udloeb:0,mappe:"",verifier:"",
-    set:{},senest:null};
+    set:{},senest:null,sidsteBackup:0};
 }
 function tomtData(){
   return {v:2,profil:Object.assign({},STDPROFIL),ugeplan:STDPLAN.slice(),
@@ -537,7 +549,7 @@ function dagligeLoads(d,datoer,udenAndet){
 /* Eksponentielt vægtede snit: akut (τ=7) mod kronisk (τ=28).
    Forholdet mellem dem er det tal, der forudsiger overbelastning bedst. */
 let beregnVersion=0, beregnCache={};
-function nulstilBeregning(){beregnVersion++;beregnCache={}}
+function nulstilBeregning(){beregnVersion++;beregnCache={};paratCache={}}
 function belastningsTal(d,tilDato,udenAndet){
   const slut=tilDato||idag();
   const noegle=beregnVersion+"|"+slut+(udenAndet?"|uden":"");
@@ -684,8 +696,11 @@ const BAND=[
 ];
 const bandFor=(s)=>BAND.find(b=>s>=b.min)||BAND[BAND.length-1];
 
+let paratCache={};
 function parathed(d,dato){
   const dt=dato||idag();
+  const pnoegle=beregnVersion+"|"+dt;
+  if(paratCache[pnoegle])return paratCache[pnoegle];
   const m=morgenFor(d,dt);
   const bt=belastningsTal(d,dt);
   const dele=[];
@@ -760,9 +775,11 @@ function parathed(d,dato){
     (b.vaegt*(100-b.score))-(a.vaegt*(100-a.score)));
   const top=rangeret[0]&&rangeret[0].score<70?rangeret[0]:null;
 
-  return {score:score,band:band,dele:dele,mangler:mangler,
+  const svar={score:score,band:band,dele:dele,mangler:mangler,
     loeftestang:top?{del:top,raad:loeftestangsRaad(top,d,dt,bt)}:null,
     rangeret:rangeret,bt:bt,harMorgen:!!m,dato:dt};
+  paratCache[pnoegle]=svar;
+  return svar;
 }
 
 function loeftestangsRaad(del,d,dt,bt){
@@ -824,6 +841,99 @@ function foreslaaHvilePuls(d){
     m.hvilePuls>=30&&m.hvilePuls<=100).map(m=>m.hvilePuls);
   if(v.length<5)return null;
   return {v:Math.round(median(v)),n:v.length};
+}
+
+/* Aerob effektivitet: meter pr. hjerteslag på rolige ture. Stiger den,
+   løber du hurtigere ved samme puls – den ærligste fremgangsmåling, der
+   findes uden laboratorium. Vises som indeks, hvor udgangspunktet = 100. */
+function aerobePunkter(d){
+  const maxP=d.profil.maxPuls||186;
+  return d.sessions
+    .filter(s=>s.type==="LOEB"&&s.loeb&&erTal(s.loeb.gnsPuls)&&
+      erTal(s.loeb.distanceKm)&&s.loeb.distanceKm>=3&&
+      erTal(s.loeb.bevaegSek||s.loeb.tidSek)&&
+      s.loeb.gnsPuls<=maxP*0.85)
+    .map(s=>({dato:s.dato,
+      ef:(s.loeb.distanceKm*1000/(s.loeb.bevaegSek||s.loeb.tidSek))/s.loeb.gnsPuls,
+      tempo:s.loeb.tempoSekPrKm,puls:s.loeb.gnsPuls}))
+    .sort((a,b)=>a.dato<b.dato?-1:1);
+}
+function aerobIndeks(d){
+  const p=aerobePunkter(d).filter(x=>dageMellem(x.dato,idag())<=112);
+  if(p.length<4)return null;
+  const basis=gennemsnit(p.slice(0,Math.min(4,p.length)).map(x=>x.ef));
+  const punkter=p.map(x=>({dato:x.dato,vaerdi:x.ef/basis*100,tempo:x.tempo,puls:x.puls}));
+  const nyere=punkter.filter(x=>dageMellem(x.dato,idag())<=28).map(x=>x.vaerdi);
+  const aeldre=punkter.filter(x=>{const dg=dageMellem(x.dato,idag());
+    return dg>28&&dg<=56}).map(x=>x.vaerdi);
+  const trend=(nyere.length>=2&&aeldre.length>=2)
+    ? (gennemsnit(nyere)-gennemsnit(aeldre))/gennemsnit(aeldre)*100 : null;
+  return {punkter:punkter,trend:trend};
+}
+
+/* Idé 3: vægt pr. øvelse over tid, læst ud af de loggede pas. */
+function vaegtHistorik(d,oevId){
+  const ud=[];
+  d.sessions.forEach(s=>{
+    if(!ERSTYRKE(s.type)||!s.entries||!s.entries[oevId])return;
+    const m=/(\d+(?:[.,]\d+)?)\s*kg/i.exec(s.entries[oevId]);
+    if(m)ud.push({dato:s.dato,kg:parseFloat(m[1].replace(",","."))});
+  });
+  return ud.sort((a,b)=>a.dato<b.dato?-1:1);
+}
+function oevelserMedVaegt(d){
+  const antal={};
+  d.sessions.forEach(s=>{
+    if(!ERSTYRKE(s.type)||!s.entries)return;
+    Object.keys(s.entries).forEach(id=>{
+      if(/\d\s*kg/i.test(s.entries[id]))antal[id]=(antal[id]||0)+1;
+    });
+  });
+  return Object.keys(antal).filter(id=>antal[id]>=3)
+    .sort((a,b)=>antal[b]-antal[a]);
+}
+
+/* Idé 6b: milepæle fra splits og ture. */
+function milepaele(d){
+  let km=null,fem=null,laengste=null,uge=null;
+  d.sessions.forEach(s=>{
+    if(s.type!=="LOEB"||!s.loeb)return;
+    const sp=(s.loeb.splits||[]).filter(k=>erTal(k.sek)&&k.sek>150&&k.sek<900);
+    sp.forEach(k=>{if(!km||k.sek<km.sek)km={sek:k.sek,dato:s.dato}});
+    for(let i=0;i+5<=sp.length;i++){
+      const sum=sp.slice(i,i+5).reduce((a,k)=>a+k.sek,0);
+      if(!fem||sum<fem.sek)fem={sek:sum,dato:s.dato};
+    }
+    if(erTal(s.loeb.distanceKm)&&(!laengste||s.loeb.distanceKm>laengste.km))
+      laengste={km:s.loeb.distanceKm,dato:s.dato};
+  });
+  const uger=ugeRaekker(d,52);
+  uger.forEach(u=>{if(u.au>0&&(!uge||u.au>uge.au))uge={au:u.au,dato:u.start}});
+  return {km:km,fem:fem,laengste:laengste,uge:uge};
+}
+
+/* Idé 5: ugerækker til månedsblikket. */
+function ugeRaekker(d,antal){
+  const ud=[];
+  const nu=new Date(fraIso(idag()));
+  const forskyd=(nu.getDay()+6)%7;
+  for(let w=0;w<antal;w++){
+    const man=new Date(nu);man.setDate(nu.getDate()-forskyd-w*7);
+    const datoer=Array.from({length:7},(_,i)=>{
+      const dd=new Date(man);dd.setDate(man.getDate()+i);return iso(dd)});
+    const kort=dagligeLoads(d,datoer);
+    let au=0,loeb=0,styrke=0,andet=0;
+    datoer.forEach(dt=>{au+=kort[dt].total;loeb+=kort[dt].loeb;
+      styrke+=kort[dt].styrke;andet+=kort[dt].andet});
+    const parat=datoer.filter(dt=>dt<=idag()).map(dt=>parathed(d,dt).score)
+      .filter(erTal);
+    const soevn=datoer.map(dt=>soevnScore(d,dt)).filter(erTal);
+    ud.push({start:datoer[0],au:Math.round(au),loeb:Math.round(loeb),
+      styrke:Math.round(styrke),andet:Math.round(andet),
+      parat:parat.length?Math.round(gennemsnit(parat)):null,
+      soevn:soevn.length?Math.round(gennemsnit(soevn)):null});
+  }
+  return ud.reverse();
 }
 
 /* Én samlet stillingtagen på tværs af alt, appen ved: kroppen (morgentjek,
@@ -1743,6 +1853,101 @@ function sparkline(d,felt,tilDato,farve){
   return ud;
 }
 
+/* Aerob motor som indeks (udgangspunkt = 100). Prikker pr. tur, linje gennem
+   et glidende 3-turs-snit, så én dårlig dag ikke stjæler billedet. */
+function efDiagram(ai){
+  const W=420,H=120,pT=10,pB=16,pL=8,pR=36;
+  const p=ai.punkter;
+  const v=p.map(x=>x.vaerdi);
+  let lo=Math.min(Math.min.apply(null,v),97), hi=Math.max(Math.max.apply(null,v),103);
+  const pad=(hi-lo)*0.12||1; lo-=pad; hi+=pad;
+  const plotW=W-pL-pR, plotH=H-pT-pB;
+  const spand=Math.max(dageMellem(p[0].dato,idag()),1);
+  const x=(dato)=>pL+plotW*(1-dageMellem(dato,idag())/spand);
+  const y=(val)=>pT+plotH-((val-lo)/(hi-lo))*plotH;
+  let ud='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Aerob effektivitet som indeks, udgangspunkt 100">';
+  ud+='<line x1="'+pL+'" y1="'+y(100).toFixed(1)+'" x2="'+(pL+plotW)+'" y2="'+
+    y(100).toFixed(1)+'" stroke="var(--akse)" stroke-width="1" stroke-dasharray="4 4"/>'+
+    '<text x="'+(pL+plotW+5)+'" y="'+(y(100)+3.5).toFixed(1)+'" font-size="9" '+
+    'fill="var(--daempet)" font-family="ui-monospace,monospace">100</text>';
+  const glat=p.map((pt,i)=>({dato:pt.dato,
+    v:gennemsnit(p.slice(Math.max(0,i-2),i+1).map(q=>q.vaerdi))}));
+  ud+='<polyline points="'+glat.map(q=>x(q.dato).toFixed(1)+","+y(q.v).toFixed(1)).join(" ")+
+    '" fill="none" stroke="var(--s-loeb)" stroke-width="2" stroke-linejoin="round" '+
+    'stroke-linecap="round" opacity=".9"/>';
+  p.forEach(pt=>{
+    ud+='<circle cx="'+x(pt.dato).toFixed(1)+'" cy="'+y(pt.vaerdi).toFixed(1)+
+      '" r="3" fill="var(--s-loeb)" opacity=".55"><title>'+esc(kortDato(pt.dato))+': '+
+      num(pt.vaerdi,0)+(erTal(pt.puls)?' · puls '+pt.puls:'')+'</title></circle>';
+  });
+  const sidstP=p[p.length-1];
+  ud+='<text x="'+(pL+plotW+5)+'" y="'+(y(sidstP.vaerdi)+3.5).toFixed(1)+
+    '" font-size="10" fill="var(--tekst)" font-family="ui-monospace,monospace">'+
+    num(sidstP.vaerdi,0)+'</text>';
+  return ud+'</svg>';
+}
+
+/* Vægt pr. øvelse over tid – trappelinje, fordi vægten står stille mellem hop. */
+function vaegtDiagram(punkter){
+  const W=420,H=100,pT=10,pB=14,pL=8,pR=42;
+  const v=punkter.map(x=>x.kg);
+  let lo=Math.min.apply(null,v), hi=Math.max.apply(null,v);
+  const pad=(hi-lo)*0.2||2; lo-=pad; hi+=pad;
+  const plotW=W-pL-pR, plotH=H-pT-pB;
+  const spand=Math.max(dageMellem(punkter[0].dato,idag()),1);
+  const x=(dato)=>pL+plotW*(1-dageMellem(dato,idag())/spand);
+  const y=(kg)=>pT+plotH-((kg-lo)/(hi-lo))*plotH;
+  let sti="";
+  punkter.forEach((pt,i)=>{
+    const px=x(pt.dato).toFixed(1), py=y(pt.kg).toFixed(1);
+    sti+=(i===0?"M"+px+","+py:" H"+px+" V"+py);
+  });
+  let ud='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Vægt over tid">'+
+    '<path d="'+sti+'" fill="none" stroke="var(--s-styrke)" stroke-width="2" '+
+    'stroke-linejoin="round" stroke-linecap="round"/>';
+  punkter.forEach(pt=>{
+    ud+='<circle cx="'+x(pt.dato).toFixed(1)+'" cy="'+y(pt.kg).toFixed(1)+
+      '" r="3" fill="var(--s-styrke)"><title>'+esc(kortDato(pt.dato))+': '+
+      num(pt.kg,1)+' kg</title></circle>';
+  });
+  const sidstV=punkter[punkter.length-1];
+  ud+='<text x="'+(pL+plotW+5)+'" y="'+(y(sidstV.kg)+3.5).toFixed(1)+
+    '" font-size="10" fill="var(--tekst)" font-family="ui-monospace,monospace">'+
+    num(sidstV.kg,1)+' kg</text>';
+  return ud+'</svg>';
+}
+
+/* Månedsblik: én stak pr. uge, samme farver som dagsdiagrammet. */
+function maanedsDiagram(uger){
+  const W=420,H=120,pT=8,pB=16,pL=8,pR=8;
+  const top=Math.max.apply(null,uger.map(u=>u.au).concat([1]));
+  const plotW=W-pL-pR, plotH=H-pT-pB;
+  const felt=plotW/uger.length, bredde=felt-6;
+  let ud='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ugentlig belastning, '+
+    uger.length+' uger">';
+  uger.forEach((u,i)=>{
+    const xx=pL+i*felt+3;
+    let bund=pT+plotH;
+    [["styrke","var(--s-styrke)"],["andet","var(--s-andet)"],["loeb","var(--s-loeb)"]]
+      .forEach(par=>{
+        const vv=u[par[0]];
+        if(vv<=0)return;
+        const hh=Math.max(1.5,(vv/top)*plotH);
+        ud+='<rect x="'+xx.toFixed(1)+'" y="'+(bund-hh).toFixed(1)+'" width="'+
+          bredde.toFixed(1)+'" height="'+hh.toFixed(1)+'" rx="2" fill="'+par[1]+'"/>';
+        bund-=hh+1.5;
+      });
+    ud+='<rect x="'+(xx-1).toFixed(1)+'" y="'+pT+'" width="'+(bredde+2).toFixed(1)+
+      '" height="'+plotH+'" fill="transparent"><title>Uge fra '+esc(kortDato(u.start))+
+      ': '+u.au+' AU</title></rect>';
+    if(i%4===0||i===uger.length-1)
+      ud+='<text x="'+(xx+bredde/2).toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" '+
+        'font-size="8" fill="var(--daempet)" font-family="ui-monospace,monospace">'+
+        esc(kortDato(u.start))+'</text>';
+  });
+  return ud+'</svg>';
+}
+
 /* ==========================================================================
    9. BRIEFING TIL CLAUDE
    Den samme tekst bruges to steder: til kopiér-og-indsæt, og som kontekst
@@ -1870,6 +2075,36 @@ function briefing(d){
       L.push("");
     }
   }
+  const ai=aerobIndeks(d);
+  const mp=milepaele(d);
+  if(ai||mp.km||mp.laengste||mp.uge){
+    L.push("## Fremgang og milepæle");
+    if(ai){
+      const sidstEF=ai.punkter[ai.punkter.length-1];
+      L.push("- Aerob effektivitet (meter/hjerteslag på rolige ture, start = indeks 100): "+
+        "senest "+num(sidstEF.vaerdi,0)+
+        (ai.trend!=null?" · seneste 4 uger mod de 4 før: "+(ai.trend>0?"+":"")+
+          num(ai.trend,1)+" %":" · for få ture til en trend"));
+    }
+    if(mp.km)L.push("- Bedste km: "+tidTekst(mp.km.sek)+" ("+mp.km.dato+")");
+    if(mp.fem)L.push("- Bedste 5 km i træk: "+tidTekst(mp.fem.sek)+" ("+mp.fem.dato+")");
+    if(mp.laengste)L.push("- Længste tur: "+num(mp.laengste.km,1)+" km ("+mp.laengste.dato+")");
+    if(mp.uge)L.push("- Største uge: "+mp.uge.au+" AU (uge fra "+mp.uge.dato+")");
+    L.push("");
+  }
+
+  const stedTal={};
+  sidsteNDatoer(28,dt).forEach(dato=>{
+    const m=morgenFor(d,dato);
+    ((m&&m.oemhedSteder)||[]).forEach(sid=>{stedTal[sid]=(stedTal[sid]||0)+1});
+  });
+  const stedListe=STEDER.filter(s=>stedTal[s[0]]);
+  if(stedListe.length){
+    L.push("## Ømhedssteder, seneste 28 dage");
+    stedListe.forEach(s=>L.push("- "+s[1]+": "+stedTal[s[0]]+" morgener"));
+    L.push("");
+  }
+
   L.push("---");
   L.push("Afkobling = fart pr. hjerteslag i anden halvdel mod første. Over ca. 5 % betyder det,");
   L.push("at turen kostede mere, end tempoet antyder.");
@@ -1971,6 +2206,7 @@ let loebType="rolig", urPas=null, loebManuel={distanceKm:null,minutter:null,gnsP
 let morgenKladde=null, morgenAaben=false;
 let samtale=[], claudeTravl=false, claudeTilstand="", claudeUdkast="", claudeFejl="";
 let importStatus=null, valgtDag=null, systemBesked=null, systemRo=null, redigerId=null;
+let valgtOevelse=null;
 
 function nyKladde(fra){
   kladde={};
@@ -2140,6 +2376,11 @@ function visIdag(){
       '<label>Ømhed <span class="forklar">Muskelømhed i ben og krop lige nu – '+
         'efterveer fra træning. Ikke smerte: gør noget ondt på en skarp måde, er det '+
         'en anden samtale.</span></label>'+skala("oemhed",k.oemhed,"ingen","meget")+
+      '<div class="steder">'+STEDER.map(s=>'<button data-sted="'+s[0]+'" class="'+
+        (((k.oemhedSteder||[]).indexOf(s[0])>=0)?"aktiv":"")+'">'+esc(s[1])+'</button>')
+        .join("")+'</div>'+
+      '<p class="lille" style="margin-top:5px">Sidder det et bestemt sted, så prik det af – '+
+        'appen holder øje med mønstret over ugerne.</p>'+
       '<label>Energi <span class="forklar">Dit oplevede overskud her til morgen – '+
         'klar til dagen, eller kører du på reserven?</span></label>'+
         skala("energi",k.energi,"tom","fuld")+
@@ -2157,6 +2398,9 @@ function visIdag(){
     if(sc!=null)dele.push("søvnscore "+sc);
     if(erTal(m.energi))dele.push("energi "+m.energi+"/5");
     if(erTal(m.oemhed))dele.push("ømhed "+m.oemhed+"/5");
+    if(m.oemhedSteder&&m.oemhedSteder.length)
+      dele.push(m.oemhedSteder.map(sid=>{
+        const s=STEDER.find(x=>x[0]===sid);return s?s[1]:sid}).join(", "));
     h+='<div class="kort"><div class="kort-top"><h2>Morgentjek ✓</h2>'+
       '<span><button class="tandhjul" id="morgenRet" style="width:auto;height:auto;'+
       'padding:4px 10px;font-size:11px">RET</button></span></div>'+
@@ -2410,6 +2654,70 @@ function visBalance(){
       ' t. Ret det under ⚙ Data.</div></div>';
   }
 
+  // Fremgang: parathed og belastning handler om i dag – det her handler om,
+  // om du faktisk bliver bedre over måneder.
+  const ai=aerobIndeks(data);
+  const oevListe=oevelserMedVaegt(data);
+  if(ai||oevListe.length){
+    h+='<h3 class="afsnit">FREMGANG</h3>';
+    if(ai){
+      const t=ai.trend;
+      const dom=t==null?null:t>=2?["var(--st-god)","Motoren vokser: de seneste 4 uger ligger "+
+          num(t,0)+" % over de 4 før. Du løber hurtigere ved samme puls."]
+        :t<=-2?["var(--st-varsel)","De seneste 4 uger ligger "+num(Math.abs(t),0)+
+          " % under de 4 før. Varme, bakker eller træthed kan forklare det – hold øje, ikke panik."]
+        :["var(--daempet)","Stabil: de seneste 4 uger ligner de 4 før. Fremgang her måles i måneder, ikke uger."];
+      h+='<div class="kort"><div class="kort-top"><h2>Aerob motor</h2>'+
+        '<span>indeks · start = 100</span></div>'+
+        '<div class="diagram">'+efDiagram(ai)+'</div>'+
+        '<div class="udlaes">'+(dom
+          ?'<b style="color:'+dom[0]+'">■</b> '+esc(dom[1])
+          :'For få rolige ture i de rigtige uger til en trend endnu – kurven taler for sig selv.')+
+        '</div>'+
+        '<p class="hint">Meter pr. hjerteslag på rolige ture (puls ≤ 85 % af max, mindst 3 km). '+
+        'Stiger kurven, løber du hurtigere ved samme puls – den ærligste fremgangsmåling uden '+
+        'laboratorium. Intervaller og korte ture tæller bevidst ikke med.</p></div>';
+    }
+    if(oevListe.length){
+      const valgt=oevListe.indexOf(valgtOevelse)>=0?valgtOevelse:oevListe[0];
+      const hist=vaegtHistorik(data,valgt);
+      const foerste=hist[0], sidsteH=hist[hist.length-1];
+      h+='<div class="kort"><div class="kort-top"><h2>Styrke: vægten på stangen</h2>'+
+        '<span class="mono">'+num(sidsteH.kg,1)+' kg</span></div>'+
+        '<select id="oevValg" class="mono" aria-label="Vælg øvelse">'+
+        oevListe.map(oid=>'<option value="'+esc(oid)+'"'+(oid===valgt?" selected":"")+'>'+
+          esc(oevelsesNavn(oid))+'</option>').join("")+'</select>'+
+        '<div class="diagram" style="margin-top:10px">'+vaegtDiagram(hist)+'</div>'+
+        '<div class="udlaes">'+esc(oevelsesNavn(valgt))+': fra '+num(foerste.kg,1)+' kg til '+
+        num(sidsteH.kg,1)+' kg over '+hist.length+' pas'+
+        (sidsteH.kg>foerste.kg?' – det er fremgang, sort på hvidt.'
+         :sidsteH.kg<foerste.kg?'. Et bevidst skridt ned er fint – ufrivilligt er det et signal.':'.')+
+        '</div>'+
+        '<p class="hint">Læst ud af dine egne noter – skriv vægten med «kg» i øvelsesfeltet '+
+        '(f.eks. «16 kg»), så følger kurven med af sig selv.</p></div>';
+    }
+  }
+
+  // Månedsblik: zoom ud – tre måneder på én skærm.
+  const uger=ugeRaekker(data,12);
+  if(uger.some(u=>u.au>0)){
+    h+='<h3 class="afsnit">MÅNEDSBLIK</h3>'+
+      '<div class="kort"><div class="kort-top"><h2>12 uger</h2><span>AU pr. uge</span></div>'+
+      '<div class="diagram">'+maanedsDiagram(uger)+'</div>'+
+      '<div class="legende"><span><i style="background:var(--s-loeb)"></i>Løb</span>'+
+      '<span><i style="background:var(--s-styrke)"></i>Styrke</span>'+
+      '<span><i style="background:var(--s-andet)"></i>Gang & cykel</span></div>'+
+      '<div class="rul" style="margin-top:10px"><table class="data"><thead><tr>'+
+      '<th>UGE FRA</th><th>AU</th><th>LØB</th><th>STYRKE</th><th>PARAT</th><th>SØVN</th>'+
+      '</tr></thead><tbody>'+
+      uger.slice().reverse().slice(0,6).map(u=>'<tr><td class="d">'+esc(kortDato(u.start))+
+        '</td><td>'+u.au+'</td><td>'+u.loeb+'</td><td>'+u.styrke+'</td>'+
+        '<td>'+(u.parat==null?"–":u.parat)+'</td><td>'+(u.soevn==null?"–":u.soevn)+
+        '</td></tr>').join("")+'</tbody></table></div>'+
+      '<p class="hint">Uger med både høj belastning og god parathed er dem, du bygger form i. '+
+      'Høj belastning oven på lav parathed er lånte penge.</p></div>';
+  }
+
   // Tabelvisning: hvert tal i diagrammerne skal også kunne læses som tal.
   h+='<h3 class="afsnit">TALLENE</h3><div class="kort"><div class="rul">'+
     '<table class="data"><thead><tr><th>DATO</th><th>PAS</th><th>LOAD</th>'+
@@ -2425,6 +2733,36 @@ function visBalance(){
         '<td>'+(m&&erTal(m.hrv)?num(m.hrv,0):"–")+'</td>'+
         '<td>'+(m&&erTal(m.soevnT)?num(m.soevnT,1):"–")+'</td></tr>';
     }).join("")+'</tbody></table></div></div>';
+
+  // Skadeslog: hvor ømheden har siddet de sidste fire uger. Kroppen gentager
+  // sig, før den brokker sig for alvor – mønstret her er varslet.
+  const dage28=sidsteNDatoer(28);
+  const stedStriber=STEDER.map(s=>{
+    const celler=dage28.map(dt=>{
+      const m28=morgenFor(data,dt);
+      return !!(m28&&m28.oemhedSteder&&m28.oemhedSteder.indexOf(s[0])>=0);
+    });
+    return {id:s[0],navn:s[1],celler:celler,antal:celler.filter(Boolean).length};
+  }).filter(s=>s.antal>0);
+  if(stedStriber.length){
+    const si14=stedStriber.find(s=>s.id==="si");
+    const siNylig=si14?si14.celler.slice(-14).filter(Boolean).length:0;
+    h+='<h3 class="afsnit">HVOR DET GØR ONDT</h3><div class="kort">'+
+      stedStriber.map(s=>'<div style="display:flex;align-items:center;gap:10px;'+
+        'margin-top:8px"><span class="lille" style="width:64px;flex-shrink:0;margin:0">'+
+        esc(s.navn)+'</span><span class="stribe">'+
+        s.celler.map(c=>'<i'+(c?' class="ondt"':'')+'></i>').join("")+
+        '</span><span class="mono lille" style="width:20px;text-align:right;margin:0">'+
+        s.antal+'</span></div>').join("")+
+      '<p class="hint">28 dage, ældst til venstre – fra ømhedsprikkerne i morgentjekket. '+
+      'Ét udslag er støj; en stribe i samme område er et mønster, der skal have '+
+      'lettere uger, før det selv beder om dem.</p>'+
+      (siNylig>=3?'<p class="hint" style="color:var(--st-varsel)">SI-leddet har meldt sig '+
+        siNylig+' gange på 14 dage. Det er dit kendte svage punkt: skru ned for hop og '+
+        'tunge etbensøvelser, og hold fast i mobilitetsdagene, til det har været '+
+        'stille en uge.</p>':"")+
+      '</div>';
+  }
 
   if(p.rangeret.length>1){
     h+='<h3 class="afsnit">HVOR DET KOSTER MEST</h3><div class="kort">'+
@@ -2587,6 +2925,18 @@ function visLog(){
     return '<p class="tom">Ingen pas endnu. Det første logger du under "I dag".</p>';
   let h='<p class="tom">'+data.sessions.length+' pas · seneste '+
     esc(paenDato(data.sessions[data.sessions.length-1].dato))+'</p>';
+  const mp=milepaele(data);
+  if(mp.km||mp.fem||mp.laengste||mp.uge){
+    h+='<div class="kort"><div class="kort-top"><h2>Milepæle</h2><span>alle tider</span></div>'+
+      '<div class="fliser" style="margin-top:10px">'+
+      (mp.km?flise("BEDSTE KM",tidTekst(mp.km.sek),kortDato(mp.km.dato)):"")+
+      (mp.fem?flise("BEDSTE 5 KM",tidTekst(mp.fem.sek),kortDato(mp.fem.dato)):"")+
+      '</div><div class="fliser">'+
+      (mp.laengste?flise("LÆNGSTE TUR",num(mp.laengste.km,1)+" km",kortDato(mp.laengste.dato)):"")+
+      (mp.uge?flise("STØRSTE UGE",mp.uge.au+" AU","fra "+kortDato(mp.uge.dato)):"")+
+      '</div><p class="hint">Bedste km og bedste 5 km i træk er læst ud af urets kilometertider. '+
+      'Slår du en af dem, flytter kortet sig selv.</p></div>';
+  }
   h+=data.sessions.slice().reverse().slice(0,60).map(s=>{
     const pr=PROGRAM[s.type];
     const det=[];
@@ -2826,6 +3176,22 @@ function visData(){
     '<button class="gem sek" id="backupNed">Gem sikkerhedskopi</button>'+
     '<label style="margin-top:12px">Gendan fra fil<input type="file" id="backupOp" '+
       'accept="application/json,.json"></label>'+
+    (dbxForbundet()?
+      '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--kant)">'+
+      '<button class="gem sek" id="dbxBackupNu">Læg en kopi i Dropbox nu</button>'+
+      '<p class="lille">'+(data.dropbox.sidsteBackup?
+        'Appen lægger selv en kopi i Dropbox cirka en gang om ugen. Seneste: '+
+        esc(new Date(data.dropbox.sidsteBackup).toLocaleDateString("da-DK"))+
+        ' · /Morgenlog/morgenlog-backup.json':
+        'Appen lægger selv en kopi i Dropbox cirka en gang om ugen – den første kommer '+
+        'ved næste synkronisering.')+'</p>'+
+      (dbxBackupStatus==="mangler-adgang"?
+        '<p class="hint" style="color:var(--st-varsel)">Dropbox-appen mangler lov til at '+
+        'skrive filer. Gå til dropbox.com/developers → din app → fanen Permissions → '+
+        'sæt flueben ved <b>files.content.write</b> → Submit. Tryk derefter Afbryd og '+
+        'Forbind igen herinde, så den nye tilladelse følger med.</p>':
+       dbxBackupStatus?'<p class="hint" style="color:var(--st-varsel)">'+esc(dbxBackupStatus)+'</p>':'')+
+      '</div>':'')+
     '<p class="lille">'+data.sessions.length+' pas · '+data.morgener.length+' morgener'+
     (gemFejl?' · <span style="color:var(--st-kritisk)">kunne ikke gemme sidst – '+
       'lageret er måske fuldt</span>':"")+'</p></div>';
@@ -2850,13 +3216,15 @@ function gemMorgen(){
   // ankommet via Dropbox EFTER at formularen blev åbnet og må aldrig slettes
   // af et øjebliksbillede i kladden.
   const skalaer=["soevnKval","oemhed","energi","stress"];
-  if(!skalaer.some(f=>erTal(k[f]))){
+  const steder=Array.isArray(k.oemhedSteder)?k.oemhedSteder.slice():[];
+  if(!skalaer.some(f=>erTal(k[f]))&&!steder.length){
     systemBesked="Morgentjekket blev ikke gemt – ingen af skalaerne var udfyldt.";
     morgenAaben=false;render();return;
   }
   let m=morgenFor(data,idag());
   if(!m){m={dato:idag()};data.morgener.push(m)}
   skalaer.forEach(f=>{if(erTal(k[f]))m[f]=k[f];else delete m[f]});
+  if(steder.length)m.oemhedSteder=steder;else delete m.oemhedSteder;
   oprydData(data);gemData(data);
   morgenAaben=false;morgenKladde=null;
   render();
@@ -3218,7 +3586,7 @@ async function sendTilClaude(tekst){
    fra browseren til Dropbox – der er stadig ingen server imellem.
    ========================================================================== */
 
-let dbxTravl=false, dbxStatus="";
+let dbxTravl=false, dbxStatus="", dbxBackupStatus="";
 
 function b64url(buf){
   return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)))
@@ -3441,6 +3809,8 @@ async function dbxSync(stille){
     }
     dbxTravl=false;
     render();
+    // Ugentlig sikkerhedskopi, når synkroniseringen alligevel er i gang.
+    if(!d.sidsteBackup||Date.now()-d.sidsteBackup>7*86400000)dbxBackup(false).catch(()=>{});
   }catch(e){
     dbxTravl=false;
     dbxStatus="Dropbox-fejl: "+e.message;
@@ -3451,7 +3821,44 @@ async function dbxSync(stille){
 
 function dbxAfbryd(){
   if(!confirm("Afbryd forbindelsen til Dropbox? Allerede hentede pas bliver stående."))return;
-  data.dropbox=dbxStd();gemData(data);dbxStatus="";render();
+  data.dropbox=dbxStd();gemData(data);dbxStatus="";dbxBackupStatus="";render();
+}
+
+/* Sikkerhedskopi til Dropbox: hele lageret som én json-fil, uden adgangsnøglerne
+   (de hører til telefonen, ikke skyen). Kører selv en gang om ugen efter en
+   vellykket synkronisering – og på knappen under Data, når man vil. */
+async function dbxBackup(manuel){
+  const d=data.dropbox;
+  if(!dbxForbundet())return;
+  if(manuel){dbxBackupStatus="Gemmer kopi i Dropbox …";render()}
+  try{
+    const token=await dbxAdgang();
+    const kopi=rensTilLager(data);
+    kopi.dropbox=Object.assign({},kopi.dropbox,{refresh:"",access:"",verifier:""});
+    const svar=await fetch("https://content.dropboxapi.com/2/files/upload",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token,
+        "Content-Type":"application/octet-stream",
+        "Dropbox-API-Arg":JSON.stringify({path:"/Morgenlog/morgenlog-backup.json",
+          mode:"overwrite",mute:true})},
+      body:JSON.stringify(kopi)
+    });
+    if(!svar.ok){
+      const tekst=await svar.text().catch(()=>"");
+      if(svar.status===401&&/missing_scope/.test(tekst)){
+        dbxBackupStatus="mangler-adgang";
+        if(manuel)render();
+        return;
+      }
+      throw new Error("Dropbox svarede "+svar.status);
+    }
+    d.sidsteBackup=Date.now();gemData(data);
+    dbxBackupStatus="";
+    if(manuel){systemRo="Sikkerhedskopien ligger nu i Dropbox under /Morgenlog.";render()}
+  }catch(e){
+    dbxBackupStatus="Kopien til Dropbox mislykkedes: "+e.message;
+    if(manuel)render();
+  }
 }
 
 /* ==========================================================================
@@ -3635,6 +4042,15 @@ function bind(){
     const f=e.currentTarget.dataset.skala,v=+e.currentTarget.dataset.v;
     morgenKladde[f]=(morgenKladde[f]===v)?undefined:v;render();
   });
+  paa("[data-sted]","click",e=>{
+    if(!morgenKladde)morgenKladde={dato:idag()};
+    const sid=e.currentTarget.dataset.sted;
+    // Kopiér listen før ændring – kladden kan dele array med det gemte morgental.
+    const l=(morgenKladde.oemhedSteder||[]).slice();
+    const i=l.indexOf(sid);
+    if(i>=0)l.splice(i,1);else l.push(sid);
+    morgenKladde.oemhedSteder=l;render();
+  });
   ["saet","reps","vaegt"].forEach(f=>{
     paa("[data-"+f+"]","change",e=>{
       const id=e.currentTarget.dataset[f];
@@ -3753,6 +4169,9 @@ function bind(){
 
   klik("backupNed",()=>hentNed(JSON.stringify(rensTilLager(data),null,2),
     "morgenlog-"+idag()+".json","application/json"));
+  klik("dbxBackupNu",()=>{dbxBackup(true)});
+  const ov=id("oevValg");
+  if(ov)ov.onchange=e=>{valgtOevelse=e.target.value;render()};
   const bop=id("backupOp");
   if(bop)bop.onchange=async e=>{
     const f=e.target.files[0];if(!f)return;
@@ -3790,7 +4209,18 @@ function bind(){
   klik("chatRyd",()=>{samtale=[];claudeFejl="";render()});
 }
 
+/* Genveje fra hjemmeskærmens app-ikon (langt tryk): #tjek=1 åbner morgentjekket,
+   #sync=1 henter fra Dropbox med det samme. Adressen ryddes bagefter, så en
+   genindlæsning ikke gentager handlingen. */
+function hurtigeHandlinger(){
+  const h=location.hash||"";
+  if(!/(^|[#&])(tjek|sync)=1/.test(h))return;
+  if(/(^|[#&])tjek=1/.test(h)){visning="idag";aabnMorgen()}
+  if(/(^|[#&])sync=1/.test(h)&&dbxForbundet())setTimeout(()=>{dbxSync(false).catch(()=>{})},300);
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+}
 tagImodAdresse();
+hurtigeHandlinger();
 render();
 if(dbxForbundet())setTimeout(()=>{dbxSync(true).catch(()=>{})},700);
 
