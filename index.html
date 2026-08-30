@@ -546,13 +546,20 @@ function belastningsTal(d,tilDato,udenAndet){
   const spand=klem(dageMellem(start,slut)+1,1,400);
   const datoer=sidsteNDatoer(spand,slut);
   const kort=dagligeLoads(d,datoer,udenAndet);
-  const foerste14=datoer.slice(0,14).map(dt=>kort[dt].total);
-  let atl=gennemsnit(foerste14)||0, ctl=atl;
+  // Opvarmning: de første 14 dage som voksende gennemsnit, derefter EWMA –
+  // ellers tælles opvarmningsdagene dobbelt og starten af historikken skævvrides.
+  let atl=0, ctl=0, opsum=0;
   const serie=[];
-  datoer.forEach(dt=>{
+  datoer.forEach((dt,i)=>{
     const l=kort[dt].total;
-    atl=atl+(l-atl)/7;
-    ctl=ctl+(l-ctl)/28;
+    if(i<14){
+      opsum+=l;
+      atl=opsum/(i+1);
+      ctl=atl;
+    }else{
+      atl=atl+(l-atl)/7;
+      ctl=ctl+(l-ctl)/28;
+    }
     serie.push({dato:dt,load:l,loeb:kort[dt].loeb,styrke:kort[dt].styrke,
       andet:kort[dt].andet,atl:atl,ctl:ctl});
   });
@@ -1084,7 +1091,7 @@ const FITTYPER={
 };
 const FITSPORT={0:"andet",1:"loeb",2:"cykel",4:"andet",10:"styrke",11:"gang",17:"gang"};
 
-function fitLaesFelt(dv,pos,type,stoerrelse){
+function fitLaesFelt(dv,pos,type,stoerrelse,be){
   const t=FITTYPER[type&0x1F];
   if(!t)return null;
   if(t.tekst){
@@ -1098,7 +1105,7 @@ function fitLaesFelt(dv,pos,type,stoerrelse){
   }
   // Felter kan være arrays; vi bruger kun første element.
   let v;
-  const le=true;
+  const le=!be;   // definitionens arkitektur-flag gælder også feltværdierne
   switch(t.b){
     case 1: v=t.s?dv.getInt8(pos):dv.getUint8(pos); break;
     case 2: v=t.s?dv.getInt16(pos,le):dv.getUint16(pos,le); break;
@@ -1109,7 +1116,7 @@ function fitLaesFelt(dv,pos,type,stoerrelse){
   if(!isFinite(v))return null;
   // Ugyldige værdier: FIT bruger den højeste værdi i typen som "ikke målt".
   if(t.nul&&v===0)return null;
-  if(!t.s&&!t.flyd&&v===Math.pow(2,t.b*8)-1)return null;
+  if(!t.s&&!t.flyd&&!t.nul&&v===Math.pow(2,t.b*8)-1)return null;
   if(t.s&&!t.flyd&&v===Math.pow(2,t.b*8-1)-1)return null;
   return v;
 }
@@ -1134,7 +1141,7 @@ function afkodFit(buffer){
     const felter={};
     for(const f of def.felter){
       if(p+f.stoerrelse>slut)return null;
-      felter[f.num]=fitLaesFelt(dv,p,f.base,f.stoerrelse);
+      felter[f.num]=fitLaesFelt(dv,p,f.base,f.stoerrelse,def.be);
       p+=f.stoerrelse;
     }
     p+=def.devStoerrelse;
@@ -1179,7 +1186,8 @@ function afkodFit(buffer){
         const antalDev=dv.getUint8(p++);
         for(let i=0;i<antalDev;i++){devStoerrelse+=dv.getUint8(p+1);p+=3}
       }
-      defs[h&0x0F]={global:global,felter:felter,devStoerrelse:devStoerrelse};
+      defs[h&0x0F]={global:global,felter:felter,devStoerrelse:devStoerrelse,
+        be:!!arkitektur};
       continue;
     }
     const def=defs[h&0x0F];
@@ -1520,6 +1528,10 @@ async function laesAppleEksport(fil,paaFremdrift){
         tilfoej(samler,start.dato,"hvilePuls",v);fundet++;
       }else if(type==="HKCategoryTypeIdentifierSleepAnalysis"&&slutD){
         const t0=appleTid(m[2]), t1=appleTid(m[3]);
+        // En blok, der både starter og slutter mellem 10 og 18, er en lur –
+        // den skal hverken tælle som søvntimer eller sætte sengetiden.
+        if(start&&start.time>=10&&start.time<18&&slutD.time>=10&&slutD.time<18&&
+          start.dato===slutD.dato)continue;
         if(t0&&t1&&t1>t0){
           // Natten hører til den morgen, den ender på.
           const dato=slutD.time<18?slutD.dato:plusDage(slutD.dato,1);
@@ -2834,14 +2846,17 @@ function visData(){
 
 function gemMorgen(){
   const k=morgenKladde||{};
-  const felter=["hrv","hvilePuls","soevnT","soevnKval","oemhed","energi","stress"];
-  if(!felter.some(f=>erTal(k[f]))){
-    systemBesked="Morgentjekket blev ikke gemt – der var ingen tal i det.";
+  // Kun skalaerne er brugerens; urets målinger (hrv, puls, søvn) kan være
+  // ankommet via Dropbox EFTER at formularen blev åbnet og må aldrig slettes
+  // af et øjebliksbillede i kladden.
+  const skalaer=["soevnKval","oemhed","energi","stress"];
+  if(!skalaer.some(f=>erTal(k[f]))){
+    systemBesked="Morgentjekket blev ikke gemt – ingen af skalaerne var udfyldt.";
     morgenAaben=false;render();return;
   }
   let m=morgenFor(data,idag());
   if(!m){m={dato:idag()};data.morgener.push(m)}
-  felter.forEach(f=>{if(erTal(k[f]))m[f]=k[f];else delete m[f]});
+  skalaer.forEach(f=>{if(erTal(k[f]))m[f]=k[f];else delete m[f]});
   oprydData(data);gemData(data);
   morgenAaben=false;morgenKladde=null;
   render();
@@ -2892,7 +2907,18 @@ function gemPas(){
     }
   }
   if(eksisterende)data.sessions=data.sessions.map(x=>x.id===s.id?s:x);
-  else data.sessions.push(s);
+  else{
+    // Er samme pas allerede kommet ind via Dropbox, mens kortet stod åbent,
+    // beriges det i stedet for at få en dublet ved siden af.
+    const mage=s.urStart?findMage({sport:type==="LOEB"?"loeb":"styrke",
+      startTid:s.urStart,kilde:"fil"}):null;
+    if(mage){
+      if(s.feel)mage.feel=s.feel;
+      if(s.note)mage.note=s.note;
+      if(s.entries&&Object.keys(s.entries).length)mage.entries=s.entries;
+      if(s.loebType)mage.loebType=s.loebType;
+    }else data.sessions.push(s);
+  }
   oprydData(data);gemData(data);
   gemt=true;redigerId=null;urPas=null;
   loebManuel={distanceKm:null,minutter:null,gnsPuls:null};
@@ -2904,6 +2930,7 @@ function sletPas(id){
   if(!s)return;
   if(!confirm("Slet "+typeNavn(s.type)+" den "+paenDato(s.dato)+"?"))return;
   data.sessions=data.sessions.filter(x=>x.id!==id);
+  if(redigerId===id){redigerId=null;nyKladde()}
   gemData(data);render();
 }
 
@@ -3030,7 +3057,9 @@ function indsaetTraening(t){
     mage.minutter=Math.round((t.bevaegSek||t.tidSek||0)/60)||mage.minutter;
     if(t.sport==="loeb"||t.sport==="gang"||t.sport==="cykel"){
       const gammel=mage.loeb||{};
-      mage.loeb=Object.assign({},gammel,t);
+      const nyt={};
+      Object.keys(t).forEach(nk=>{if(t[nk]!=null)nyt[nk]=t[nk]});
+      mage.loeb=Object.assign({},gammel,nyt);
       delete mage.loeb.startTid;delete mage.loeb.sport;
     }else{
       mage.ur={kilde:t.kilde,filnavn:t.filnavn,format:t.format,gnsPuls:t.gnsPuls,
@@ -3259,7 +3288,7 @@ async function dbxAdgang(){
   return d.access;
 }
 
-async function dbxKald(sti,krop){
+async function dbxKald(sti,krop,andetForsoeg){
   const token=await dbxAdgang();
   const svar=await fetch("https://api.dropboxapi.com/2/"+sti,{
     method:"POST",
@@ -3267,8 +3296,9 @@ async function dbxKald(sti,krop){
     body:JSON.stringify(krop)
   });
   if(svar.status===401){
+    if(andetForsoeg)throw new Error("Adgangen blev afvist – prøv at forbinde igen.");
     data.dropbox.access="";
-    return dbxKald(sti,krop);
+    return dbxKald(sti,krop,true);
   }
   const j=await svar.json().catch(()=>({}));
   if(!svar.ok)throw new Error(j.error_summary||("Dropbox svarede "+svar.status));
@@ -3369,9 +3399,11 @@ async function dbxSync(stille){
     }
     let antalNy=0,antalBeriget=0,antalAndet=0,fejl=0,morgenDage=0;
     for(const f of nye){
+      let hentet=false;
       try{
         if(erTal(f.size)&&f.size>25*1024*1024){d.set[f.id]=f.rev;continue}
         const buf=await dbxHentFil(f.id);
+        hentet=true;   // netværksfejl før dette punkt → prøv igen næste gang
         if(/\.(json|csv)$/i.test(f.name)){
           // Helbredsfil fra Health Auto Export: HRV, hvilepuls og søvn.
           const tekst=new TextDecoder("utf-8").decode(buf);
@@ -3392,7 +3424,7 @@ async function dbxSync(stille){
           else if(r.fejl)fejl++;
         }
       }catch(e){fejl++}
-      d.set[f.id]=f.rev;
+      if(hentet)d.set[f.id]=f.rev;
     }
     d.senest={tid:Date.now(),filer:filer.length,ny:antalNy};
     gemData(data);
@@ -3610,10 +3642,6 @@ function bind(){
     });
   });
   paa("[data-kladde='note']","input",e=>{note=e.currentTarget.value});
-  paa("[data-morgen]","input",e=>{
-    if(!morgenKladde)morgenKladde={dato:idag()};
-    morgenKladde[e.currentTarget.dataset.morgen]=tal(e.currentTarget.value);
-  });
   paa("[data-loebm]","input",e=>{
     loebManuel[e.currentTarget.dataset.loebm]=tal(e.currentTarget.value);
     const g=document.getElementById("gemPas");
@@ -3704,7 +3732,9 @@ function bind(){
   klik("dbxSyncNu",()=>{dbxSync(false)});
   klik("dbxFind",async()=>{await dbxFindMappe();render()});
   klik("dbxForfra",()=>{
-    data.dropbox.set={};data.dropbox.senest=null;gemData(data);dbxSync(false);
+    // senest bevares: ellers genindtræder førstegangs-loftet på 90 filer,
+    // og ældre filer ville blive stemplet som sete uden at blive læst.
+    data.dropbox.set={};gemData(data);dbxSync(false);
   });
   klik("dbxAfbryd",dbxAfbryd);
 
@@ -3721,7 +3751,7 @@ function bind(){
     else kopier(t,id("briefDel"),"Del");
   });
 
-  klik("backupNed",()=>hentNed(JSON.stringify(data,null,2),
+  klik("backupNed",()=>hentNed(JSON.stringify(rensTilLager(data),null,2),
     "morgenlog-"+idag()+".json","application/json"));
   const bop=id("backupOp");
   if(bop)bop.onchange=async e=>{
@@ -3737,6 +3767,7 @@ function bind(){
       d.sessions=ny.sessions;d.morgener=ny.morgener||[];
       d.sidsteVaegte=ny.sidsteVaegte||ny.lastWeights||{};
       if(ny.dropbox)Object.assign(d.dropbox,ny.dropbox);
+      if(ny.ui)Object.assign(d.ui,ny.ui);
       data=oprydData(d);gemData(data);
       systemBesked=null;visning="log";render();
     }catch(err){systemBesked="Kunne ikke læse sikkerhedskopien.";render()}
