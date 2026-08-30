@@ -344,7 +344,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=18;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=19;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -2093,7 +2093,11 @@ function visIdag(){
   h+='</div>';
 
   if(p.loeftestang){
-    h+='<div class="vagt"><b>Skru her:</b> '+esc(p.loeftestang.raad)+'</div>';
+    const groen=p.band&&p.band.status==="god";
+    h+=groen
+      ? '<div class="kort" style="margin-top:14px"><p class="hint" style="margin-top:0">'+
+        '<b style="color:var(--tekst)">Vil du finpudse:</b> '+esc(p.loeftestang.raad)+'</p></div>'
+      : '<div class="vagt"><b>Skru her:</b> '+esc(p.loeftestang.raad)+'</div>';
   }
   if(p.mangler.length&&p.score!=null){
     h+='<p class="hint">Uden '+esc(p.mangler.join(" og "))+
@@ -2938,6 +2942,11 @@ async function haandterTraeningsfil(filer){
     const r=laesTraeningsfil(bytes,liste[0].name);
     if(r.fejl){systemBesked=r.fejl;render();return}
     if(r.sprunget){systemRo="Filen blev sprunget over: "+r.sprunget+".";render();return}
+    if(r.traening.sport==="gang"||r.traening.sport==="cykel"){
+      // Gåture og cykling har ingen øvelser at udfylde – direkte i loggen.
+      modtagTraening(r.traening);
+      render();return;
+    }
     urPas=r.traening;
     // Lagde du et styrkepas ind, mens LØB var valgt (eller omvendt), så skift.
     if(urPas.sport==="loeb"&&type!=="LOEB")type="LOEB";
@@ -3423,10 +3432,6 @@ function dbxAfbryd(){
 function grundadresse(){
   return location.origin+location.pathname;
 }
-function genvejsSkabelon(){
-  return grundadresse()+"#ind=1&sport=styrke&start=[Startdato]&min=[Varighed]"+
-    "&puls=[Gnspuls]&kcal=[Energi]";
-}
 /* Varighed kan komme som "44", "44,5", "44:03", "1:02:30" eller i sekunder.
    Over 300 tolkes som sekunder – ingen af hans pas varer fem timer. */
 function laesVarighedTekst(v){
@@ -3540,52 +3545,6 @@ function tagImodAdresse(){
   if(!r)return;
   if(r.fejl){systemBesked=r.fejl;return}
   modtagTraening(r.traening);
-}
-
-/* Udklipsholder-vejen: genvejen kopierer træningen som tekst, og den rigtige
-   app (hjemmeskærmen) henter den her. URL-vejen åbner Safari, som på iOS har
-   sit eget adskilte lager – derfor denne omvej. */
-function bygFraGaet(g,raa){
-  const sek=Math.round(g.min*60);
-  const erLoeb=g.sport==="loeb"||(g.sport!=="styrke"&&erTal(g.km)&&g.km>=0.5);
-  return {
-    sport:erLoeb?"loeb":"styrke",
-    kilde:"genvej",filnavn:"",format:"Udklipsholder",
-    startTid:g.start||Date.now(),
-    tidSek:sek,bevaegSek:sek,
-    distanceKm:(erLoeb&&erTal(g.km))?g.km:null,
-    tempoSekPrKm:(erLoeb&&erTal(g.km)&&g.km>0)?sek/g.km:null,
-    gnsPuls:erTal(g.puls)?g.puls:null,maxPuls:null,
-    kalorier:erTal(g.kcal)?g.kcal:null,
-    stigningM:null,kadence:null,kobling:null,splits:[]
-  };
-}
-async function hentFraUdklip(){
-  systemBesked=null;systemRo=null;
-  if(!navigator.clipboard||!navigator.clipboard.readText){
-    systemBesked="Din browser vil ikke dele udklipsholderen med appen.";render();return;
-  }
-  let tekst="";
-  try{tekst=await navigator.clipboard.readText()}
-  catch(e){
-    systemBesked="Telefonen spurgte om lov til at læse udklipsholderen – tryk "+
-      "\u00abTillad\u00bb/\u00abInds\u00e6t\u00bb og pr\u00f8v knappen igen.";
-    render();return;
-  }
-  if(!tekst||!tekst.trim()){systemBesked="Udklipsholderen er tom. Afslut en træning først – "+
-    "genvejen lægger den derind.";render();return}
-  const g=gaetFraRaa(tekst);
-  if(g.sport==="andet"){
-    systemRo="Det kopierede ligner en gåtur eller cykeltur – dem logger appen ikke.";
-    render();return;
-  }
-  if(!erTal(g.min)||g.min<=0){
-    systemBesked="Kunne ikke finde en varighed i det kopierede. Der stod: \u00ab"+
-      tekst.slice(0,180)+"\u00bb \u2013 vis det til Claude, s\u00e5 l\u00e6rer appen formatet.";
-    render();return;
-  }
-  modtagTraening(bygFraGaet(g,tekst));
-  render();
 }
 
 /* ==========================================================================
