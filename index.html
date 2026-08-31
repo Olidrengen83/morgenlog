@@ -356,7 +356,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=20;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=21;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -723,23 +723,32 @@ function parathed(d,dato){
       tekst:num(hp7.v,0)+" mod basis "+num(hpBl.m,0)});
   }else if(!m||!erTal(m.hvilePuls))mangler.push("hvilepuls");
 
-  // Søvn: gælden over tre nætter vejer tungere end i går nat alene.
+  // Søvn: gælden over tre nætter vejer tungere end i går nat alene – men tre
+  // gode nætter må ikke skjule to underskuds-uger. Derfor tæller 14-dages
+  // snittet også med: kronisk underskud koster, selv når de sidste nætter
+  // var fine, for det er dén konto, kl. 5-træningen trækker på.
   const naetter=vaerdier(d,"soevnT",dt,3).map(x=>x.v);
   if(naetter.length){
     const behov=d.profil.soevnBehov||7.5;
     const gaeld=Math.max(0,naetter.reduce((s,t)=>s+(behov-t),0));
     const gaeldScore=klem(100-gaeld*13,0,100);
+    const n14=vaerdier(d,"soevnT",dt,14).map(x=>x.v);
+    const snit14=n14.length>=7?gennemsnit(n14):null;
+    const kronisk=snit14!=null?Math.max(0,behov-snit14):0;
     const kval=rullende(d,"soevnKval",dt,3).v;
     let kvalScore=kval!=null?klem((kval-1)/4*100,0,100):null;
     if(kvalScore==null){
       const auto=sidsteNDatoer(3,dt).map(x=>soevnKvalAuto(d,x)).filter(erTal);
       if(auto.length)kvalScore=gennemsnit(auto);
     }
-    const score=kvalScore!=null?0.65*gaeldScore+0.35*kvalScore:gaeldScore;
+    let score=kvalScore!=null?0.65*gaeldScore+0.35*kvalScore:gaeldScore;
+    score=klem(score-klem((kronisk-0.3)*15,0,20),0,100);
     dele.push({id:"soevn",navn:"Søvn",vaegt:.25,score:score,z:null,
       vaerdi:gennemsnit(naetter),gaeld:gaeld,behov:behov,enhed:"t",n:naetter.length,
+      snit14:snit14,kronisk:kronisk,
       tekst:num(gennemsnit(naetter),1)+" t i snit · "+
-        (gaeld>0.3?num(gaeld,1)+" t gæld på 3 nætter":"ingen gæld")});
+        (gaeld>0.3?num(gaeld,1)+" t gæld på 3 nætter":"ingen gæld på 3 nætter")+
+        (kronisk>=0.4?" · 14 dage: "+num(snit14,1)+" t mod behov "+num(behov,1):"")});
   }else mangler.push("søvn");
 
   const subj=[];
@@ -787,6 +796,10 @@ function loeftestangsRaad(del,d,dt,bt){
     if(del.gaeld>0.5)return "Sov mere. Du mangler "+num(del.gaeld,1)+
       " t over de sidste tre nætter mod dit behov på "+num(del.behov,1)+
       " t. En time tidligere i seng i aften flytter mere end nogen ændring i programmet.";
+    if(del.kronisk>=0.4)return "De sidste nætter var fine, men 14-dages snittet er "+
+      num(del.snit14,1)+" t mod dit behov på "+num(del.behov,1)+" t. Det er ikke noget, "+
+      "du skal optimere – det er den ene konto, kl. 5-træningen trækker på. En fast "+
+      "sengetid en halv time tidligere flytter mere end noget i programmet.";
     return "Søvnkvaliteten trækker ned, selvom timerne er der. Kig på skærm, alkohol og temperatur før du kigger på træningen.";
   }
   if(del.id==="hrv"){
@@ -962,6 +975,11 @@ function samletVurdering(d,_p){
       : "Skær ugen ned mod ca. "+kHoej+" AU – du lægger på hurtigere, end du bygger op.";
     else if(r<0.8)ud.uge="Der er plads til at lægge lidt til – op mod "+kHoej+" AU.";
     else ud.uge="Ugen er i balance – bliv mellem ca. "+kLav+" og "+kHoej+" AU.";
+    // Rød zone på tynd historik er mest matematik – sig det, før den skræmmer.
+    if(r>1.3&&dageMellem(sammenhaengendeStart(d),idag())<42)
+      ud.uge+=" (Forbehold: det kroniske tal bygger delvist på uger, der står "+
+        "tomme i historikken, så forholdet overdriver endnu. Giv det et par uger, "+
+        "før den røde farve får lov at bestemme.)";
   }
   if(ud.idag&&ud.uge){
     const kropNed=p.band.status==="varsel"||p.band.status==="kritisk";
@@ -2006,6 +2024,10 @@ function briefing(d){
   L.push("- Akut (7 dages EWMA): "+num(bt.atl,0)+" AU/dag");
   L.push("- Kronisk (28 dages EWMA): "+num(bt.ctl,0)+" AU/dag");
   L.push("- Akut:kronisk = "+(bt.forhold!=null?num(bt.forhold,2)+" ("+forholdZone(bt.forhold).navn+")":"for lidt data"));
+  if(bt.forhold!=null&&bt.forhold>1.3&&dageMellem(sammenhaengendeStart(d),dt)<42)
+    L.push("- OBS: den kroniske side bygger delvist på uger, der står tomme i historikken "+
+      "(ung historik eller hul før den seneste stribe) – forholdet overdriver endnu, "+
+      "så tag rød zone som et gult lys.");
   L.push("- Form (kronisk − akut): "+num(bt.form,0));
   L.push("- Denne uge: "+num(bt.ugeSum,0)+" AU mod "+num(bt.forrigeUgeSum,0)+" AU i sidste uge"+
     (bt.aendring!=null?" ("+(bt.aendring>0?"+":"")+num(bt.aendring*100,0)+" %)":""));
@@ -2611,6 +2633,12 @@ function visBalance(){
     if(raad.ungHistorik)h+='<p class="lille">Din historik er under seks uger gammel, '+
       'så den kroniske side er stadig ved at indhente virkeligheden. Tag den røde '+
       'zone som et gult lys, indtil regnskabet har set en hel opbygningsperiode.</p>';
+    if(raad.hulHistorik)h+='<p class="lille">Din seneste sammenhængende stribe er '+
+      'under seks uger gammel – ugerne før står tomme i regnskabet, og tomme uger '+
+      'trykker den kroniske side kunstigt ned. Er hullet manglende data fra før uret '+
+      'kom med, er den røde zone mest matematik: tag den som et gult lys, til der er '+
+      'fire ugers jævn træning i bogen. Var det en ægte pause, gælder rådet om at '+
+      'bygge roligt op stadig.</p>';
     h+='</div>';
   }
 
@@ -2648,10 +2676,22 @@ function visBalance(){
       '<span>28 dage · ms</span></div><div class="diagram">'+hrvSpark+'</div>'+
       '<div class="udlaes">Det grå bånd er dit 42-dages snit ± én spredning. '+
       'Under båndet tre dage i træk er signalet – ikke en enkelt lav morgen.</div></div>';
-    if(soevnSpark)h+='<div class="kort"><div class="kort-top"><h2>Søvn</h2>'+
-      '<span>28 dage · timer</span></div><div class="diagram">'+soevnSpark+'</div>'+
-      '<div class="udlaes">Behov sat til '+num(data.profil.soevnBehov,1)+
-      ' t. Ret det under ⚙ Data.</div></div>';
+    if(soevnSpark){
+      const s14=rullende(data,"soevnT",idag(),14);
+      const sBehov=data.profil.soevnBehov||7.5;
+      h+='<div class="kort"><div class="kort-top"><h2>Søvn</h2>'+
+        '<span>28 dage · timer</span></div><div class="diagram">'+soevnSpark+'</div>'+
+        '<div class="udlaes">'+
+        (s14.n>=7&&s14.v<sBehov-0.4
+          ?'<b style="color:var(--st-varsel)">■</b> Seneste 14 dage: '+num(s14.v,1)+
+           ' t i snit mod behovet på '+num(sBehov,1)+' t. Enkelte gode nætter dækker '+
+           'ikke over det – det er den konto, morgentræningen trækker på.'
+          :s14.n>=7
+          ?'Seneste 14 dage: '+num(s14.v,1)+' t i snit mod behovet på '+num(sBehov,1)+
+           ' t. Behovet retter du under ⚙ Data.'
+          :'Behov sat til '+num(sBehov,1)+' t. Ret det under ⚙ Data.')+
+        '</div></div>';
+    }
   }
 
   // Fremgang: parathed og belastning handler om i dag – det her handler om,
@@ -2775,6 +2815,20 @@ function visBalance(){
   }
   return h;
 }
+/* Hvornår begyndte den seneste sammenhængende træningsstribe? Ligger der et
+   hul på over 10 dage lige før den, har den kroniske side regnet tomme dage
+   som hvile – og så overdriver akut:kronisk, hvad enten hullet var en ægte
+   pause eller bare manglende data fra før uret kom med. */
+function sammenhaengendeStart(d){
+  if(!d.sessions||!d.sessions.length)return idag();
+  let start=d.sessions[d.sessions.length-1].dato;
+  for(let i=d.sessions.length-2;i>=0;i--){
+    if(dageMellem(d.sessions[i].dato,start)>10)break;
+    start=d.sessions[i].dato;
+  }
+  return start;
+}
+
 /* Kør belastningsformlerne forlæns: hvor mange dage på et givet dagligt
    niveau, før forholdet er tilbage i grøn zone (0,8–1,3)? */
 function dageTilGroen(atl,ctl,dagligLoad){
@@ -2801,6 +2855,9 @@ function balanceRaad(bt,d){
   // Ung historik: kronisk side er stadig ved at indhente virkeligheden.
   const foerste=d.sessions.length?d.sessions[0].dato:idag();
   ud.ungHistorik=dageMellem(foerste,idag())<42;
+  // Samme forbehold, når historikken er gammel, men har et hul lige før den
+  // seneste stribe: de tomme uger trykker den kroniske side kunstigt ned.
+  ud.hulHistorik=!ud.ungHistorik&&dageMellem(sammenhaengendeStart(d),idag())<42;
 
   // Nye kategorier i ugen, som historikken næsten ikke kender, puster
   // forholdet kunstigt op. Vis forholdet uden dem som sammenligning.
