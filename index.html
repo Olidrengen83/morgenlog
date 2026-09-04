@@ -296,12 +296,12 @@ const PROGRAM = {
     {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"3 × max−2",hvorfor:"Overkropsbalance"},
     {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"3 × 8–10",hvorfor:"Skulderstabilitet og brystryg"},
     {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"3 × 10–12",hvorfor:"Ballemuskler – motoren i frasparket"},
-    {id:"monster",vid:"https://www.youtube.com/results?search_query=monster+walk+band+glute+exercise",navn:"Monster walks",maal:"3 × 12–15",hvorfor:"Gluteus medius – stopper knæet i at falde ind"},
+    {id:"hofteabd",vid:"https://www.youtube.com/results?search_query=standing+banded+hip+abduction+glute+medius",navn:"Stående hofteabduktion",maal:"3 × 12–15/side",hvorfor:"Gluteus medius – stopper knæet i at falde ind. Elastik, på stedet"},
     {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"3 × 12–15/side",hvorfor:"Akillessene – den hyppigste løbeskade"},
-    {id:"carry",vid:"https://www.youtube.com/results?search_query=suitcase+carry+kettlebell+technique",navn:"Suitcase carry",maal:"3 × 30–40 m/side",hvorfor:"Sidestabilitet under træthed"}]},
+    {id:"suithold",vid:"https://www.youtube.com/results?search_query=suitcase+hold+kettlebell+anti+lateral+flexion",navn:"Suitcase hold",maal:"3 × 30–40 sek/side (24 kg)",hvorfor:"Sidestabilitet under træthed – stående stille"}]},
   C:{navn:"Styrke C",under:"Swings, core & brystryg",farve:"styrke",oevelser:[
     {id:"swing",vid:"https://www.youtube.com/results?search_query=hardstyle+kettlebell+swing+strongfirst+tutorial",navn:"KB swings",maal:"5 × 15",hvorfor:"Eksplosiv hofte – uden at belaste knæene"},
-    {id:"tgu",vid:"https://www.youtube.com/results?search_query=turkish+get+up+step+by+step+strongfirst",navn:"Turkish get-up",maal:"3–4/side",hvorfor:"Helkropskontrol – langsomt og bevidst"},
+    {id:"ohhold",vid:"https://www.youtube.com/results?search_query=half+kneeling+overhead+kettlebell+hold",navn:"Halvknælende overhead hold",maal:"3 × 20–30 sek/side (12 kg)",hvorfor:"Skulder og core under spænd – helt i ro på knæet"},
     {id:"pull",vid:"https://www.youtube.com/results?search_query=pull+up+progression+beginner+negatives",navn:"Træk-progression",maal:"3 × 3–5",hvorfor:"Trækstyrke"},
     {id:"deadbug",vid:"https://www.youtube.com/results?search_query=dead+bug+exercise+proper+form",navn:"Dead bug",maal:"3 × 8/side",hvorfor:"Dyb core uden rygbelastning"},
     {id:"birddog",vid:"https://www.youtube.com/results?search_query=bird+dog+exercise+proper+form",navn:"Bird dog",maal:"2 × 8/side",hvorfor:"Kobler skulder og modsat hofte"},
@@ -326,10 +326,10 @@ const REPS={
   row:["8","10","12","15"], step:["8/side","10/side","12/side"],
   pallof:["8/side","10/side","12/side"],
   pushup:["5","8","10","12","15","20"], ohp:["6","8","10","12"],
-  hip:["8","10","12","15"], monster:["10","12","15","20"],
+  hip:["8","10","12","15"], hofteabd:["10/side","12/side","15/side","20/side"],
   calf:["10/side","12/side","15/side","20/side"],
-  carry:["20 m/side","30 m/side","40 m/side"],
-  swing:["10","12","15","20"], tgu:["1/side","2/side","3/side","4/side"],
+  suithold:["20 sek/side","30 sek/side","40 sek/side","60 sek/side"],
+  swing:["10","12","15","20"], ohhold:["20 sek/side","30 sek/side","40 sek/side"],
   pull:["3","4","5","6","8"], deadbug:["6/side","8/side","10/side"],
   birddog:["6/side","8/side","10/side"], sideplank:["20 sek/side","30 sek/side","45 sek/side"],
   thorax:["3 min","5 min","8 min"], thorax2:["3 min","5 min","8 min"],
@@ -356,7 +356,7 @@ const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","S�
 const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=21;   // vises under Data, så man kan se hvilken udgave telefonen kører
+const APPVERSION=22;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -1973,9 +1973,17 @@ function maanedsDiagram(uger){
    ========================================================================== */
 
 function typeNavn(t){return PROGRAM[t]?PROGRAM[t].navn:t}
+/* Udgåede øvelser beholder deres navn i gamle logs og i briefingen –
+   programmet har fået stationære afløsere (knagende gulv kl. 05). */
+const UDGAAEDE={
+  monster:{navn:"Monster walks"},
+  carry:{navn:"Suitcase carry"},
+  tgu:{navn:"Turkish get-up"}
+};
 const ALLEOEVELSER=(()=>{
   const k={};
   Object.keys(PROGRAM).forEach(t=>(PROGRAM[t].oevelser||[]).forEach(o=>{k[o.id]=o}));
+  Object.keys(UDGAAEDE).forEach(id=>{if(!k[id])k[id]=UDGAAEDE[id]});
   return k;
 })();
 function oevelsesNavn(id){return ALLEOEVELSER[id]?ALLEOEVELSER[id].navn:id}
