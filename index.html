@@ -286,20 +286,21 @@
    ========================================================================== */
 
 const PROGRAM = {
-  A:{navn:"Styrke A",under:"Ben & træk",farve:"styrke",oevelser:[
-    {id:"goblet",vid:"https://www.youtube.com/results?search_query=goblet+squat+form+tutorial",navn:"Goblet squat",maal:"3 × 8–10",hvorfor:"Kvadriceps og knæ – bærer nedad i bakkerne"},
-    {id:"rdl",vid:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift+kettlebell+tutorial",navn:"Etbens-RDL",maal:"3 × 8/side",hvorfor:"Baglår og balance – den vigtigste enkeltøvelse for løbere"},
-    {id:"row",vid:"https://www.youtube.com/results?search_query=kettlebell+bent+over+row+form",navn:"Roning",maal:"3 × 10–12",hvorfor:"Øvre ryg – holder overkroppen oprejst sent i løbet"},
-    {id:"step",vid:"https://www.youtube.com/results?search_query=bulgarian+split+squat+vs+step+up+form",navn:"Step-ups / split squat",maal:"2 × 10/side",hvorfor:"Etbenskraft – det løb faktisk er"},
-    {id:"pallof",vid:"https://www.youtube.com/results?search_query=pallof+press+band+tutorial",navn:"Pallof press",maal:"2 × 10/side",hvorfor:"Anti-rotation – holder bækkenet i ro"}]},
-  B:{navn:"Styrke B",under:"Pres, hofte & fod",farve:"styrke",oevelser:[
-    {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"3 × max−2",hvorfor:"Overkropsbalance"},
-    {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"3 × 8–10",hvorfor:"Skulderstabilitet og brystryg"},
-    {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"3 × 10–12",hvorfor:"Ballemuskler – motoren i frasparket"},
-    {id:"hofteabd",vid:"https://www.youtube.com/results?search_query=standing+banded+hip+abduction+glute+medius",navn:"Stående hofteabduktion",maal:"3 × 12–15/side",hvorfor:"Gluteus medius – stopper knæet i at falde ind. Elastik, på stedet"},
-    {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"3 × 12–15/side",hvorfor:"Akillessene – den hyppigste løbeskade"},
-    {id:"suithold",vid:"https://www.youtube.com/results?search_query=suitcase+hold+kettlebell+anti+lateral+flexion",navn:"Suitcase hold",maal:"3 × 30–40 sek/side (24 kg)",hvorfor:"Sidestabilitet under træthed – stående stille"}]},
-  C:{navn:"Styrke C",under:"Swings, core & brystryg",farve:"styrke",oevelser:[
+  A:{navn:"Styrke A",under:"Ben & hofte",farve:"styrke",oevelser:[
+    {id:"goblet",vid:"https://www.youtube.com/results?search_query=goblet+squat+form+tutorial",navn:"Goblet squat",maal:"2 × 8",hvorfor:"Kvadriceps og knæ – bærer nedad i bakkerne"},
+    {id:"rdl",vid:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift+kettlebell+tutorial",navn:"Etbens-RDL",maal:"2 × 8/side",hvorfor:"Baglår og balance – den vigtigste enkeltøvelse for løbere"},
+    {id:"step",vid:"https://www.youtube.com/results?search_query=bulgarian+split+squat+vs+step+up+form",navn:"Split squat",maal:"2 × 8/side",hvorfor:"Etbenskraft – det løb faktisk er",notat:"3–4 sek. ned"},
+    {id:"calf",vid:"https://www.youtube.com/results?search_query=single+leg+calf+raise+tutorial",navn:"Enbenet læghæv",maal:"2 × 12/side",hvorfor:"Akillessene – den hyppigste løbeskade"},
+    {id:"hofteabd",vid:"https://www.youtube.com/results?search_query=standing+banded+hip+abduction+glute+medius",navn:"Stående hofteabduktion",maal:"2 × 12/side",hvorfor:"Gluteus medius – stopper knæet i at falde ind. Elastik, på stedet"}]},
+  B:{navn:"Styrke B",under:"Pres, træk & hofte",farve:"styrke",oevelser:[
+    {id:"pushup",vid:"https://www.youtube.com/results?search_query=perfect+push+up+form+tutorial",navn:"Push-ups",maal:"2 × 8",hvorfor:"Overkropsbalance"},
+    {id:"row",vid:"https://www.youtube.com/results?search_query=kettlebell+bent+over+row+form",navn:"Roning",maal:"2 × 10",hvorfor:"Øvre ryg – holder overkroppen oprejst sent i løbet"},
+    {id:"ohp",vid:"https://www.youtube.com/results?search_query=kettlebell+overhead+press+strongfirst+technique",navn:"Overhead press",maal:"2 × 8",hvorfor:"Skulderstabilitet og brystryg"},
+    {id:"hip",vid:"https://www.youtube.com/results?search_query=glute+bridge+hip+thrust+kettlebell+form",navn:"Hip thrust",maal:"2 × 10",hvorfor:"Ballemuskler – motoren i frasparket"},
+    {id:"pallof",vid:"https://www.youtube.com/results?search_query=pallof+press+band+tutorial",navn:"Pallof press",maal:"2 × 10/side",hvorfor:"Anti-rotation – holder bækkenet i ro"},
+    {id:"suithold",vid:"https://www.youtube.com/results?search_query=suitcase+hold+kettlebell+anti+lateral+flexion",navn:"Suitcase hold",maal:"2 × 30 sek/side",hvorfor:"Sidestabilitet under træthed – stående stille"}]},
+  // Udgået af planen – står her, så gamle C-pas stadig kan vises og redigeres.
+  C:{navn:"Styrke C",under:"Udgået – historik",farve:"styrke",udgaaet:true,oevelser:[
     {id:"swing",vid:"https://www.youtube.com/results?search_query=hardstyle+kettlebell+swing+strongfirst+tutorial",navn:"KB swings",maal:"5 × 15",hvorfor:"Eksplosiv hofte – uden at belaste knæene"},
     {id:"ohhold",vid:"https://www.youtube.com/results?search_query=half+kneeling+overhead+kettlebell+hold",navn:"Halvknælende overhead hold",maal:"3 × 20–30 sek/side (12 kg)",hvorfor:"Skulder og core under spænd – helt i ro på knæet"},
     {id:"pull",vid:"https://www.youtube.com/results?search_query=pull+up+progression+beginner+negatives",navn:"Træk-progression",maal:"3 × 3–5",hvorfor:"Trækstyrke"},
@@ -313,17 +314,20 @@ const PROGRAM = {
     {id:"90_90",vid:"https://www.youtube.com/results?search_query=90+90+hip+switch+mobility",navn:"90/90 hofteskift",maal:"2 × 8/side",hvorfor:"Rotation i hoften, ikke i ryggen"},
     {id:"ankel",vid:"https://www.youtube.com/results?search_query=ankle+dorsiflexion+mobility+drill+knee+to+wall",navn:"Ankelmobilitet",maal:"2 × 10/side",hvorfor:"Stiv ankel flytter arbejdet op i knæet"},
     {id:"gang",vid:"",navn:"Rolig gåtur",maal:"20–30 min",hvorfor:"Blodgennemstrømning uden belastning"}]},
+  LET:{navn:"Let",under:"Mobilitet eller op til 20 min meget let løb",farve:"styrke",oevelser:[
+    {id:"letmob",vid:"https://www.youtube.com/results?search_query=mobility+routine+runners+10+minutes",navn:"Mobilitet efter behov",maal:"10–15 min",hvorfor:"Gulvtid, elastik, hofter – det, kroppen beder om"},
+    {id:"letloeb",vid:"",navn:"Meget let løb",maal:"15–20 min",hvorfor:"Snakketempo minus – pulsen skal knap nok op. Maks 20 min"}]},
   LOEB:{navn:"Løb",under:"Snakketempo",farve:"loeb",oevelser:[]},
   GANG:{navn:"Gåtur",under:"Rask gang",farve:"andet",oevelser:[]},
   CYKEL:{navn:"Cykling",under:"",farve:"andet",oevelser:[]}
 };
 const KONDI={LOEB:1,GANG:1,CYKEL:1};   // pas med puls og evt. distance fra uret
-const STYRKETYPER=["A","B","C"];
-const ERSTYRKE=(t)=>t==="A"||t==="B"||t==="C"||t==="MOB";
+const STYRKETYPER=["A","B"];
+const ERSTYRKE=(t)=>t==="A"||t==="B"||t==="C"||t==="MOB"||t==="LET";
 
 const REPS={
   goblet:["6","8","10","12"], rdl:["6/side","8/side","10/side"],
-  row:["8","10","12","15"], step:["8/side","10/side","12/side"],
+  row:["8","10","12","15"], step:["6/side","8/side","10/side","12/side"],
   pallof:["8/side","10/side","12/side"],
   pushup:["5","8","10","12","15","20"], ohp:["6","8","10","12"],
   hip:["8","10","12","15"], hofteabd:["10/side","12/side","15/side","20/side"],
@@ -334,9 +338,10 @@ const REPS={
   birddog:["6/side","8/side","10/side"], sideplank:["20 sek/side","30 sek/side","45 sek/side"],
   thorax:["3 min","5 min","8 min"], thorax2:["3 min","5 min","8 min"],
   hofte:["45 sek/side","60 sek/side","90 sek/side"], "90_90":["6/side","8/side","10/side"],
-  ankel:["8/side","10/side","12/side"], gang:["20 min","30 min","45 min"]
+  ankel:["8/side","10/side","12/side"], gang:["20 min","30 min","45 min"],
+  letmob:["5 min","10 min","15 min","20 min"], letloeb:["10 min","15 min","20 min"]
 };
-const SAET=["1","2","3","4","5","6"];
+const SAET=["1","2","3"];
 const VAEGT=["–","Kropsvægt","8 kg","12 kg","16 kg","20 kg","24 kg","28 kg","32 kg",
   "Elastik let","Elastik middel","Elastik hård"];
 const FEELS=[{id:"let",label:"For let",rpe:4},{id:"tilpas",label:"Tilpas",rpe:6},
@@ -350,13 +355,30 @@ const LOEBTYPER=[
   {id:"interval",navn:"Interval / fart",rpe:8},
   {id:"tempo",navn:"Tempo / tærskel",rpe:7}
 ];
-const STDPLAN=["FRI","LOEB","A","LOEB","B","C","LOEB"]; // index = getDay(), 0 = søndag
+const STDPLAN=["FRI","LOEB","A","LOEB","B","LET","LOEB"]; // index = getDay(), 0 = søndag
 const DAGE=["M","T","O","T","F","L","S"];
 const UGEDAGSNAVNE=["Mandag","Tirsdag","Onsdag","Torsdag","Fredag","Lørdag","Søndag"];
-const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["C","Styrke C"],
+// Styrke C er udgået af planen; gamle C-pas bliver stående som historik.
+const PLANVALG=[["LOEB","Løb"],["A","Styrke A"],["B","Styrke B"],["LET","Let"],
   ["MOB","Mobilitet"],["FRI","Fri"]];
 
-const APPVERSION=22;   // vises under Data, så man kan se hvilken udgave telefonen kører
+/* Startvægte for programmets øvelser – bruges kun, indtil du selv har logget
+   en vægt; derefter vinder «sidst brugte». */
+const STDVAEGT={goblet:"24 kg",rdl:"16 kg",step:"16 kg",calf:"Kropsvægt",
+  hofteabd:"Elastik middel",pushup:"Kropsvægt",row:"16 kg",ohp:"12 kg",
+  hip:"24 kg",pallof:"Elastik middel",suithold:"24 kg"};
+
+/* Løbeprotokollen: seks trin fra run/walk til 30 min sammenhængende.
+   Trin skiftes manuelt – appen viser kun, hvor du er, og hvad dagen hedder. */
+const LOEBETRIN=[
+  {hverdag:"4 × 8 min løb, 2 min gang imellem",loerdag:"5 × 8 min løb, 2 min gang imellem"},
+  {hverdag:"3 × 10 min løb, 2 min gang imellem",loerdag:"4 × 10 min løb, 2 min gang imellem"},
+  {hverdag:"3 × 7 min løb (let uge)",loerdag:"4 × 7 min løb (let uge)"},
+  {hverdag:"2 × 15 min løb, 2 min gang imellem",loerdag:"3 × 15 min løb, 2 min gang imellem"},
+  {hverdag:"25 min sammenhængende",loerdag:"25 min sammenhængende + 10 min run/walk"},
+  {hverdag:"30 min sammenhængende",loerdag:"30 min sammenhængende + 10 min run/walk"}];
+
+const APPVERSION=23;   // vises under Data, så man kan se hvilken udgave telefonen kører
 const KEY="morgenlog-v2";
 const GAMMELKEY="traening-v1";
 const MODEL="claude-opus-5";
@@ -427,7 +449,7 @@ function nyId(){return Date.now().toString(36)+Math.random().toString(36).slice(
    3. LAGER
    ========================================================================== */
 
-const STDPROFIL={maxPuls:186,hvilePuls:52,soevnBehov:7.5,foedselsaar:null};
+const STDPROFIL={maxPuls:186,hvilePuls:52,soevnBehov:7.5,foedselsaar:null,loebeTrin:1};
 
 function dbxStd(){
   return {appKey:"",refresh:"",access:"",udloeb:0,mappe:"",verifier:"",
@@ -468,6 +490,10 @@ function hentData(){
   return oprydData(d);
 }
 function oprydData(d){
+  // Engangs-skift til den nye standarduge (sep. 2026): Man Løb · Tir A ·
+  // Ons Løb · Tor B · Fre Let · Lør Løb · Søn Fri. Flaget bor i ui, så
+  // skiftet ikke gentages, og en gendannet sikkerhedskopi også følger med.
+  if(d.ui&&!d.ui.planV23){d.ugeplan=STDPLAN.slice();d.ui.planV23=true}
   d.sessions=d.sessions.filter(s=>s&&s.dato&&PROGRAM[s.type]);
   d.sessions.forEach(s=>{if(!s.id)s.id=nyId()});
   d.sessions.sort((a,b)=>a.dato<b.dato?-1:a.dato>b.dato?1:0);
@@ -511,6 +537,7 @@ function anstrengelse(s,profil){
   }else if(s.type==="GANG"){planRpe=3}
   else if(s.type==="CYKEL"){planRpe=5.5}
   else if(s.type==="MOB"){planRpe=2.5}
+  else if(s.type==="LET"){planRpe=2}
   else{planRpe=6}
   // Pulsen vejer tungest når den findes; følelsen korrigerer den.
   if(pulsRpe!=null&&feelRpe!=null)return 0.7*pulsRpe+0.3*feelRpe;
@@ -524,21 +551,25 @@ function varighed(s){
   if(s.ur&&erTal(s.ur.tidSek))return s.ur.tidSek/60;
   if(ERSTYRKE(s.type)){
     const n=s.entries?Object.keys(s.entries).length:0;
-    return n?klem(10+n*7,20,90):(s.type==="MOB"?25:45);
+    return n?klem(10+n*7,20,90):(s.type==="MOB"?25:s.type==="LET"?20:45);
   }
   return 30;
 }
 function sessionLoad(s,profil){
   return Math.round(varighed(s)*anstrengelse(s,profil));
 }
+/* Gåture og cykling tæller med vægt 0,25 i regnskabet: de skal ses, men ikke
+   styre akut:kronisk. Passets fulde AU står stadig i loggen. */
+const ANDETVAEGT=0.25;
 function dagligeLoads(d,datoer,udenAndet){
   const kort={};
   datoer.forEach(dt=>kort[dt]={loeb:0,styrke:0,andet:0,total:0,pas:[]});
   d.sessions.forEach(s=>{
     if(udenAndet&&(s.type==="GANG"||s.type==="CYKEL"))return;
     if(!kort[s.dato])return;
-    const l=sessionLoad(s,d.profil);
-    const spand=s.type==="LOEB"?"loeb":(s.type==="GANG"||s.type==="CYKEL")?"andet":"styrke";
+    const erAndet=(s.type==="GANG"||s.type==="CYKEL");
+    const l=sessionLoad(s,d.profil)*(erAndet?ANDETVAEGT:1);
+    const spand=s.type==="LOEB"?"loeb":erAndet?"andet":"styrke";
     kort[s.dato][spand]+=l;
     kort[s.dato].total+=l;
     kort[s.dato].pas.push(s);
@@ -999,6 +1030,11 @@ function samletVurdering(d,_p){
 function dagensRaad(p,plantype){
   if(p.score==null)return {tekst:"Registrér et morgentjek, så begynder appen at kunne sige noget om dagen.",status:"normal"};
   const b=p.band, erLoeb=plantype==="LOEB";
+  if(plantype==="LET"){
+    if(b.status==="kritisk")return {tekst:"Kun mobilitet i dag – spring løbedelen over. Let-dagen må gerne være helt let.",status:"kritisk"};
+    if(b.status==="varsel")return {tekst:"Let-dagen passer perfekt i dag: mobilitet, og højst en kort, meget rolig løbetur.",status:"varsel"};
+    return {tekst:"Let dag efter planen: mobilitet eller op til 20 min meget let løb – den skal føles som ingenting.",status:b.status==="god"?"god":"normal"};
+  }
   if(b.status==="kritisk")
     return {tekst:erLoeb?"Byt løbeturen ud med 20 minutters gåtur eller mobilitet. Løbet er der stadig i morgen."
       :"Drop styrken i dag. Mobilitet eller fri – ingen af delene koster dig noget.",status:"kritisk"};
@@ -2007,14 +2043,20 @@ function briefing(d){
   const L=[];
   L.push("# Morgenlog – status "+dt);
   L.push("");
-  L.push("Jeg træner løb ca. 3 gange om ugen og styrke ca. 3 gange om ugen. Løbet er hovedsagen;");
-  L.push("styrken er der for at holde mig hel. Nedenfor er alt, appen har registreret.");
+  L.push("Jeg træner løb 3 gange om ugen, styrke 2 gange (A og B) og har en let dag fredag");
+  L.push("(mobilitet eller op til 20 min meget let løb). Løbet er hovedsagen; styrken er der");
+  L.push("for at holde mig hel. Nedenfor er alt, appen har registreret.");
   L.push("");
   L.push("## Profil");
   L.push("- Maxpuls (antaget): "+d.profil.maxPuls+" · hvilepuls: "+d.profil.hvilePuls+
     " · søvnbehov: "+num(d.profil.soevnBehov,1)+" t");
   L.push("- Ugeplan: "+UGEDAGSNAVNE.map((n,i)=>n.slice(0,3)+" "+
     (PLANVALG.find(v=>v[0]===d.ugeplan[(i+1)%7])||["","?"])[1]).join(" · "));
+  const briefTrin=klem(d.profil.loebeTrin||1,1,6);
+  L.push("- Løbeprotokol: trin "+briefTrin+" af 6 – hverdag: "+
+    LOEBETRIN[briefTrin-1].hverdag+"; lørdag: "+LOEBETRIN[briefTrin-1].loerdag+
+    ". Oprykning kræver to godkendte pas i træk (puls under 145, jævnt tempo); "+
+    "trin skiftes manuelt.");
   L.push("");
 
   L.push("## Restitution i dag");
@@ -2041,6 +2083,7 @@ function briefing(d){
     (bt.aendring!=null?" ("+(bt.aendring>0?"+":"")+num(bt.aendring*100,0)+" %)":""));
   if(bt.monotoni!=null)L.push("- Monotoni: "+num(bt.monotoni,2)+
     " · strain: "+num(bt.strain,0));
+  L.push("- Gåture og cykling tæller med vægt 0,25 i regnskabet; passets fulde AU står i pastabellen.");
   L.push("");
 
   const md=sidsteNDatoer(14,dt).filter(x=>morgenFor(d,x));
@@ -2150,9 +2193,12 @@ const SPOERGSMAAL=[
 ];
 
 const SYSTEMPROMPT=
-"Du er træner for en voksen motionist, der løber ca. tre gange om ugen og styrketræner ca. tre gange "+
-"om ugen. Løb er hovedsagen; styrken er der for at holde ham hel. Han har tidligere haft problemer "+
-"med SI-leddet, så tre styrkedage er ikke til forhandling – skær hellere i løbet.\n\n"+
+"Du er træner for en voksen motionist, der løber tre gange om ugen, styrketræner to gange (program A "+
+"og B) og har en let dag fredag (mobilitet eller op til 20 min meget let løb). Løb er hovedsagen; "+
+"styrken er der for at holde ham hel. Han har tidligere haft problemer med SI-leddet, så de to "+
+"styrkedage er ikke til forhandling – skær hellere i løbet. Han følger en løbeprotokol i seks trin "+
+"(run/walk mod 30 min sammenhængende); oprykning kræver to godkendte pas i træk med puls under 145 "+
+"og jævnt tempo, og trin skiftes manuelt.\n\n"+
 "Du får en struktureret status fra hans app: parathedsscore, belastningstal (sRPE-load, akut:kronisk, "+
 "monotoni), morgental (HRV, hvilepuls, søvn, ømhed, energi, stress) og de seneste pas og løbeture.\n\n"+
 "Sådan svarer du:\n"+
@@ -2241,7 +2287,7 @@ let valgtOevelse=null;
 function nyKladde(fra){
   kladde={};
   (PROGRAM[type]&&PROGRAM[type].oevelser||[]).forEach(o=>{
-    kladde[o.id]={vaegt:data.sidsteVaegte[o.id]||"–",saet:stdSaet(o.maal),
+    kladde[o.id]={vaegt:data.sidsteVaegte[o.id]||STDVAEGT[o.id]||"–",saet:stdSaet(o.maal),
       reps:stdReps(o.id,o.maal),done:false};
   });
   feel=null;gemt=false;note="";minutter="";
@@ -2460,12 +2506,32 @@ function visIdag(){
       '<button class="gem sek" style="margin-top:10px" id="redigerFortryd">Fortryd</button></div>';
   }
 
-  h+='<div class="nav mono" style="margin-top:10px">'+["A","B","C","MOB","LOEB"].map(t=>
+  h+='<div class="nav mono" style="margin-top:10px">'+["A","B","LET","MOB","LOEB"].map(t=>
     '<button data-type="'+t+'" class="'+(type===t?"aktiv":"")+'">'+
     (t==="LOEB"?"LØB":t==="MOB"?"MOBIL":t)+'</button>').join("")+'</div>';
   if(planType!==type&&planType!=="FRI"){
     h+='<p class="hint">Planen siger '+esc((PLANVALG.find(v=>v[0]===planType)||["","?"])[1])+
       ' i dag. Du kan trygt bytte om – appen regner på det, du faktisk laver.</p>';
+  }
+
+  // Løbeprotokollen: seks trin, skiftes manuelt med pilene.
+  if(type==="LOEB"){
+    const trin=klem(data.profil.loebeTrin||1,1,6);
+    const lt=LOEBETRIN[trin-1];
+    const erLoerdag=new Date().getDay()===6;
+    h+='<div class="kort"><div class="kort-top"><h2>Løbeprotokol</h2>'+
+      '<span style="display:flex;gap:8px;align-items:center">'+
+      '<button class="tandhjul" id="trinNed" aria-label="Et trin ned" style="width:auto;'+
+        'height:auto;padding:3px 10px;font-size:13px"'+(trin<=1?" disabled":"")+'>‹</button>'+
+      '<span class="mono">Trin '+trin+' af 6</span>'+
+      '<button class="tandhjul" id="trinOp" aria-label="Et trin op" style="width:auto;'+
+        'height:auto;padding:3px 10px;font-size:13px"'+(trin>=6?" disabled":"")+'>›</button>'+
+      '</span></div>'+
+      '<div class="udlaes" style="border-top:none;padding-top:4px"><b>I dag'+
+      (erLoerdag?" (lørdag)":"")+':</b> '+esc(erLoerdag?lt.loerdag:lt.hverdag)+'</div>'+
+      '<p class="lille">'+esc(erLoerdag?"Hverdage: "+lt.hverdag:"Lørdag: "+lt.loerdag)+'</p>'+
+      '<p class="hint">Krav for at rykke et trin op: to godkendte pas i træk – puls under '+
+      '145, jævnt tempo. Trin skiftes manuelt med pilene.</p></div>';
   }
 
   const pr=PROGRAM[type];
@@ -2532,6 +2598,7 @@ function styrkeFelter(pr){
       (o.vid?' <a class="vid" href="'+esc(o.vid)+'" target="_blank" rel="noopener" '+
         'aria-label="Se video">▷</a>':"")+'</div>'+
       (o.hvorfor?'<div class="sidst">'+esc(o.hvorfor)+'</div>':"")+
+      (o.notat?'<div class="sidst" style="color:var(--gry)">'+esc(o.notat)+'</div>':"")+
       '<div class="valg">'+
         vaelger("saet",o.id,SAET,k.saet,"Sæt")+'<span class="gange">×</span>'+
         vaelger("reps",o.id,REPS[o.id]||[o.maal],k.reps,"Gentagelser")+
@@ -2655,10 +2722,11 @@ function visBalance(){
     '<div class="diagram">'+belastningsDiagram(bt,28)+'</div>'+
     '<div class="legende"><span><i style="background:var(--s-loeb)"></i>Løb</span>'+
     '<span><i style="background:var(--s-styrke)"></i>Styrke</span>'+
-    '<span><i style="background:var(--s-andet)"></i>Gang & cykel</span>'+
+    '<span><i style="background:var(--s-andet)"></i>Gang & cykel (¼ vægt)</span>'+
     '<span><i class="linje" style="background:var(--daempet)"></i>Grundform (28 d)</span></div>'+
     '<p class="hint">AU = minutter × anstrengelse (1–10). Det er den fælles enhed, '+
-    'der gør et styrkepas og en løbetur sammenlignelige.</p>'+
+    'der gør et styrkepas og en løbetur sammenlignelige. Gåture og cykling tæller '+
+    'med kvart vægt i regnskabet – de skal ses, men ikke styre det.</p>'+
     '<div class="udlaes" id="soejleUdlaes">'+esc(valgtDag||
       "Denne uge: "+num(bt.ugeSum,0)+" AU mod "+num(bt.forrigeUgeSum,0)+" AU i sidste uge"+
       (bt.aendring!=null?" ("+(bt.aendring>0?"+":"")+num(bt.aendring*100,0)+" %)":"")+".")+
@@ -2754,7 +2822,7 @@ function visBalance(){
       '<div class="diagram">'+maanedsDiagram(uger)+'</div>'+
       '<div class="legende"><span><i style="background:var(--s-loeb)"></i>Løb</span>'+
       '<span><i style="background:var(--s-styrke)"></i>Styrke</span>'+
-      '<span><i style="background:var(--s-andet)"></i>Gang & cykel</span></div>'+
+      '<span><i style="background:var(--s-andet)"></i>Gang & cykel (¼ vægt)</span></div>'+
       '<div class="rul" style="margin-top:10px"><table class="data"><thead><tr>'+
       '<th>UGE FRA</th><th>AU</th><th>LØB</th><th>STYRKE</th><th>PARAT</th><th>SØVN</th>'+
       '</tr></thead><tbody>'+
@@ -2874,8 +2942,8 @@ function balanceRaad(bt,d){
   let andetUge=0, andetFoer=0;
   (d.sessions||[]).forEach(sx=>{
     if(sx.type!=="GANG"&&sx.type!=="CYKEL")return;
-    if(uge7.indexOf(sx.dato)>=0)andetUge+=sessionLoad(sx,profil);
-    else if(dageMellem(sx.dato,idag())<=28)andetFoer+=sessionLoad(sx,profil);
+    if(uge7.indexOf(sx.dato)>=0)andetUge+=sessionLoad(sx,profil)*ANDETVAEGT;
+    else if(dageMellem(sx.dato,idag())<=28)andetFoer+=sessionLoad(sx,profil)*ANDETVAEGT;
   });
   if(bt.ugeSum>0&&andetUge/bt.ugeSum>0.12&&andetFoer<andetUge*0.5&&d.profil){
     const uden=belastningsTal(d,idag(),true);
@@ -2969,9 +3037,9 @@ function visPlan(){
         "det er præcis det mønster, der plejer at gå galt.");break;
     }
   }
-  if(antalStyrke<3)advarsler.push("Færre end tre styrkedage. Styrken er det, der holder "+
+  if(antalStyrke<2)advarsler.push("Færre end to styrkedage. Styrken er det, der holder "+
     "SI-leddet i ro – skær hellere i løbet end i styrken.");
-  if(antalLoeb>4)advarsler.push("Mere end fire løbedage. Med tre styrkedage ved siden af "+
+  if(antalLoeb>4)advarsler.push("Mere end fire løbedage. Med styrkedagene ved siden af "+
     "bliver der ikke plads til at bygge noget op.");
   if(data.ugeplan.filter(x=>x==="FRI").length===0)advarsler.push("Ingen fridag i ugen. "+
     "Fremgangen sker på fridagene, ikke på træningsdagene.");
@@ -4162,6 +4230,10 @@ function bind(){
   const id=(x)=>document.getElementById(x);
   const klik=(x,f)=>{const el=id(x);if(el)el.onclick=f};
 
+  klik("trinNed",()=>{data.profil.loebeTrin=klem((data.profil.loebeTrin||1)-1,1,6);
+    gemData(data);render()});
+  klik("trinOp",()=>{data.profil.loebeTrin=klem((data.profil.loebeTrin||1)+1,1,6);
+    gemData(data);render()});
   klik("morgenStart",()=>{aabnMorgen();render()});
   klik("morgenRet",()=>{aabnMorgen();render()});
   klik("morgenAnnuller",()=>{morgenAaben=false;morgenKladde=null;render()});
