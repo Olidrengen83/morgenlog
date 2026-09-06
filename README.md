@@ -17,8 +17,19 @@ sæt, gentagelser og vægt, eller en løbetur du lægger ind som fil.
 HRV og søvn tegnet op mod din egen 42-dages basislinje. Alle diagrammer har en
 tabel med de samme tal.
 
-**PLAN** — ugens skelet. Byt rundt på dagene, eller vælg bare et andet pas under
-I dag; appen regner på det, du faktisk lavede.
+**PLAN** — ugens skelet: Man Løb · Tir Styrke A · Ons Løb · Tor Styrke B ·
+Fre Let · Lør Løb · Søn Fri. Byt rundt på dagene, eller vælg bare et andet pas
+under I dag; appen regner på det, du faktisk lavede. »Let« er valgfri mobilitet
+eller op til 20 min meget let løb og tælles med RPE 2. Styrke C er udgået af
+planen — gamle C-pas står stadig i loggen som historik.
+
+På løbedage viser I dag-fanen **løbeprotokollen**: seks trin fra 4 × 8 min
+run/walk til 30 min sammenhængende, med sin egen lørdagsvariant. Trin skiftes
+manuelt med pilene; kravet for at rykke op er to godkendte pas i træk med puls
+under 145 og jævnt tempo.
+
+Gåture og cykling logges med deres fulde AU, men tæller kun med kvart vægt i
+akut:kronisk-regnskabet — de skal ses, ikke styre.
 
 **LOG** — hvert pas med load, RPE og parathed den dag. Pas, uret har logget uden
 øvelser, kan færdiggøres herfra.
