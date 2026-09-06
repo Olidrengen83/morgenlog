@@ -23,10 +23,12 @@ under I dag; appen regner på det, du faktisk lavede. »Let« er valgfri mobilit
 eller op til 20 min meget let løb og tælles med RPE 2. Styrke C er udgået af
 planen — gamle C-pas står stadig i loggen som historik.
 
-På løbedage viser I dag-fanen **løbeprotokollen**: seks trin fra 4 × 8 min
+På løbedage viser I dag-fanen **løbeprotokollen**: fem trin fra 4 × 8 min
 run/walk til 30 min sammenhængende, med sin egen lørdagsvariant. Trin skiftes
 manuelt med pilene; kravet for at rykke op er to godkendte pas i træk med puls
-under 145 og jævnt tempo.
+under 145 og jævnt tempo. Oveni er der en **let uge**-knap: slået til tager den
+ét interval af alle ture, uanset trin — på de sammenhængende trin er det
+lørdagens run/walk-tillæg, der ryger.
 
 Gåture og cykling logges med deres fulde AU, men tæller kun med kvart vægt i
 akut:kronisk-regnskabet — de skal ses, ikke styre.
