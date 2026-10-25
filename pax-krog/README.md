@@ -7,9 +7,11 @@ så børnenes tøj fra i dag kan hænge klar til i morgen.
 
 | Fil | Hvad |
 |---|---|
-| `pax_krog.stl` | Klar til slicer. 55,8 × 35,2 × 25 mm, ca. 14 g PLA. |
+| `pax_krog_P1S_PETG.3mf` | **Bambu Studio-projekt**: P1S, 0,4 mm dyse, Bambu PETG Basic, Textured PEI, 4 vægge, 40 % gyroid. Åbn, slice, print. |
+| `pax_krog.stl` | Ren model til andre slicere. 55,8 × 35,2 × 25 mm, ca. 14 g. |
 | `pax_krog.scad` | Parametrisk OpenSCAD-udgave, ret målene øverst. |
 | `lav_krog.py` | Python-udgave der har lavet STL'en (shapely + trimesh). |
+| `lav_3mf.py` | Pakker STL'en som Bambu Studio-projekt med profiler og indstillinger. |
 | `pax_krog_profil.png` | Tværsnit med fronten tegnet ind. |
 | `pax_krog_3d.png` | 3D-visning. |
 
@@ -28,8 +30,12 @@ så børnenes tøj fra i dag kan hænge klar til i morgen.
 
 - Læg den **på siden** (det er sådan STL'en er orienteret). Så ligger lagene langs
   krogen, og den knækker ikke i hjørnet.
-- 3 vægge (perimeters), 25–40 % infill, lag 0,2 mm. PLA eller PETG; PETG tåler lidt
-  mere bøjning hvis slidsen er stram.
+- 4 vægge, 40 % gyroid infill, lag 0,2 mm. PETG anbefales: det tåler mere bøjning end
+  PLA, hvis slidsen er stram, og bliver ikke blødt i en varm bil eller vindueskarm.
+- Bambu Studio: åbn `pax_krog_P1S_PETG.3mf` via *Fil > Åbn projekt*. Trækker du den ind i
+  stedet, så vælg »Load project« (ikke »geometry only«), ellers ryger printprofilen.
+- Indstillingerne ligger både i projektet og som per-objekt-indstillinger på selve
+  krogen, så de holder, selv hvis du skifter procesprofil.
 - Ingen support nødvendig.
 - Sæt evt. et stykke filt eller en strimmel tape på indersiden af det forreste ben,
   hvis du er bange for mærker i lakken.
