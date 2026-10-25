@@ -11,8 +11,8 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe1-bestik__knivbakke-b.stl` | 4×6×8 | 167.5 × 251.6 × 56.0 | 165 × 501 × 50 (hel bakke) | 324.7 cm³ | 403 g | 13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.) |
 | `skuffe1-bestik__redskaber-a.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 150.3 cm³ | 186 g | Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer, småting) |
 | `skuffe1-bestik__redskaber-b.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 150.3 cm³ | 186 g | Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer, småting) |
-| `skuffe1-bestik__bestik-bag.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 426.2 cm³ | 528 g | Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler |
-| `skuffe1-bestik__bestik-for.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 437.7 cm³ | 543 g | Fire rum 61 x 249: spiseknive, gafler, spiseskeer, spisepinde (nederst) med løs indsats til lange teskeer ovenpå |
+| `skuffe1-bestik__bestik-kort.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 426.2 cm³ | 528 g | Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler |
+| `skuffe1-bestik__bestik-lang.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 437.7 cm³ | 543 g | Fire rum 61 x 249: spiseknive, gafler, spiseskeer, spisepinde (nederst) med løs indsats til lange teskeer ovenpå |
 
 ## skuffe2-ruller-poser
 
@@ -36,6 +36,6 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 
 | Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |
 |---|---|---|---|---|---|---|
-| `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-for: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
+| `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
 
 **I alt ca. 4399 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

@@ -44,23 +44,23 @@
 <line x1="211.0" y1="466.26" x2="289.5" y2="466.26" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="250.25" y="314.25" font-size="11" text-anchor="middle" font-weight="bold">redskaber</text>
 <text x="250.25" y="327.25" font-size="9" text-anchor="middle" fill="#444">2×12×8u</text>
-<rect x="293.0" y="65.0" width="250.5" height="250.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="369.89" y1="67.0" x2="369.89" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<rect x="370.52" y="148.41333333333333" width="172.71999999999997" height="1.2600000000000051" fill="#3b3b3b"/>
-<rect x="370.52" y="231.82666666666663" width="172.71999999999997" height="1.2600000000000193" fill="#3b3b3b"/>
-<text x="418.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-bag</text>
-<text x="418.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
-<rect x="293.0" y="317.0" width="250.5" height="250.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="356.19" y1="319.0" x2="356.19" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="418.75" y1="319.0" x2="418.75" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="481.30999999999995" y1="319.0" x2="481.30999999999995" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<rect x="481.93999999999994" y="318.26" width="61.30000000000001" height="248.98" fill="none" stroke="#3b3b3b" stroke-width="1" stroke-dasharray="3 3"/>
-<path d="M 314.91 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<path d="M 377.47 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<path d="M 440.03 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<path d="M 502.5899999999999 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="418.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-for</text>
+<rect x="293.0" y="317.0" width="250.5" height="250.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="369.89" y1="319.0" x2="369.89" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="370.52" y="400.4133333333333" width="172.71999999999997" height="1.2600000000000051" fill="#3b3b3b"/>
+<rect x="370.52" y="483.8266666666666" width="172.71999999999997" height="1.2600000000000193" fill="#3b3b3b"/>
+<text x="418.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-kort</text>
 <text x="418.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
+<rect x="293.0" y="65.0" width="250.5" height="250.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="356.19" y1="67.0" x2="356.19" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="418.75" y1="67.0" x2="418.75" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="481.30999999999995" y1="67.0" x2="481.30999999999995" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="481.93999999999994" y="66.26" width="61.30000000000001" height="248.98" fill="none" stroke="#3b3b3b" stroke-width="1" stroke-dasharray="3 3"/>
+<path d="M 314.91 315.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 377.47 315.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 440.03 315.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 502.5899999999999 315.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<text x="418.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-lang</text>
+<text x="418.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
 <text x="292.0" y="586.0" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>
 <text x="604.0" y="56" font-size="16" font-weight="bold">skuffe2-ruller-poser  ·  12×12 enheder, bagkant øverst</text>
 <rect x="604.0" y="64" width="504.0" height="504.0" fill="#e8e1d3" stroke="#6b5d45" stroke-width="2"/>

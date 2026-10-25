@@ -43,7 +43,8 @@ STL-filerne laves igen på få sekunder.
 
 ## Skuffe 1 – bestik
 
-Fire bakker. Bagkanten er øverst på tegningen; forkanten (mod dig) nederst. Prioriteten er udnyttelse, ikke udseende:
+Fire bakker. Bagkanten er øverst på tegningen; forkanten (mod dig) nederst. De to 6×6-bakker har samme
+fodaftryk og kan byttes om når som helst, uden nyt print. Prioriteten er udnyttelse, ikke udseende:
 alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for to bakkevægge, er det.
 
 * **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
@@ -57,11 +58,11 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, tre rum i fuld højde:
   199 mm (piskeris, ostehøvl, grillspyd, lange redskaber), 199 mm (hvidløgspresser, rivejern, pizzahjul, proptrækker)
   og 100 mm (måleskeer, småting).
-* **Bestik-bag 6×6**: til venstre et rum på 75 × 249 mm til de store skeer på 21 cm. Til højre tre tværrum på
-  172 × 82 mm til teskeer, børnebestik og kagegafler.
-* **Bestik-for 6×6**: fire rum på 61 × 249 mm med greb-hak i forkanten: spiseknive, gafler, spiseskeer og
+* **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer og
   spisepinde. Spisepinde-rummet har to lister 22 mm over bunden, og den løse **teske-indsats** (60 × 248 × 34 mm)
   hviler på dem med de lange teskeer, mens spisepindene ligger nedenunder. Indsatsen har greb-hak i begge ender.
+* **Bestik-kort 6×6** (forrest): til venstre et rum på 75 × 249 mm til de store skeer på 21 cm. Til højre tre tværrum på
+  172 × 82 mm til teskeer, børnebestik og kagegafler.
 
 ## Skuffe 2 – ruller, poser og småting (foreløbig plan, revideres)
 

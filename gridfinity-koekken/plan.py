@@ -31,12 +31,12 @@ BESTIK = [
             label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(200.0, 400.0),
             label="Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer, småting)"),
-    BinSpec("bestik-bag", 6, 6, H, pos=(6, 0),
+    BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
             dividers_x=(STORE_SKEER_B + 0.63,),
             walls=((STORE_SKEER_B + 1.26, C3, W_IN6, C3 + 1.26),
                    (STORE_SKEER_B + 1.26, 2 * C3 + 1.26, W_IN6, 2 * C3 + 2.52)),
             label="Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler"),
-    BinSpec("bestik-for", 6, 6, H, pos=(6, 6),
+    BinSpec("bestik-lang", 6, 6, H, pos=(6, 0),
             dividers_x=(C4 + 0.63, 2 * C4 + 1.89, 3 * C4 + 3.15),
             rails=((3 * C4 + 3.78, W_IN6, 0.0, W_IN6, 22.0),),
             front_notch=True, notch_radius=12,
@@ -47,7 +47,7 @@ BESTIK = [
 # Løse indsatser uden Gridfinity-fod
 EXTRA = [
     TraySpec("teske-indsats", width=C4 - 0.8, length=W_IN6 - 0.8, height=56 - 22,
-             label="Øverste lag i rum 4 i bestik-for: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder"),
+             label="Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder"),
 ]
 
 # ISTAD-æskerne er 29,5 / 23 / 19 cm lange og 7,5 cm brede -> 2 enheder brede (80 mm indv.)
