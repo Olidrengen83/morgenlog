@@ -29,7 +29,8 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe2-ruller-poser__smaating.stl` | 4×2×8 | 167.5 × 83.5 × 56.0 | 165 × 81 × 50 (hel bakke) | 108.4 cm³ | 134 g | Bagerst, to rum 80 x 80: tandstikker + barberblade · tændstikker + fødselsdagslys |
 | `skuffe2-ruller-poser__istad-smaa.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 19 cm på langs (80 x 248 mm), ender bag papiret |
 | `skuffe2-ruller-poser__poseklemmer.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 103.3 cm³ | 128 g | Alle poseklemmer (13,5 / 10,5 / 5 cm) i ét rum 80 x 164 mm, fuld højde |
-| `skuffe2-ruller-poser__elastikker.stl` | 2×2×8 | 83.5 × 83.5 × 56.0 | 81 × 81 × 50 (hel bakke) | 56.5 cm³ | 70 g | Elastikker, løse (80 x 80 mm) |
+| `skuffe2-ruller-poser__elastikker.stl` | 1×2×8 | 41.5 × 83.5 × 56.0 | 39 × 81 × 50 (hel bakke) | 33.1 cm³ | 41 g | Elastikker, løse (37 x 80 mm) |
+| `skuffe2-ruller-poser__frit-1x2.stl` | 1×2×8 | 41.5 × 83.5 × 56.0 | 39 × 81 × 50 (hel bakke) | 33.1 cm³ | 41 g | Frit smalt rum 37 x 80 mm (fx tændstikæske, snor, blyant) |
 | `skuffe2-ruller-poser__mellemlaegspapir.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af |
 
 ## loese-indsatser
@@ -38,4 +39,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
 
-**I alt ca. 4463 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4475 g PLA** (21 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

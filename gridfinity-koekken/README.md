@@ -13,7 +13,7 @@ STL-filerne laves igen på få sekunder.
 
 ## Hvad er lavet
 
-* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 13 til rulle/pose-skuffen; 20 i alt). Se `printliste.md`.
+* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 14 til rulle/pose-skuffen; 21 i alt). Se `printliste.md`.
 * **`plan.py`** – selve planen: hvilke bakker, hvor store, hvor de står, skillevægge, knivbakke-parametre.
 * **`gridfinity.py`** – lille Gridfinity-bibliotek (fodprofil 0,8 / 1,8 / 2,15 mm, 42 mm pitch, 4 mm hjørner).
 * **`generate.py`** – laver STL, `layout.svg` og `printliste.md`. **`preview.py`** laver PNG-billederne.
@@ -70,7 +70,7 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 
 ## Skuffe 2 – ruller, poser og småting
 
-Elleve bakker, alle 8 enheder høje. Det daglige ligger forrest eller i kolonner på langs, så æskens ende sidder
+Tolv bakker, alle 8 enheder høje. Det daglige ligger forrest eller i kolonner på langs, så æskens ende sidder
 ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
 
 * **Ruller 4×8** (164 × 332 mm, to halvdele) langs venstre side: film, sølvpapir, cellofan og fryseposer på rulle
@@ -80,7 +80,7 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
   19 cm i 2×6 (248 mm). De to store ender ved forkanten, den lille lige bag papiret.
 * **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
 * **Poseklemmer 2×4**: alle klemmer (13,5 / 10,5 / 5 cm) i ét rum på 80 × 164 mm i fuld højde.
-  **Elastikker 2×2** lige foran, bag papiret.
+  **Elastikker 1×2** (37 × 80 mm) lige foran, bag papiret, med et frit 1×2-rum ved siden af.
 * **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
   Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).

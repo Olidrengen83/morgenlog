@@ -118,10 +118,13 @@
 <rect x="1025.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1066.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">poseklemmer</text>
 <text x="1066.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×8u</text>
-<rect x="1025.0" y="317.0" width="82.5" height="82.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="1066.25" y="356.25" font-size="11" text-anchor="middle" font-weight="bold">elastikker</text>
-<text x="1066.25" y="369.25" font-size="9" text-anchor="middle" fill="#444">2×2×8u</text>
-<rect x="941.0" y="401.0" width="166.5" height="166.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="1025.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="1045.25" y="356.25" font-size="9" text-anchor="middle" font-weight="bold">elastikker</text>
+<text x="1045.25" y="369.25" font-size="7" text-anchor="middle" fill="#444">1×2×8u</text>
+<rect x="1067.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="1087.25" y="356.25" font-size="9" text-anchor="middle" font-weight="bold">frit-1x2</text>
+<text x="1087.25" y="369.25" font-size="7" text-anchor="middle" fill="#444">1×2×8u</text>
+<rect x="941.0" y="401.0" width="166.5" height="166.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1024.25" y="482.25" font-size="11" text-anchor="middle" font-weight="bold">mellemlaegspapir</text>
 <text x="1024.25" y="495.25" font-size="9" text-anchor="middle" fill="#444">4×4×8u</text>
 <text x="856.0" y="586.0" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>

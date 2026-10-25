@@ -77,8 +77,10 @@ RULLER = [
             label="ISTAD 19 cm på langs (80 x 248 mm), ender bag papiret"),
     BinSpec("poseklemmer", 2, 4, H, pos=(10, 2),
             label="Alle poseklemmer (13,5 / 10,5 / 5 cm) i ét rum 80 x 164 mm, fuld højde"),
-    BinSpec("elastikker", 2, 2, H, pos=(10, 6),
-            label="Elastikker, løse (80 x 80 mm)"),
+    BinSpec("elastikker", 1, 2, H, pos=(10, 6),
+            label="Elastikker, løse (37 x 80 mm)"),
+    BinSpec("frit-1x2", 1, 2, H, pos=(11, 6),
+            label="Frit smalt rum 37 x 80 mm (fx tændstikæske, snor, blyant)"),
     BinSpec("mellemlaegspapir", 4, 4, H, pos=(8, 8),
             label="FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af"),
 ]
