@@ -81,18 +81,28 @@ def _cell() -> Manifold:
 
 @dataclass
 class KnifeTray:
-    """Parametre for knivbakke. Knivspidser mod y=0 (bagenden)."""
-    slots: int = 10
-    pitch: float = 15.0          # mm mellem slidser
-    slot_width: float = 5.0      # bredde af slids (knivryg + luft)
-    lean_deg: float = 25.0       # hældning af klingen fra lodret
+    """Knivbakke med to rækker lodrette slidser. Spidser mod y=0 (bagenden).
+
+    Bagerste række: lange knive, spids mod bagvæggen, holdt af `back_ribs`.
+    Forreste række: korte knive, spids bagud, holdt af `front_ribs` (kun fra
+    `front_x_from` og ud til højre væg). Til venstre for den forreste række er
+    der et frit felt (x < front_x_from, y > field_y0), delt af tværvægge ved
+    `field_dividers`. Alle x/y er indvendige mål fra venstre/bageste væg.
+    """
+    back_slots: int = 6
+    back_pitch: float = 25.0
+    back_x0: float = 20.0
+    back_ribs: Tuple[float, ...] = (45.0, 120.0, 195.0)
+    front_slots: int = 7
+    front_pitch: float = 15.0
+    front_x0: float = 70.0
+    front_ribs: Tuple[float, ...] = (350.0, 430.0)
+    front_x_from: float = 62.0
+    field_y0: float = 338.0
+    field_dividers: Tuple[float, ...] = (419.0,)
+    slot_width: float = 4.0
+    slot_bottom: float = 1.0        # slidsbund over gulvet
     rib_thickness: float = 3.0
-    rib_positions: Tuple[float, ...] = (45.0, 120.0, 195.0)  # y fra bagvæg (indvendigt)
-    stagger: bool = True         # første ribbe kun med slidser i hver anden -> forskudte håndtag
-    rest_start: float = 250.0    # håndtagsrampe starter her (indvendig y)
-    rest_h0: float = 8.0         # rampehøjde over gulv ved start
-    rest_h1: float = 20.0        # rampehøjde over gulv ved forenden
-    rest_step: float = 22.0      # afstand mellem trin-ribber i rampen
 
 
 @dataclass
@@ -101,15 +111,18 @@ class BinSpec:
     units_x: int
     units_y: int
     units_z: int = 7
-    wall: float = 1.6
+    wall: float = 1.26            # 3 linjer à 0,42 mm
     floor_top: float = 6.0            # gulvets overside (z)
-    divider_t: float = 1.2
+    divider_t: float = 1.26
     dividers_y: Tuple[float, ...] = ()   # y-positioner (indvendigt, fra bagvæg)
     dividers_x: Tuple[float, ...] = ()   # x-positioner (indvendigt, fra venstre væg)
     divider_height: Optional[float] = None  # None = fuld højde
     front_notch: bool = False
     notch_radius: float = 14.0
     notch_x: Optional[float] = None   # hakkets centrum (x); None = midt på bakken
+    notch_xs: Tuple[float, ...] = ()  # flere hak (x-centre, udvendige koordinater)
+    walls: Tuple[Tuple[float, float, float, float], ...] = ()  # fritstående vægge (x0,y0,x1,y1) indv.
+    rails: Tuple[Tuple[float, float, float, float, float], ...] = ()  # (x0,x1,y0,y1,z_top) lister
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)
@@ -160,6 +173,14 @@ def build_bin(spec: BinSpec) -> Manifold:
         m = m + Manifold.cube((t, L - 2 * wall + 0.4, dh - spec.floor_top + 0.5)).translate(
             (wall + x - t / 2, wall - 0.2, spec.floor_top - 0.5))
 
+    # Fritstående vægge (fuld højde) og lister til løse indsatser
+    for (x0, y0, x1, y1) in spec.walls:
+        m = m + Manifold.cube((x1 - x0, y1 - y0, H - spec.floor_top + 0.5)).translate(
+            (wall + x0, wall + y0, spec.floor_top - 0.5))
+    for (x0, x1, y0, y1, zt) in spec.rails:
+        for xa in (x0, x1 - 3.0):
+            m = m + Manifold.cube((3.0, y1 - y0, 2.0)).translate((wall + xa, wall + y0, zt - 2.0))
+
     # Knivbakke-features
     if spec.knife is not None:
         m = m + _knife_features(spec)
@@ -168,8 +189,9 @@ def build_bin(spec: BinSpec) -> Manifold:
     if spec.front_notch:
         r = min(spec.notch_radius, (W - 2 * wall) / 2 - 6)
         cyl = Manifold.cylinder(wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))
-        nx = W / 2 if spec.notch_x is None else spec.notch_x
-        m = m - cyl.translate((nx, L - wall - 2, H))
+        xs = list(spec.notch_xs) or [W / 2 if spec.notch_x is None else spec.notch_x]
+        for nx in xs:
+            m = m - cyl.translate((nx, L - wall - 2, H))
     return m
 
 
@@ -177,46 +199,62 @@ def _knife_features(spec: BinSpec) -> Manifold:
     k = spec.knife
     W, L, H = spec.W, spec.L, spec.H
     wall, fz = spec.wall, spec.floor_top
-    iw = W - 2 * wall
-    span = (k.slots - 1) * k.pitch
-    # Klingen hælder mod +x: toppen af en 45 mm klinge flytter sig lean-afhængigt.
-    lateral = 45.0 * math.sin(math.radians(k.lean_deg))
-    x0 = wall + max(4.0, (iw - span - lateral) / 2)
-    if x0 + span + lateral + 2 > W - wall:
-        raise ValueError(
-            f"{spec.name}: {k.slots} slidser à {k.pitch} mm med {k.lean_deg}° hældning "
-            f"passer ikke i {iw:.0f} mm indvendig bredde")
-
+    iw, il = W - 2 * wall, L - 2 * wall
     parts = []
-    # Ribber med slidser
-    for ri, y in enumerate(k.rib_positions):
-        rib = Manifold.cube((iw + 0.4, k.rib_thickness, H - fz + 0.5)).translate(
-            (wall - 0.2, wall + y, fz - 0.5))
-        for s in range(k.slots):
-            if k.stagger and ri == 0 and s % 2 == 1:
-                continue  # ulige knive stopper mod første ribbe -> forskudte håndtag
-            xs = x0 + s * k.pitch
-            zb = fz + 3.0
-            cutter = (Manifold.cube((k.slot_width, k.rib_thickness + 2, 80))
-                      .translate((-k.slot_width / 2, 0, 0))
-                      .rotate((0, k.lean_deg, 0))
-                      .translate((xs, wall + y - 1, zb)))
-            # Afrundet bund i slidsen så ryggen hviler blødt
+
+    def rib_with_slots(x_from, x_to, y, xs):
+        rib = Manifold.cube((x_to - x_from + 0.4, k.rib_thickness, H - fz + 0.5)).translate(
+            (wall + x_from - 0.2, wall + y, fz - 0.5))
+        zb = fz + k.slot_bottom + k.slot_width / 2
+        for xs_ in xs:
+            cutter = Manifold.cube((k.slot_width, k.rib_thickness + 2, H)).translate(
+                (wall + xs_ - k.slot_width / 2, wall + y - 1, zb))
             rnd = (Manifold.cylinder(k.rib_thickness + 2, k.slot_width / 2, k.slot_width / 2, 16)
-                   .rotate((-90, 0, 0))
-                   .translate((xs, wall + y - 1, zb)))
+                   .rotate((-90, 0, 0)).translate((wall + xs_, wall + y - 1, zb)))
             rib = rib - cutter - rnd
-        parts.append(rib)
-    # Håndtagsrampe: trin-ribber (lette at printe) med stigende højde mod forenden
-    y0 = wall + k.rest_start
-    y1 = L - wall
-    n = max(2, int((y1 - y0) // k.rest_step))
-    for i in range(n):
-        yy = y0 + i * (y1 - y0 - k.rib_thickness) / (n - 1)
-        hh = k.rest_h0 + (k.rest_h1 - k.rest_h0) * i / (n - 1)
-        parts.append(Manifold.cube((iw + 0.4, k.rib_thickness, hh + 0.5)).translate(
-            (wall - 0.2, yy, fz - 0.5)))
+        return rib
+
+    back_xs = [k.back_x0 + i * k.back_pitch for i in range(k.back_slots)]
+    front_xs = [k.front_x0 + i * k.front_pitch for i in range(k.front_slots)]
+    if back_xs[-1] + 6 > iw or front_xs[-1] + 6 > iw or front_xs[0] - k.slot_width < k.front_x_from:
+        raise ValueError(f"{spec.name}: slidserne passer ikke i {iw:.0f} mm indvendig bredde")
+    for y in k.back_ribs:
+        parts.append(rib_with_slots(0, iw, y, back_xs))
+    for y in k.front_ribs:
+        parts.append(rib_with_slots(k.front_x_from, iw, y, front_xs))
+    # Det frie felt: langsgående væg + tværvægge
+    t = k.rib_thickness
+    parts.append(Manifold.cube((t, il - k.field_y0 + t + 0.2, H - fz + 0.5)).translate(
+        (wall + k.front_x_from - t, wall + k.field_y0 - t, fz - 0.5)))
+    for y in (k.field_y0,) + tuple(k.field_dividers):
+        parts.append(Manifold.cube((k.front_x_from + 0.4, t, H - fz + 0.5)).translate(
+            (wall - 0.2, wall + y - t, fz - 0.5)))
     return Manifold.batch_boolean(parts, __import__("manifold3d").OpType.Add)
+
+
+@dataclass
+class TraySpec:
+    """Løs indsats (simpel kasse uden Gridfinity-fod), fx øverste lag i et rum."""
+    name: str
+    width: float
+    length: float
+    height: float
+    wall: float = 1.26
+    floor: float = 1.26
+    end_notch_radius: float = 10.0
+    label: str = ""
+
+
+def build_tray(t: TraySpec) -> Manifold:
+    outer = _slab(_rrect(t.width, t.length, 2.0), 0, t.height)
+    inner = _slab(_rrect(t.width - 2 * t.wall, t.length - 2 * t.wall, 1.0), t.floor, t.height + 1
+                  ).translate((t.wall, t.wall, 0))
+    m = outer - inner
+    if t.end_notch_radius > 0:
+        r = t.end_notch_radius
+        cyl = Manifold.cylinder(t.wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))
+        m = m - cyl.translate((t.width / 2, -2, t.height)) - cyl.translate((t.width / 2, t.length - t.wall - 2, t.height))
+    return m
 
 
 # --- Opdeling til printerpladen ---------------------------------------------
@@ -279,13 +317,15 @@ def to_trimesh(m: Manifold):
 
 
 def export_stl(m: Manifold, path: str) -> dict:
+    import trimesh
     tm = to_trimesh(m)
     tm.export(path)
+    reloaded = trimesh.load(path)   # tjek som sliceren ser filen
     bb = m.bounding_box()
     return {
         "path": path,
         "size_mm": (round(bb[3] - bb[0], 1), round(bb[4] - bb[1], 1), round(bb[5] - bb[2], 1)),
         "volume_cm3": round(m.volume() / 1000, 1),
-        "watertight": bool(tm.is_watertight),
+        "watertight": bool(tm.is_watertight and reloaded.is_watertight),
         "triangles": int(len(tm.faces)),
     }

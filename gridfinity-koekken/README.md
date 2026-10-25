@@ -13,57 +13,57 @@ STL-filerne laves igen på få sekunder.
 
 ## Hvad er lavet
 
-* **`stl/`** – 26 færdige STL-filer (13 til bestikskuffen, 13 til rulle/pose-skuffen). Se `printliste.md`.
+* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 13 til rulle/pose-skuffen). Se `printliste.md`.
 * **`plan.py`** – selve planen: hvilke bakker, hvor store, hvor de står, skillevægge, knivbakke-parametre.
 * **`gridfinity.py`** – lille Gridfinity-bibliotek (fodprofil 0,8 / 1,8 / 2,15 mm, 42 mm pitch, 4 mm hjørner).
 * **`generate.py`** – laver STL, `layout.svg` og `printliste.md`. **`preview.py`** laver PNG-billederne.
 
-## Forudsætninger (tjek disse først)
+## Forudsætninger
 
-1. **Basepladen er 12 × 12 enheder** (504 × 504 mm). Der er 6 mm til overs i bredden og 21 mm i dybden.
+1. **Basepladen er 12 × 12 enheder** (504 × 504 mm) af skeleton-typen, så bakkerne står reelt på skuffebunden.
    Hvis din baseplade er anderledes, ret `DRAWER_UNITS` i `plan.py`.
-2. **Højde.** Bakkerne er 7 enheder = 49 mm (bestikrummene 6 enheder = 42 mm). Oven på en
-   almindelig baseplade giver det ca. 50–52 mm i alt, altså under de 60 mm. Gå ikke op på 8 enheder (56 mm +).
-3. **Printerplade.** `MAX_PRINT_UNITS = 6` deler lange bakker i stykker på højst 251,5 mm
-   (passer på 256 mm-plader som Bambu X1/P1/A1). Har du en Prusa MK3/MK4 (250 × 210) eller
-   Ender 3 (220 × 220), så sæt den til **5** (209,5 mm) og kør `python3 generate.py` igen.
+2. **Højde.** Bestikskuffens bakker er 8 enheder = 56 mm, ca. 57 mm i alt. Knivene står lodret og den
+   bredeste klinge (santoku, 45 mm) ender i ca. 53 mm. Alt under de 60 mm.
+3. **Printer: Bambu P1S** (256 × 256 mm). `MAX_PRINT_UNITS = 6` deler lange bakker i stykker på højst 251,5 mm.
    Delte bakker (`-a`, `-b`) har åbne ender mod hinanden og låses sammen af basepladen.
+4. **Vægge** er 1,26 mm = 3 linjer à 0,42 mm, både ydervægge og skillevægge. Stift nok til 56 mm høje vægge, og
+   tyndere end det bliver svajende på de lange stræk.
 
-### Mål der er lagt til grund
+### Mål der er lagt til grund (bestikskuffen)
 
-Opmålte (fra dig) og skønnede mål. Ret i `plan.py`, hvis noget ikke passer.
-
-| Ting | Mål | Skal kunne være i | Bakke |
-|---|---|---|---|
-| Længste køkkenkniv | 33 cm | ≤ 374 mm | `knivbakke` 4×9 |
-| Store skeer | 21 cm | ≤ 248 mm | `store-skeer` 6×2 og `skeer` 2×6 |
-| Sølvpapir- og film-æsker | 31 cm | ≤ 332 mm lange, to æsker ≤ 122 mm tilsammen i bredden (skøn: mål bredden) | `ruller` 8×3 |
-| ISTAD stor / mellem / lille | 29,5 / 23 / 19 × 7,5 cm | ≤ 332 / 248 / 206 × 80 mm | `fryseposer-store/-mellem/-smaa` |
-| Mellemlægspapir-æske | 15 × 12,5 cm | ≤ 164 × 130 mm | `papir-taendstikker`, bagerste rum |
-| Poser på rulle, trægafler, sugerør, sushi-måtte | skøn ≤ 24 cm | ≤ 248 mm | `lange-ting` 6×2 |
-| Stegetermometer | skøn ≤ 16 cm | ≤ 164 mm | `termometre` 4×3 |
-| Ringe til glas | skøn ≤ 12 cm | ≤ 122 mm i diameter | `ringe` 3×3 |
-
-Æskernes højde skal være under 43 mm for at ligge under kanten (de må stikke op til ca. 55 mm i alt).
+| Ting | Mål | Plads |
+|---|---|---|
+| Køkkenknive | 33 · 31 · 31 · 25 · 22 · 22 cm (lange) og 5 × 21 + 2 × 18 cm (korte) | knivbakke 4×12, 500 mm indvendigt |
+| Santoku-klinge, ryg til æg | 45 mm | lodret slids, bund 7 mm over skuffebunden |
+| Bamix-skær | ø36 mm, 4 stk. | småtingsrum 59 × 80 mm forrest i knivbakken |
+| Store skeer | 21 cm | rum 75 × 249 mm |
+| Spisepinde og lange teskeer | ca. 24 cm | rum 61 × 249 mm i to lag |
+| Spiseknive, gafler, spiseskeer | 1,5 enhed brede | rum 61 × 249 mm |
+| Teskeer, børnebestik, kagegafler | korte | tværrum 172 × 82 mm |
 
 ## Skuffe 1 – bestik
 
-Bagkanten er øverst på tegningen; forkanten (mod dig) nederst.
+Fire bakker. Bagkanten er øverst på tegningen; forkanten (mod dig) nederst. Prioriteten er udnyttelse, ikke udseende:
+alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for to bakkevægge, er det.
 
-* **Knivbakke 4×9** til venstre: 10 skrå slidser (25° hældning, 15 mm deling) i tre ribber.
-  Spidserne vender bagud, så du altid griber i et håndtag. Den forreste ribbe har kun slidser i
-  hver anden plads, så håndtagene forskydes og ikke ligger oven i hinanden. Trin-ribber forrest
-  løfter håndtagene, så de er nemme at tage. Ret `KnifeTray(slots=…, pitch=…, lean_deg=…)` i `plan.py`.
-* **Redskaber 2×9** (80 × 374 mm indvendigt): piskeris, ostehøvl, grillspyd og de
-  lange sorte redskaber der i dag ligger løst i siden.
-* **Værktøj 3×3** og **Måleskeer 3×3** forrest til venstre: hvidløgspresser, rivejern, pizzahjul,
-  proptrækker, te-si, måleskeer.
-* **Store skeer 6×2** bagerst på tværs (248 × 80 mm): skeerne på 21 cm og serveringsbestik.
-* **Teskeer, børnebestik, kagegafler 2×4** (80 × 164 mm): korte rum til det korte bestik.
-* **Gafler, spiseknive, spiseskeer 2×6** forrest (80 × 248 mm). Knivrummet har en skillevæg på langs,
-  så der er en smal stribe på 26 × 248 mm til **spisepinde** og 53 mm til knivene. Alle bestikrum er 42 mm høje med greb-hak i forkanten.
+* **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
+  * Bagerst: tre ribber med 6 lodrette slidser i 25 mm deling til de lange knive, spidserne mod bagvæggen.
+    33, 31 og 31 cm i venstre side, 22, 25 og 22 cm i højre.
+  * Forrest: to ribber med 7 slidser i 15 mm deling, skubbet mod højre, til de fem steakknive og to urteknive.
+    Spidserne vender bagud og ligger bag håndtagene på 22/25 cm-knivene.
+  * Forrest til venstre, foran de lange knives håndtag: to småtingsrum på 59 × 80 mm. Bamix-skærene i det ene,
+    det andet frit.
+  * Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden. Ret `KnifeTray(...)` i `plan.py`.
+* **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, tre rum i fuld højde:
+  199 mm (piskeris, ostehøvl, grillspyd, lange redskaber), 199 mm (hvidløgspresser, rivejern, pizzahjul, proptrækker)
+  og 100 mm (måleskeer, småting).
+* **Bestik-bag 6×6**: til venstre et rum på 75 × 249 mm til de store skeer på 21 cm. Til højre tre tværrum på
+  172 × 82 mm til teskeer, børnebestik og kagegafler.
+* **Bestik-for 6×6**: fire rum på 61 × 249 mm med greb-hak i forkanten: spiseknive, gafler, spiseskeer og
+  spisepinde. Spisepinde-rummet har to lister 22 mm over bunden, og den løse **teske-indsats** (60 × 248 × 34 mm)
+  hviler på dem med de lange teskeer, mens spisepindene ligger nedenunder. Indsatsen har greb-hak i begge ender.
 
-## Skuffe 2 – ruller, poser og småting
+## Skuffe 2 – ruller, poser og småting (foreløbig plan, revideres)
 
 * **Ruller 8×3** bagerst (332 × 122 mm indvendigt): sølvpapir og film side om side.
 * **Papir | tændstikker 4×5** bagerst til højre med skillevæg: mellemlægspapiret i det bageste rum

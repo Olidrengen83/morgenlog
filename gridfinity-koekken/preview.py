@@ -73,11 +73,23 @@ def render_layout(fname):
                 ax.plot([x + b.wall + dx] * 2, [y + 2, y + b.L - 2], color="#333", lw=1.5)
             for dy in b.dividers_y:
                 ax.plot([x + 2, x + b.W - 2], [y + b.L - b.wall - dy] * 2, color="#333", lw=1.5)
+            for (wx0, wy0, wx1, wy1) in b.walls:
+                ax.add_patch(mpatches.Rectangle((x + b.wall + wx0, y + b.L - b.wall - wy1), wx1 - wx0, wy1 - wy0, fc="#333", ec="none"))
+            for (rx0, rx1, ry0, ry1, _z) in b.rails:
+                ax.add_patch(mpatches.Rectangle((x + b.wall + rx0, y + b.L - b.wall - ry1), rx1 - rx0, ry1 - ry0, fc="none", ec="#333", lw=1, ls=":"))
             if b.knife is not None:
-                for ry in b.knife.rib_positions:
-                    ax.plot([x + 4, x + b.W - 4], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
+                k = b.knife; iw = b.W - 2 * b.wall
+                for ry in k.back_ribs:
+                    ax.plot([x + b.wall, x + b.wall + iw], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
+                for ry in k.front_ribs:
+                    ax.plot([x + b.wall + k.front_x_from, x + b.wall + iw], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
+                fx = x + b.wall + k.front_x_from
+                ax.plot([fx, fx], [y, y + b.L - b.wall - k.field_y0], color="#333", lw=2)
+                for fd in (k.field_y0,) + tuple(k.field_dividers):
+                    ax.plot([x, fx], [y + b.L - b.wall - fd] * 2, color="#333", lw=2)
             if b.front_notch:
-                ax.add_patch(mpatches.Wedge((x + b.W / 2, y), 12, 0, 180, fc="#faf8f3", ec="#333", lw=1))
+                for nx in (list(b.notch_xs) or [b.W / 2]):
+                    ax.add_patch(mpatches.Wedge((x + nx, y), 10, 0, 180, fc="#faf8f3", ec="#333", lw=1))
             fs = 10 if min(b.W, b.L) > 100 else 8
             ax.text(x + b.W / 2, y + b.L / 2 + 6, b.name, ha="center", va="center", fontsize=fs, fontweight="bold")
             ax.text(x + b.W / 2, y + b.L / 2 - 8, f"{b.units_x}×{b.units_y}×{b.units_z}u", ha="center", va="center", fontsize=fs - 2, color="#333")

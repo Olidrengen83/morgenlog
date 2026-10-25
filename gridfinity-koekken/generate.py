@@ -12,7 +12,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import plan  # noqa: E402
-from gridfinity import PITCH, build_bin, export_stl, split  # noqa: E402
+from gridfinity import PITCH, build_bin, build_tray, export_stl, split  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PLA_DENSITY = 1.24  # g/cm3
@@ -63,11 +63,24 @@ def layout_svg(drawers, drawer_units, path):
                 out.append(f'<line x1="{x + (b.wall + dx) * s}" y1="{y + 2}" x2="{x + (b.wall + dx) * s}" y2="{y + h - 2}" stroke="#3b3b3b" stroke-width="1.2"/>')
             for dy in b.dividers_y:
                 out.append(f'<line x1="{x + 2}" y1="{y + (b.wall + dy) * s}" x2="{x + w - 2}" y2="{y + (b.wall + dy) * s}" stroke="#3b3b3b" stroke-width="1.2"/>')
+            for (wx0, wy0, wx1, wy1) in b.walls:
+                out.append(f'<rect x="{x + (b.wall + wx0) * s}" y="{y + (b.wall + wy0) * s}" width="{(wx1 - wx0) * s}" height="{(wy1 - wy0) * s}" fill="#3b3b3b"/>')
+            for (rx0, rx1, ry0, ry1, _z) in b.rails:
+                out.append(f'<rect x="{x + (b.wall + rx0) * s}" y="{y + (b.wall + ry0) * s}" width="{(rx1 - rx0) * s}" height="{(ry1 - ry0) * s}" fill="none" stroke="#3b3b3b" stroke-width="1" stroke-dasharray="3 3"/>')
             if b.knife is not None:
-                for ry in b.knife.rib_positions:
-                    out.append(f'<line x1="{x + 4}" y1="{y + (b.wall + ry) * s}" x2="{x + w - 4}" y2="{y + (b.wall + ry) * s}" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>')
+                k = b.knife
+                iw = b.W - 2 * b.wall
+                for ry in k.back_ribs:
+                    out.append(f'<line x1="{x + b.wall * s}" y1="{y + (b.wall + ry) * s}" x2="{x + (b.wall + iw) * s}" y2="{y + (b.wall + ry) * s}" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>')
+                for ry in k.front_ribs:
+                    out.append(f'<line x1="{x + (b.wall + k.front_x_from) * s}" y1="{y + (b.wall + ry) * s}" x2="{x + (b.wall + iw) * s}" y2="{y + (b.wall + ry) * s}" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>')
+                fy = y + (b.wall + k.field_y0) * s
+                out.append(f'<line x1="{x + (b.wall + k.front_x_from) * s}" y1="{fy}" x2="{x + (b.wall + k.front_x_from) * s}" y2="{y + h - 2}" stroke="#3b3b3b" stroke-width="2"/>')
+                for fd in (k.field_y0,) + tuple(k.field_dividers):
+                    out.append(f'<line x1="{x + 2}" y1="{y + (b.wall + fd) * s}" x2="{x + (b.wall + k.front_x_from) * s}" y2="{y + (b.wall + fd) * s}" stroke="#3b3b3b" stroke-width="2"/>')
             if b.front_notch:
-                out.append(f'<path d="M {x + w/2 - 12} {y + h} a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>')
+                for nx in (list(b.notch_xs) or [b.W / 2]):
+                    out.append(f'<path d="M {x + nx * s - 10} {y + h} a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>')
             cx, cy = x + w / 2, y + h / 2
             fs = 11 if min(w, h) > 70 else 9
             out.append(f'<text x="{cx}" y="{cy - 2}" font-size="{fs}" text-anchor="middle" font-weight="bold">{b.name}</text>')
@@ -106,6 +119,15 @@ def main():
                       f"{info['volume_cm3']:6.1f} cm3 ≈ {grams:4.0f} g{flag}")
             print(f"    ({time.time() - t0:.1f} s)")
 
+    for t in getattr(plan, "EXTRA", []):
+        if args.only and args.only not in t.name:
+            continue
+        info = export_stl(build_tray(t), os.path.join(args.out, f"indsats__{t.name}.stl"))
+        grams = info["volume_cm3"] * PLA_DENSITY
+        rows.append(("loese-indsatser", t, t.name, ("-", "-"), info, grams))
+        print(f"  {t.name:28s} indsats  {info['size_mm'][0]:6.1f} x {info['size_mm'][1]:6.1f} x {info['size_mm'][2]:4.1f} mm  "
+              f"{info['volume_cm3']:6.1f} cm3 ≈ {grams:4.0f} g")
+
     layout_svg(plan.DRAWERS, plan.DRAWER_UNITS, os.path.join(HERE, "layout.svg"))
 
     # Oversigt til README
@@ -119,10 +141,14 @@ def main():
             if dname != cur:
                 cur = dname
                 f.write(f"\n## {dname}\n\n| Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |\n|---|---|---|---|---|---|---|\n")
-            iw, il, idp = b.inner
-            f.write(f"| `{dname}__{pname}.stl` | {dims[0]}×{dims[1]}×{b.units_z} | "
-                    f"{info['size_mm'][0]} × {info['size_mm'][1]} × {info['size_mm'][2]} | "
-                    f"{iw:.0f} × {il:.0f} × {idp:.0f} (hel bakke) | {info['volume_cm3']} cm³ | {grams:.0f} g | {b.label} |\n")
+            if hasattr(b, "inner"):
+                iw, il, idp = b.inner
+                f.write(f"| `{dname}__{pname}.stl` | {dims[0]}×{dims[1]}×{b.units_z} | "
+                        f"{info['size_mm'][0]} × {info['size_mm'][1]} × {info['size_mm'][2]} | "
+                        f"{iw:.0f} × {il:.0f} × {idp:.0f} (hel bakke) | {info['volume_cm3']} cm³ | {grams:.0f} g | {b.label} |\n")
+            else:
+                f.write(f"| `indsats__{pname}.stl` | – | "
+                        f"{info['size_mm'][0]} × {info['size_mm'][1]} × {info['size_mm'][2]} | – | {info['volume_cm3']} cm³ | {grams:.0f} g | {b.label} |\n")
             total += grams
         f.write(f"\n**I alt ca. {total:.0f} g PLA** ({len(rows)} dele, massivt regnet; "
                 "reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).\n")

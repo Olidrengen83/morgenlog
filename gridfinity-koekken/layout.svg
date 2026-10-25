@@ -28,50 +28,39 @@
 <line x1="40.0" y1="484.0" x2="544.0" y2="484.0" stroke="#c9bfae" stroke-width="0.5"/>
 <line x1="40.0" y1="526.0" x2="544.0" y2="526.0" stroke="#c9bfae" stroke-width="0.5"/>
 <line x1="40.0" y1="568.0" x2="544.0" y2="568.0" stroke="#c9bfae" stroke-width="0.5"/>
-<rect x="41.0" y="65.0" width="166.5" height="376.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="45.0" y1="111.6" x2="203.5" y2="111.6" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
-<line x1="45.0" y1="186.6" x2="203.5" y2="186.6" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
-<line x1="45.0" y1="261.6" x2="203.5" y2="261.6" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
-<text x="124.25" y="251.25" font-size="11" text-anchor="middle" font-weight="bold">knivbakke</text>
-<text x="124.25" y="264.25" font-size="9" text-anchor="middle" fill="#444">4×9×7u</text>
-<rect x="209.0" y="65.0" width="82.5" height="376.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="250.25" y="251.25" font-size="11" text-anchor="middle" font-weight="bold">redskaber</text>
-<text x="250.25" y="264.25" font-size="9" text-anchor="middle" fill="#444">2×9×7u</text>
-<rect x="41.0" y="443.0" width="124.5" height="124.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="103.25" y="503.25" font-size="11" text-anchor="middle" font-weight="bold">vaerktoej</text>
-<text x="103.25" y="516.25" font-size="9" text-anchor="middle" fill="#444">3×3×7u</text>
-<rect x="167.0" y="443.0" width="124.5" height="124.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="229.25" y="503.25" font-size="11" text-anchor="middle" font-weight="bold">maaleskeer</text>
-<text x="229.25" y="516.25" font-size="9" text-anchor="middle" fill="#444">3×3×7u</text>
-<rect x="293.0" y="65.0" width="250.5" height="82.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 406.25 147.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="418.25" y="104.25" font-size="11" text-anchor="middle" font-weight="bold">store-skeer</text>
-<text x="418.25" y="117.25" font-size="9" text-anchor="middle" fill="#444">6×2×6u</text>
-<rect x="293.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#fff3b8" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 322.25 315.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="334.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">teskeer</text>
-<text x="334.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×6u</text>
-<rect x="377.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#d2eff0" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 406.25 315.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="418.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">boernebestik</text>
-<text x="418.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×6u</text>
-<rect x="461.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#f2d9c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 490.25 315.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="502.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">kagegafler</text>
-<text x="502.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×6u</text>
-<rect x="293.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 322.25 567.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="334.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">gafler</text>
-<text x="334.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">2×6×6u</text>
-<rect x="377.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="405.6" y1="319.0" x2="405.6" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 406.25 567.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="418.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">knive-spisepinde</text>
-<text x="418.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">2×6×6u</text>
-<rect x="461.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
-<path d="M 490.25 567.5 a 12 12 0 0 0 24 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
-<text x="502.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">skeer</text>
-<text x="502.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">2×6×6u</text>
+<rect x="41.0" y="65.0" width="166.5" height="502.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="42.26" y1="111.25999999999999" x2="207.23999999999998" y2="111.25999999999999" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="42.26" y1="186.26" x2="207.23999999999998" y2="186.26" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="42.26" y1="261.26" x2="207.23999999999998" y2="261.26" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="104.25999999999999" y1="416.26" x2="207.23999999999998" y2="416.26" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="104.25999999999999" y1="496.26" x2="207.23999999999998" y2="496.26" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>
+<line x1="104.25999999999999" y1="404.26" x2="104.25999999999999" y2="565.5" stroke="#3b3b3b" stroke-width="2"/>
+<line x1="43.0" y1="404.26" x2="104.25999999999999" y2="404.26" stroke="#3b3b3b" stroke-width="2"/>
+<line x1="43.0" y1="485.26" x2="104.25999999999999" y2="485.26" stroke="#3b3b3b" stroke-width="2"/>
+<text x="124.25" y="314.25" font-size="11" text-anchor="middle" font-weight="bold">knivbakke</text>
+<text x="124.25" y="327.25" font-size="9" text-anchor="middle" fill="#444">4×12×8u</text>
+<rect x="209.0" y="65.0" width="82.5" height="502.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="211.0" y1="266.26" x2="289.5" y2="266.26" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="211.0" y1="466.26" x2="289.5" y2="466.26" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="250.25" y="314.25" font-size="11" text-anchor="middle" font-weight="bold">redskaber</text>
+<text x="250.25" y="327.25" font-size="9" text-anchor="middle" fill="#444">2×12×8u</text>
+<rect x="293.0" y="65.0" width="250.5" height="250.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="369.89" y1="67.0" x2="369.89" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="370.52" y="148.41333333333333" width="172.71999999999997" height="1.2600000000000051" fill="#3b3b3b"/>
+<rect x="370.52" y="231.82666666666663" width="172.71999999999997" height="1.2600000000000193" fill="#3b3b3b"/>
+<text x="418.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-bag</text>
+<text x="418.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
+<rect x="293.0" y="317.0" width="250.5" height="250.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="356.19" y1="319.0" x2="356.19" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="418.75" y1="319.0" x2="418.75" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="481.30999999999995" y1="319.0" x2="481.30999999999995" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="481.93999999999994" y="318.26" width="61.30000000000001" height="248.98" fill="none" stroke="#3b3b3b" stroke-width="1" stroke-dasharray="3 3"/>
+<path d="M 314.91 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 377.47 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 440.03 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<path d="M 502.5899999999999 567.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
+<text x="418.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-for</text>
+<text x="418.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
 <text x="292.0" y="586.0" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>
 <text x="604.0" y="56" font-size="16" font-weight="bold">skuffe2-ruller-poser  ·  12×12 enheder, bagkant øverst</text>
 <rect x="604.0" y="64" width="504.0" height="504.0" fill="#e8e1d3" stroke="#6b5d45" stroke-width="2"/>
@@ -105,7 +94,7 @@
 <text x="772.25" y="125.25" font-size="11" text-anchor="middle" font-weight="bold">ruller</text>
 <text x="772.25" y="138.25" font-size="9" text-anchor="middle" fill="#444">8×3×7u</text>
 <rect x="941.0" y="65.0" width="166.5" height="208.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="943.0" y1="196.6" x2="1105.5" y2="196.6" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="943.0" y1="196.26" x2="1105.5" y2="196.26" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1024.25" y="167.25" font-size="11" text-anchor="middle" font-weight="bold">papir-taendstikker</text>
 <text x="1024.25" y="180.25" font-size="9" text-anchor="middle" fill="#444">4×5×7u</text>
 <rect x="605.0" y="191.0" width="334.5" height="82.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>

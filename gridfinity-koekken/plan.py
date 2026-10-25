@@ -8,7 +8,7 @@ Højder: 7 enheder = 49 mm (+ basepladen ≈ 50-52 mm i alt, under de 60 mm).
 pos = (x fra venstre, y fra bagkanten) i enheder. Bagenden (y=0) er inde i skabet,
 forenden (y=12) er ud mod dig.
 """
-from gridfinity import BinSpec, KnifeTray
+from gridfinity import BinSpec, KnifeTray, TraySpec
 
 # Hvor langt et stykke din printer kan printe. 6 = 251,5 mm (Bambu/Prusa XL/256 mm-plader).
 # Sæt til 5 (209,5 mm) for Prusa MK3/MK4 (250x210) eller Ender 3 (220x220).
@@ -16,29 +16,38 @@ MAX_PRINT_UNITS = 6
 
 DRAWER_UNITS = (12, 12)
 
+# --- Skuffe 1: bestik -------------------------------------------------------
+# Alle bakker 8 enheder = 56 mm (skeleton-baseplade, så ca. 57 mm i alt).
+# Vægge og skillevægge 1,26 mm (3 linjer på P1S).
+H = 8
+W_IN6 = 6 * 42 - 0.5 - 2 * 1.26          # 248,98 mm indvendigt i en 6-bred bakke
+C4 = (W_IN6 - 3 * 1.26) / 4              # 61,3 mm: fire rum i forreste bakke
+C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i bageste bakke
+STORE_SKEER_B = 75.0                     # bredde på rummet til 21 cm-skeerne
+
 BESTIK = [
-    BinSpec("knivbakke", 4, 9, 7, pos=(0, 0), knife=KnifeTray(),
-            label="Køkkenknive op til 33 cm (10 skrå slidser, spidser bagud)"),
-    BinSpec("redskaber", 2, 9, 7, pos=(4, 0),
-            label="Piskeris, ostehøvl, grillspyd, lange paletknive"),
-    BinSpec("vaerktoej", 3, 3, 7, pos=(0, 9),
-            label="Hvidløgspresser, rivejern, pizzahjul, proptrækker, te-si"),
-    BinSpec("maaleskeer", 3, 3, 7, pos=(3, 9),
-            label="Måleskeer, små dimser"),
-    # Bagerst: lang bakke på tværs til de store skeer (21 cm) og serveringsbestik
-    BinSpec("store-skeer", 6, 2, 6, pos=(6, 0), front_notch=True,
-            label="Store skeer (21 cm) og serveringsbestik, ligger på tværs (248 x 80 mm)"),
-    # Små rum (80 x 164 mm) til det korte bestik
-    BinSpec("teskeer", 2, 4, 6, pos=(6, 2), front_notch=True, label="Teskeer"),
-    BinSpec("boernebestik", 2, 4, 6, pos=(8, 2), front_notch=True, label="Børnebestik"),
-    BinSpec("kagegafler", 2, 4, 6, pos=(10, 2), front_notch=True,
-            label="Kagegafler, dessertskeer"),
-    # Forrest: det der bruges mest (80 x 248 mm, spiseknive på 24 cm kan ligge fladt)
-    BinSpec("gafler", 2, 6, 6, pos=(6, 6), front_notch=True, label="Gafler"),
-    BinSpec("knive-spisepinde", 2, 6, 6, pos=(8, 6), front_notch=True, dividers_x=(27.0,),
-            notch_x=1.6 + 27 + 26, notch_radius=12,
-            label="Venstre stribe: spisepinde (26 x 248 mm) · højre: spiseknive (53 x 248 mm)"),
-    BinSpec("skeer", 2, 6, 6, pos=(10, 6), front_notch=True, label="Spiseskeer"),
+    BinSpec("knivbakke", 4, 12, H, pos=(0, 0),
+            knife=KnifeTray(front_x0=68.0),
+            label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
+    BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(200.0, 400.0),
+            label="Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer, småting)"),
+    BinSpec("bestik-bag", 6, 6, H, pos=(6, 0),
+            dividers_x=(STORE_SKEER_B + 0.63,),
+            walls=((STORE_SKEER_B + 1.26, C3, W_IN6, C3 + 1.26),
+                   (STORE_SKEER_B + 1.26, 2 * C3 + 1.26, W_IN6, 2 * C3 + 2.52)),
+            label="Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler"),
+    BinSpec("bestik-for", 6, 6, H, pos=(6, 6),
+            dividers_x=(C4 + 0.63, 2 * C4 + 1.89, 3 * C4 + 3.15),
+            rails=((3 * C4 + 3.78, W_IN6, 0.0, W_IN6, 22.0),),
+            front_notch=True, notch_radius=12,
+            notch_xs=tuple(1.26 + C4 / 2 + i * (C4 + 1.26) for i in range(4)),
+            label="Fire rum 61 x 249: spiseknive, gafler, spiseskeer, spisepinde (nederst) med løs indsats til lange teskeer ovenpå"),
+]
+
+# Løse indsatser uden Gridfinity-fod
+EXTRA = [
+    TraySpec("teske-indsats", width=C4 - 0.8, length=W_IN6 - 0.8, height=56 - 22,
+             label="Øverste lag i rum 4 i bestik-for: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder"),
 ]
 
 # ISTAD-æskerne er 29,5 / 23 / 19 cm lange og 7,5 cm brede -> 2 enheder brede (80 mm indv.)
