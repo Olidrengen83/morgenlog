@@ -123,6 +123,7 @@ class BinSpec:
     notch_xs: Tuple[float, ...] = ()  # flere hak (x-centre, udvendige koordinater)
     walls: Tuple[Tuple[float, float, float, float], ...] = ()  # fritstående vægge (x0,y0,x1,y1) indv.
     rails: Tuple[Tuple[float, float, float, float, float], ...] = ()  # (x0,x1,y0,y1,z_top) lister
+    divider_slots: Tuple[Tuple[float, float, float], ...] = ()  # (y-skillevæg, x-centrum, bredde): lodret slids i skillevæg
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)
@@ -172,6 +173,11 @@ def build_bin(spec: BinSpec) -> Manifold:
     for x in spec.dividers_x:
         m = m + Manifold.cube((t, L - 2 * wall + 0.4, dh - spec.floor_top + 0.5)).translate(
             (wall + x - t / 2, wall - 0.2, spec.floor_top - 0.5))
+
+    for (y, xc, sw) in spec.divider_slots:
+        m = m - Manifold.cube((sw, t + 2, H)).translate((wall + xc - sw / 2, wall + y - t / 2 - 1, spec.floor_top + 1.0))
+        m = m - (Manifold.cylinder(t + 2, sw / 2, sw / 2, 16).rotate((-90, 0, 0))
+                 .translate((wall + xc, wall + y - t / 2 - 1, spec.floor_top + 1.0)))
 
     # Fritstående vægge (fuld højde) og lister til løse indsatser
     for (x0, y0, x1, y1) in spec.walls:

@@ -34,6 +34,7 @@ STL-filerne laves igen på få sekunder.
 | Ting | Mål | Plads |
 |---|---|---|
 | Køkkenknive | 33 · 31 · 31 · 25 · 22 · 22 cm (lange) og 5 × 21 + 2 × 18 cm (korte) | knivbakke 4×12, 500 mm indvendigt |
+| Brødkniv | 39 cm | langs væggen i redskabsbakken, gennem slids i skillevæggen |
 | Santoku-klinge, ryg til æg | 45 mm | lodret slids, bund 7 mm over skuffebunden |
 | Bamix-skær | ø36 mm, 4 stk. | småtingsrum 59 × 80 mm forrest i knivbakken |
 | Store skeer | 21 cm | rum 75 × 249 mm |
@@ -49,15 +50,18 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 
 * **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
   * Bagerst: tre ribber med 6 lodrette slidser i 25 mm deling til de lange knive, spidserne mod bagvæggen.
-    33, 31 og 31 cm i venstre side, 22, 25 og 22 cm i højre.
-  * Forrest: to ribber med 7 slidser i 15 mm deling, skubbet mod højre, til de fem steakknive og to urteknive.
-    Spidserne vender bagud og ligger bag håndtagene på 22/25 cm-knivene.
+    Fra venstre: 33, 31, 31, 25, 22, 22 cm.
+  * Forrest: to ribber med 7 slidser i 15 mm deling, skubbet mod højre. Fra venstre: 18, 18, 21, 21, 21, 21, 21 cm.
+    Fordelingen er ikke tilfældig: de to urteknive ligger foran de to 31 cm-knive (31 + 18 = 49 cm i en 50 cm kolonne),
+    og steakknivene ligger foran 25/22/22, som slutter senest 25 cm inde. Byttes der rundt, støder spidser og håndtag sammen.
   * Forrest til venstre, foran de lange knives håndtag: to småtingsrum på 59 × 80 mm. Bamix-skærene i det ene,
     det andet frit.
   * Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden. Ret `KnifeTray(...)` i `plan.py`.
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, tre rum i fuld højde:
   199 mm (piskeris, ostehøvl, grillspyd, lange redskaber), 199 mm (hvidløgspresser, rivejern, pizzahjul, proptrækker)
-  og 100 mm (måleskeer, småting).
+  og 100 mm (måleskeer, småting). **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod
+  bagvæggen og går gennem en 4 mm slids i den første skillevæg; håndtaget ender i rum 2. Den koster ingen plads
+  i knivbakken, hvor fire knive over 29 cm ikke kan få hver sin fri kolonne i 164 mm bredde.
 * **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer og
   spisepinde. Spisepinde-rummet har to lister 22 mm over bunden, og den løse **teske-indsats** (60 × 248 × 34 mm)
   hviler på dem med de lange teskeer, mens spisepindene ligger nedenunder. Indsatsen har greb-hak i begge ender.
@@ -75,8 +79,8 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
 * **ISTAD i tre kolonner** på langs, alle 80 mm brede: 29,5 cm i 2×8 (332 mm, to halvdele), 23 cm i 2×6 (248 mm) og
   19 cm i 2×6 (248 mm). De to store ender ved forkanten, den lille lige bag papiret.
 * **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
-* **Poseklemmer 2×4** med tre sorterede lommer: store klemmer (13,5 cm) i en bane på 39 × 163 mm, mellem (10,5 cm)
-  og små (5 cm) efter hinanden i den anden bane. **Elastikker 2×2** lige foran, bag papiret.
+* **Poseklemmer 2×4**: alle klemmer (13,5 / 10,5 / 5 cm) i ét rum på 80 × 164 mm i fuld højde.
+  **Elastikker 2×2** lige foran, bag papiret.
 * **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
   Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).

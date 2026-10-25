@@ -26,11 +26,16 @@ C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i bageste bakk
 STORE_SKEER_B = 75.0                     # bredde på rummet til 21 cm-skeerne
 
 BESTIK = [
+    # Fordeling bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm.
+    # Forrest (x = 68, 83, 98 … 158): 18 · 18 · 21 · 21 · 21 · 21 · 21 cm.
+    # De to 18 cm ligger foran de to 31 cm (31 + 18 = 49 cm), steakknivene foran 25/22/22.
     BinSpec("knivbakke", 4, 12, H, pos=(0, 0),
             knife=KnifeTray(front_x0=68.0),
             label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
+    # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i første skillevæg.
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(200.0, 400.0),
-            label="Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer, småting)"),
+            divider_slots=((200.0, 9.0, 4.0),),
+            label="Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer). Brødkniv 39 cm langs venstre væg gennem slids i skillevæg 1"),
     BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
             dividers_x=(STORE_SKEER_B + 0.63,),
             walls=((STORE_SKEER_B + 1.26, C3, W_IN6, C3 + 1.26),
@@ -70,9 +75,8 @@ RULLER = [
             label="Bagerst, to rum 80 x 80: tandstikker + barberblade · tændstikker + fødselsdagslys"),
     BinSpec("istad-smaa", 2, 6, H, pos=(8, 2),
             label="ISTAD 19 cm på langs (80 x 248 mm), ender bag papiret"),
-    BinSpec("poseklemmer", 2, 4, H, pos=(10, 2), dividers_x=(40.0,),
-            walls=((40.63, 108.0, 80.98, 109.26),),
-            label="Tre lommer: store klemmer 13,5 cm (39 x 163) · mellem 10,5 cm (39 x 108) · små 5 cm (39 x 54, forrest)"),
+    BinSpec("poseklemmer", 2, 4, H, pos=(10, 2),
+            label="Alle poseklemmer (13,5 / 10,5 / 5 cm) i ét rum 80 x 164 mm, fuld højde"),
     BinSpec("elastikker", 2, 2, H, pos=(10, 6),
             label="Elastikker, løse (80 x 80 mm)"),
     BinSpec("mellemlaegspapir", 4, 4, H, pos=(8, 8),
