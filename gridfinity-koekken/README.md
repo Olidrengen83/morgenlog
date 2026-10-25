@@ -79,7 +79,7 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 * PLA eller PETG, 0,2 mm lag, 3 perimetre, 10–15 % infill, ingen support (filerne står rigtigt).
   Bunden er massiv i modellen, så sliceren fylder den med infill; vægten i `printliste.md` er regnet
   massivt og er derfor i overkanten (se totalen nederst i `printliste.md`).
-* Vægge er 1,6 mm, gulvet 6 mm over fodens bund. Alt kan vaskes i hånden; PETG tåler opvaskemaskine bedre.
+* Vægge er 1,26 mm, gulvet 6 mm over fodens bund. Alt kan vaskes i hånden; PETG tåler opvaskemaskine bedre.
 * Print de små 3×3-bakker først og tjek at de passer i din baseplade, før du printer de store.
 
 ## Generér igen
