@@ -109,6 +109,7 @@ class BinSpec:
     divider_height: Optional[float] = None  # None = fuld højde
     front_notch: bool = False
     notch_radius: float = 14.0
+    notch_x: Optional[float] = None   # hakkets centrum (x); None = midt på bakken
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)
@@ -167,7 +168,8 @@ def build_bin(spec: BinSpec) -> Manifold:
     if spec.front_notch:
         r = min(spec.notch_radius, (W - 2 * wall) / 2 - 6)
         cyl = Manifold.cylinder(wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))
-        m = m - cyl.translate((W / 2, L - wall - 2, H))
+        nx = W / 2 if spec.notch_x is None else spec.notch_x
+        m = m - cyl.translate((nx, L - wall - 2, H))
     return m
 
 

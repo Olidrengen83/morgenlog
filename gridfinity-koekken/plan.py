@@ -20,7 +20,7 @@ BESTIK = [
     BinSpec("knivbakke", 4, 9, 7, pos=(0, 0), knife=KnifeTray(),
             label="Køkkenknive op til 33 cm (10 skrå slidser, spidser bagud)"),
     BinSpec("redskaber", 2, 9, 7, pos=(4, 0),
-            label="Piskeris, ostehøvl, grillspyd, spisepinde, lange paletknive"),
+            label="Piskeris, ostehøvl, grillspyd, lange paletknive"),
     BinSpec("vaerktoej", 3, 3, 7, pos=(0, 9),
             label="Hvidløgspresser, rivejern, pizzahjul, proptrækker, te-si"),
     BinSpec("maaleskeer", 3, 3, 7, pos=(3, 9),
@@ -35,7 +35,9 @@ BESTIK = [
             label="Kagegafler, dessertskeer"),
     # Forrest: det der bruges mest (80 x 248 mm, spiseknive på 24 cm kan ligge fladt)
     BinSpec("gafler", 2, 6, 6, pos=(6, 6), front_notch=True, label="Gafler"),
-    BinSpec("knive", 2, 6, 6, pos=(8, 6), front_notch=True, label="Spiseknive"),
+    BinSpec("knive-spisepinde", 2, 6, 6, pos=(8, 6), front_notch=True, dividers_x=(27.0,),
+            notch_x=1.6 + 27 + 26, notch_radius=12,
+            label="Venstre stribe: spisepinde (26 x 248 mm) · højre: spiseknive (53 x 248 mm)"),
     BinSpec("skeer", 2, 6, 6, pos=(10, 6), front_notch=True, label="Spiseskeer"),
 ]
 

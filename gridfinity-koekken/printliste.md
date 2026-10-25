@@ -9,8 +9,8 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `skuffe1-bestik__knivbakke-a.stl` | 4×5×7 | 167.5 × 209.6 × 49.0 | 164 × 374 × 43 (hel bakke) | 267.4 cm³ | 332 g | Køkkenknive op til 33 cm (10 skrå slidser, spidser bagud) |
 | `skuffe1-bestik__knivbakke-b.stl` | 4×4×7 | 167.5 × 167.6 × 49.0 | 164 × 374 × 43 (hel bakke) | 213.5 cm³ | 265 g | Køkkenknive op til 33 cm (10 skrå slidser, spidser bagud) |
-| `skuffe1-bestik__redskaber-a.stl` | 2×5×7 | 83.5 × 209.6 × 49.0 | 80 × 374 × 43 (hel bakke) | 124.7 cm³ | 155 g | Piskeris, ostehøvl, grillspyd, spisepinde, lange paletknive |
-| `skuffe1-bestik__redskaber-b.stl` | 2×4×7 | 83.5 × 167.6 × 49.0 | 80 × 374 × 43 (hel bakke) | 100.8 cm³ | 125 g | Piskeris, ostehøvl, grillspyd, spisepinde, lange paletknive |
+| `skuffe1-bestik__redskaber-a.stl` | 2×5×7 | 83.5 × 209.6 × 49.0 | 80 × 374 × 43 (hel bakke) | 124.7 cm³ | 155 g | Piskeris, ostehøvl, grillspyd, lange paletknive |
+| `skuffe1-bestik__redskaber-b.stl` | 2×4×7 | 83.5 × 167.6 × 49.0 | 80 × 374 × 43 (hel bakke) | 100.8 cm³ | 125 g | Piskeris, ostehøvl, grillspyd, lange paletknive |
 | `skuffe1-bestik__vaerktoej.stl` | 3×3×7 | 125.5 × 125.5 × 49.0 | 122 × 122 × 43 (hel bakke) | 115.1 cm³ | 143 g | Hvidløgspresser, rivejern, pizzahjul, proptrækker, te-si |
 | `skuffe1-bestik__maaleskeer.stl` | 3×3×7 | 125.5 × 125.5 × 49.0 | 122 × 122 × 43 (hel bakke) | 115.1 cm³ | 143 g | Måleskeer, små dimser |
 | `skuffe1-bestik__store-skeer.stl` | 6×2×6 | 251.5 × 83.5 × 42.0 | 248 × 80 × 36 (hel bakke) | 146.0 cm³ | 181 g | Store skeer (21 cm) og serveringsbestik, ligger på tværs (248 x 80 mm) |
@@ -18,7 +18,7 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe1-bestik__boernebestik.stl` | 2×4×6 | 83.5 × 167.5 × 42.0 | 80 × 164 × 36 (hel bakke) | 100.1 cm³ | 124 g | Børnebestik |
 | `skuffe1-bestik__kagegafler.stl` | 2×4×6 | 83.5 × 167.5 × 42.0 | 80 × 164 × 36 (hel bakke) | 100.1 cm³ | 124 g | Kagegafler, dessertskeer |
 | `skuffe1-bestik__gafler.stl` | 2×6×6 | 83.5 × 251.5 × 42.0 | 80 × 248 × 36 (hel bakke) | 146.0 cm³ | 181 g | Gafler |
-| `skuffe1-bestik__knive.stl` | 2×6×6 | 83.5 × 251.5 × 42.0 | 80 × 248 × 36 (hel bakke) | 146.0 cm³ | 181 g | Spiseknive |
+| `skuffe1-bestik__knive-spisepinde.stl` | 2×6×6 | 83.5 × 251.5 × 42.0 | 80 × 248 × 36 (hel bakke) | 156.8 cm³ | 194 g | Venstre stribe: spisepinde (26 x 248 mm) · højre: spiseknive (53 x 248 mm) |
 | `skuffe1-bestik__skeer.stl` | 2×6×6 | 83.5 × 251.5 × 42.0 | 80 × 248 × 36 (hel bakke) | 146.0 cm³ | 181 g | Spiseskeer |
 
 ## skuffe2-ruller-poser
@@ -39,4 +39,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe2-ruller-poser__ringe.stl` | 3×3×7 | 125.5 × 125.5 × 49.0 | 122 × 122 × 43 (hel bakke) | 115.1 cm³ | 143 g | Gummiringe og plastringe til glas |
 | `skuffe2-ruller-poser__poseklemmer.stl` | 5×3×7 | 209.5 × 125.5 × 49.0 | 206 × 122 × 43 (hel bakke) | 181.1 cm³ | 225 g | Alle poseklemmer (indv. 206 x 122 mm) |
 
-**I alt ca. 4480 g PLA** (26 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4494 g PLA** (26 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

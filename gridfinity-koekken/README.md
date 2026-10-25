@@ -54,13 +54,14 @@ Bagkanten er øverst på tegningen; forkanten (mod dig) nederst.
   Spidserne vender bagud, så du altid griber i et håndtag. Den forreste ribbe har kun slidser i
   hver anden plads, så håndtagene forskydes og ikke ligger oven i hinanden. Trin-ribber forrest
   løfter håndtagene, så de er nemme at tage. Ret `KnifeTray(slots=…, pitch=…, lean_deg=…)` i `plan.py`.
-* **Redskaber 2×9** (80 × 374 mm indvendigt): piskeris, ostehøvl, grillspyd, spisepinde og de
+* **Redskaber 2×9** (80 × 374 mm indvendigt): piskeris, ostehøvl, grillspyd og de
   lange sorte redskaber der i dag ligger løst i siden.
 * **Værktøj 3×3** og **Måleskeer 3×3** forrest til venstre: hvidløgspresser, rivejern, pizzahjul,
   proptrækker, te-si, måleskeer.
 * **Store skeer 6×2** bagerst på tværs (248 × 80 mm): skeerne på 21 cm og serveringsbestik.
 * **Teskeer, børnebestik, kagegafler 2×4** (80 × 164 mm): korte rum til det korte bestik.
-* **Gafler, spiseknive, spiseskeer 2×6** forrest (80 × 248 mm). Alle bestikrum er 42 mm høje med greb-hak i forkanten.
+* **Gafler, spiseknive, spiseskeer 2×6** forrest (80 × 248 mm). Knivrummet har en skillevæg på langs,
+  så der er en smal stribe på 26 × 248 mm til **spisepinde** og 53 mm til knivene. Alle bestikrum er 42 mm høje med greb-hak i forkanten.
 
 ## Skuffe 2 – ruller, poser og småting
 
