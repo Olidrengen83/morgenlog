@@ -26,9 +26,9 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe2-ruller-poser__istad-store-b.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 333 × 50 (hel bakke) | 98.4 cm³ | 122 g | ISTAD 29,5 cm på langs (80 x 332 mm) |
 | `skuffe2-ruller-poser__lange-ting.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | Bagerst: trægafler, papirsugerør, sushi-måtte (80 x 248 mm) |
 | `skuffe2-ruller-poser__istad-mellem.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 23 cm på langs (80 x 248 mm) |
-| `skuffe2-ruller-poser__smaating.stl` | 4×3×8 | 167.5 × 125.5 × 56.0 | 165 × 123 × 50 (hel bakke) | 152.6 cm³ | 189 g | Bagerst, to rum 80 x 122: tandstikker + barberblade · tændstikker + fødselsdagslys |
-| `skuffe2-ruller-poser__istad-smaa.stl` | 2×5×8 | 83.5 × 209.5 × 56.0 | 81 × 207 × 50 (hel bakke) | 126.7 cm³ | 157 g | ISTAD 19 cm på langs (80 x 206 mm) |
-| `skuffe2-ruller-poser__poseklemmer.stl` | 2×3×8 | 83.5 × 125.5 × 56.0 | 81 × 123 × 50 (hel bakke) | 79.9 cm³ | 99 g | Poseklemmer (80 x 122 mm) |
+| `skuffe2-ruller-poser__smaating.stl` | 4×2×8 | 167.5 × 83.5 × 56.0 | 165 × 81 × 50 (hel bakke) | 108.4 cm³ | 134 g | Bagerst, to rum 80 x 80: tandstikker + barberblade · tændstikker + fødselsdagslys |
+| `skuffe2-ruller-poser__istad-smaa.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 19 cm på langs (80 x 248 mm), ender bag papiret |
+| `skuffe2-ruller-poser__poseklemmer.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 116.2 cm³ | 144 g | Tre lommer: store klemmer 13,5 cm (39 x 163) · mellem 10,5 cm (39 x 108) · små 5 cm (39 x 54, forrest) |
 | `skuffe2-ruller-poser__elastikker.stl` | 2×2×8 | 83.5 × 83.5 × 56.0 | 81 × 81 × 50 (hel bakke) | 56.5 cm³ | 70 g | Elastikker, løse (80 x 80 mm) |
 | `skuffe2-ruller-poser__mellemlaegspapir.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af |
 
@@ -38,4 +38,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
 
-**I alt ca. 4460 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4480 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

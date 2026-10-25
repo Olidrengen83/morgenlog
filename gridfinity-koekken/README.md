@@ -73,11 +73,12 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
   ved siden af hinanden på langs. Fire ting på 164 mm kræver, at de hver er under ca. 40 mm brede. Er de bredere, må
   en af dem flyttes, eller kolonnen gøres 5 enheder bred (så skal kolonnerne til højre rykkes).
 * **ISTAD i tre kolonner** på langs, alle 80 mm brede: 29,5 cm i 2×8 (332 mm, to halvdele), 23 cm i 2×6 (248 mm) og
-  19 cm i 2×5 (206 mm). Alle ender ved forkanten.
+  19 cm i 2×6 (248 mm). De to store ender ved forkanten, den lille lige bag papiret.
 * **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
-* **Elastikker 2×2** og **Poseklemmer 2×3** i højre side foran småtingene.
+* **Poseklemmer 2×4** med tre sorterede lommer: store klemmer (13,5 cm) i en bane på 39 × 163 mm, mellem (10,5 cm)
+  og små (5 cm) efter hinanden i den anden bane. **Elastikker 2×2** lige foran, bag papiret.
 * **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
-  Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×3 med skillevæg (tandstikker og barberblade
+  Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).
 
 ## Print

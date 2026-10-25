@@ -108,16 +108,18 @@
 <rect x="857.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#fff3b8" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="898.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">istad-mellem</text>
 <text x="898.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">2×6×8u</text>
-<rect x="941.0" y="65.0" width="166.5" height="124.5" rx="4" fill="#d2eff0" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="1023.26" y1="67.0" x2="1023.26" y2="187.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="1024.25" y="125.25" font-size="11" text-anchor="middle" font-weight="bold">smaating</text>
-<text x="1024.25" y="138.25" font-size="9" text-anchor="middle" fill="#444">4×3×8u</text>
-<rect x="941.0" y="191.0" width="82.5" height="208.5" rx="4" fill="#f2d9c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="982.25" y="293.25" font-size="11" text-anchor="middle" font-weight="bold">istad-smaa</text>
-<text x="982.25" y="306.25" font-size="9" text-anchor="middle" fill="#444">2×5×8u</text>
-<rect x="1025.0" y="191.0" width="82.5" height="124.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="1066.25" y="251.25" font-size="11" text-anchor="middle" font-weight="bold">poseklemmer</text>
-<text x="1066.25" y="264.25" font-size="9" text-anchor="middle" fill="#444">2×3×8u</text>
+<rect x="941.0" y="65.0" width="166.5" height="82.5" rx="4" fill="#d2eff0" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="1023.26" y1="67.0" x2="1023.26" y2="145.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="1024.25" y="104.25" font-size="11" text-anchor="middle" font-weight="bold">smaating</text>
+<text x="1024.25" y="117.25" font-size="9" text-anchor="middle" fill="#444">4×2×8u</text>
+<rect x="941.0" y="149.0" width="82.5" height="250.5" rx="4" fill="#f2d9c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="982.25" y="272.25" font-size="11" text-anchor="middle" font-weight="bold">istad-smaa</text>
+<text x="982.25" y="285.25" font-size="9" text-anchor="middle" fill="#444">2×6×8u</text>
+<rect x="1025.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="1066.26" y1="151.0" x2="1066.26" y2="313.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="1066.89" y="258.26" width="40.35" height="1.2600000000000051" fill="#3b3b3b"/>
+<text x="1066.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">poseklemmer</text>
+<text x="1066.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×8u</text>
 <rect x="1025.0" y="317.0" width="82.5" height="82.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1066.25" y="356.25" font-size="11" text-anchor="middle" font-weight="bold">elastikker</text>
 <text x="1066.25" y="369.25" font-size="9" text-anchor="middle" fill="#444">2×2×8u</text>
