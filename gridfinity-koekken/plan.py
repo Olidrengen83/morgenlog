@@ -50,30 +50,32 @@ EXTRA = [
              label="Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder"),
 ]
 
-# ISTAD-æskerne er 29,5 / 23 / 19 cm lange og 7,5 cm brede -> 2 enheder brede (80 mm indv.)
+# --- Skuffe 2: ruller, poser og småting ------------------------------------
+# Prioritet: det daglige forrest eller i kolonner, hvor æskens ende griber ved forkanten.
+# ISTAD-æskerne (29,5 / 23 / 19 x 7,5 cm) ligger på langs i 2 enheder brede kolonner.
 RULLER = [
-    BinSpec("ruller", 8, 3, 7, pos=(0, 0),
-            label="Sølvpapir + film, 31 cm æsker side om side (indv. 332 x 122 mm)"),
-    BinSpec("papir-taendstikker", 4, 5, 7, pos=(8, 0), dividers_y=(130.0,),
-            label="Bagerst: mellemlægspapir 15 x 12,5 cm (164 x 130 mm) · forrest: tændstikker, snor (164 x 73 mm)"),
-    BinSpec("fryseposer-store", 8, 2, 7, pos=(0, 3),
-            label="ISTAD 29,5 cm (indv. 332 x 80 mm)"),
-    BinSpec("fryseposer-mellem", 6, 2, 7, pos=(0, 5),
-            label="ISTAD 23 cm (indv. 248 x 80 mm)"),
-    BinSpec("lange-ting", 6, 2, 7, pos=(6, 5),
-            label="Poser på rulle, trægafler, sugerør, sushi-måtte (indv. 248 x 80 mm)"),
-    BinSpec("fryseposer-smaa", 5, 2, 7, pos=(0, 7),
-            label="ISTAD 19 cm (indv. 206 x 80 mm)"),
-    BinSpec("smaating", 4, 2, 7, pos=(5, 7),
-            label="Tandstikker, barberblade, fødselsdagslys"),
-    BinSpec("elastikker", 3, 2, 7, pos=(9, 7),
-            label="Elastikker (løse, uden pap-æske)"),
-    BinSpec("termometre", 4, 3, 7, pos=(0, 9),
-            label="Stegetermometer, trådtermometer (indv. 164 x 122 mm)"),
-    BinSpec("ringe", 3, 3, 7, pos=(4, 9),
-            label="Gummiringe og plastringe til glas"),
-    BinSpec("poseklemmer", 5, 3, 7, pos=(7, 9),
-            label="Alle poseklemmer (indv. 206 x 122 mm)"),
+    BinSpec("pynt-ringe", 4, 4, H, pos=(0, 0),
+            label="BAGERST, sjældent: ringe til glas, fødselsdagsflag, parasoller, lys (164 x 164 mm)"),
+    BinSpec("ruller", 4, 8, H, pos=(0, 4),
+            label="Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten"),
+    BinSpec("termometre", 2, 4, H, pos=(4, 0),
+            label="Bagerst: stegetermometer, trådtermometer, snor (80 x 164 mm)"),
+    BinSpec("istad-store", 2, 8, H, pos=(4, 4),
+            label="ISTAD 29,5 cm på langs (80 x 332 mm)"),
+    BinSpec("lange-ting", 2, 6, H, pos=(6, 0),
+            label="Bagerst: trægafler, papirsugerør, sushi-måtte (80 x 248 mm)"),
+    BinSpec("istad-mellem", 2, 6, H, pos=(6, 6),
+            label="ISTAD 23 cm på langs (80 x 248 mm)"),
+    BinSpec("smaating", 4, 3, H, pos=(8, 0), dividers_x=(81.0,),
+            label="Bagerst, to rum 80 x 122: tandstikker + barberblade · tændstikker + fødselsdagslys"),
+    BinSpec("istad-smaa", 2, 5, H, pos=(8, 3),
+            label="ISTAD 19 cm på langs (80 x 206 mm)"),
+    BinSpec("poseklemmer", 2, 3, H, pos=(10, 3),
+            label="Poseklemmer (80 x 122 mm)"),
+    BinSpec("elastikker", 2, 2, H, pos=(10, 6),
+            label="Elastikker, løse (80 x 80 mm)"),
+    BinSpec("mellemlaegspapir", 4, 4, H, pos=(8, 8),
+            label="FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af"),
 ]
 
 DRAWERS = {

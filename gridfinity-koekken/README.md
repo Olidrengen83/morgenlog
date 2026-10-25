@@ -13,7 +13,7 @@ STL-filerne laves igen på få sekunder.
 
 ## Hvad er lavet
 
-* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 13 til rulle/pose-skuffen). Se `printliste.md`.
+* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 13 til rulle/pose-skuffen; 20 i alt). Se `printliste.md`.
 * **`plan.py`** – selve planen: hvilke bakker, hvor store, hvor de står, skillevægge, knivbakke-parametre.
 * **`gridfinity.py`** – lille Gridfinity-bibliotek (fodprofil 0,8 / 1,8 / 2,15 mm, 42 mm pitch, 4 mm hjørner).
 * **`generate.py`** – laver STL, `layout.svg` og `printliste.md`. **`preview.py`** laver PNG-billederne.
@@ -64,16 +64,21 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 * **Bestik-kort 6×6** (forrest): til venstre et rum på 75 × 249 mm til de store skeer på 21 cm. Til højre tre tværrum på
   172 × 82 mm til teskeer, børnebestik og kagegafler.
 
-## Skuffe 2 – ruller, poser og småting (foreløbig plan, revideres)
+## Skuffe 2 – ruller, poser og småting
 
-* **Ruller 8×3** bagerst (332 × 122 mm indvendigt): sølvpapir og film side om side.
-* **Papir | tændstikker 4×5** bagerst til højre med skillevæg: mellemlægspapiret i det bageste rum
-  (164 × 130 mm), tændstikker og snor i det forreste (164 × 73 mm).
-* **Fryseposer store 8×2, mellem 6×2, små 5×2**: én bakke pr. ISTAD-æske, alle 80 mm brede.
-* **Lange ting 6×2**: poser på rulle, trægafler, papirsugerør, sushi-måtte.
-* **Småting 4×2** (tandstikker, barberblade, fødselsdagslys) og **Elastikker 3×2** (smid pap-æsken ud).
-* Forrest: **Termometre 4×3**, **Ringe 3×3** og **Poseklemmer 5×3** (206 × 122 mm til alle klemmerne).
-* Gaveposerne med gule blade og festtingene hører nok ikke til i køkkenskuffen – der er ikke sat plads af til dem.
+Elleve bakker, alle 8 enheder høje. Det daglige ligger forrest eller i kolonner på langs, så æskens ende sidder
+ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
+
+* **Ruller 4×8** (164 × 332 mm, to halvdele) langs venstre side: film, sølvpapir, cellofan og fryseposer på rulle
+  ved siden af hinanden på langs. Fire ting på 164 mm kræver, at de hver er under ca. 40 mm brede. Er de bredere, må
+  en af dem flyttes, eller kolonnen gøres 5 enheder bred (så skal kolonnerne til højre rykkes).
+* **ISTAD i tre kolonner** på langs, alle 80 mm brede: 29,5 cm i 2×8 (332 mm, to halvdele), 23 cm i 2×6 (248 mm) og
+  19 cm i 2×5 (206 mm). Alle ender ved forkanten.
+* **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
+* **Elastikker 2×2** og **Poseklemmer 2×3** i højre side foran småtingene.
+* **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
+  Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×3 med skillevæg (tandstikker og barberblade
+  i det ene rum, tændstikker og fødselsdagslys i det andet).
 
 ## Print
 

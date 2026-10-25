@@ -18,19 +18,19 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 
 | Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |
 |---|---|---|---|---|---|---|
-| `skuffe2-ruller-poser__ruller-1.stl` | 4×3×7 | 167.6 × 125.5 × 49.0 | 333 × 123 × 43 (hel bakke) | 133.3 cm³ | 165 g | Sølvpapir + film, 31 cm æsker side om side (indv. 332 x 122 mm) |
-| `skuffe2-ruller-poser__ruller-2.stl` | 4×3×7 | 167.6 × 125.5 × 49.0 | 333 × 123 × 43 (hel bakke) | 133.3 cm³ | 165 g | Sølvpapir + film, 31 cm æsker side om side (indv. 332 x 122 mm) |
-| `skuffe2-ruller-poser__papir-taendstikker.stl` | 4×5×7 | 167.5 × 209.5 × 49.0 | 165 × 207 × 43 (hel bakke) | 230.3 cm³ | 286 g | Bagerst: mellemlægspapir 15 x 12,5 cm (164 x 130 mm) · forrest: tændstikker, snor (164 x 73 mm) |
-| `skuffe2-ruller-poser__fryseposer-store-1.stl` | 4×2×7 | 167.6 × 83.5 × 49.0 | 333 × 81 × 43 (hel bakke) | 94.8 cm³ | 118 g | ISTAD 29,5 cm (indv. 332 x 80 mm) |
-| `skuffe2-ruller-poser__fryseposer-store-2.stl` | 4×2×7 | 167.6 × 83.5 × 49.0 | 333 × 81 × 43 (hel bakke) | 94.8 cm³ | 118 g | ISTAD 29,5 cm (indv. 332 x 80 mm) |
-| `skuffe2-ruller-poser__fryseposer-mellem.stl` | 6×2×7 | 251.5 × 83.5 × 49.0 | 249 × 81 × 43 (hel bakke) | 144.3 cm³ | 179 g | ISTAD 23 cm (indv. 248 x 80 mm) |
-| `skuffe2-ruller-poser__lange-ting.stl` | 6×2×7 | 251.5 × 83.5 × 49.0 | 249 × 81 × 43 (hel bakke) | 144.3 cm³ | 179 g | Poser på rulle, trægafler, sugerør, sushi-måtte (indv. 248 x 80 mm) |
-| `skuffe2-ruller-poser__fryseposer-smaa.stl` | 5×2×7 | 209.5 × 83.5 × 49.0 | 207 × 81 × 43 (hel bakke) | 121.6 cm³ | 151 g | ISTAD 19 cm (indv. 206 x 80 mm) |
-| `skuffe2-ruller-poser__smaating.stl` | 4×2×7 | 167.5 × 83.5 × 49.0 | 165 × 81 × 43 (hel bakke) | 99.0 cm³ | 123 g | Tandstikker, barberblade, fødselsdagslys |
-| `skuffe2-ruller-poser__elastikker.stl` | 3×2×7 | 125.5 × 83.5 × 49.0 | 123 × 81 × 43 (hel bakke) | 76.3 cm³ | 95 g | Elastikker (løse, uden pap-æske) |
-| `skuffe2-ruller-poser__termometre.stl` | 4×3×7 | 167.5 × 125.5 × 49.0 | 165 × 123 × 43 (hel bakke) | 139.8 cm³ | 173 g | Stegetermometer, trådtermometer (indv. 164 x 122 mm) |
-| `skuffe2-ruller-poser__ringe.stl` | 3×3×7 | 125.5 × 125.5 × 49.0 | 123 × 123 × 43 (hel bakke) | 108.0 cm³ | 134 g | Gummiringe og plastringe til glas |
-| `skuffe2-ruller-poser__poseklemmer.stl` | 5×3×7 | 209.5 × 125.5 × 49.0 | 207 × 123 × 43 (hel bakke) | 171.5 cm³ | 213 g | Alle poseklemmer (indv. 206 x 122 mm) |
+| `skuffe2-ruller-poser__pynt-ringe.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | BAGERST, sjældent: ringe til glas, fødselsdagsflag, parasoller, lys (164 x 164 mm) |
+| `skuffe2-ruller-poser__ruller-a.stl` | 4×4×8 | 167.5 × 167.6 × 56.0 | 165 × 333 × 50 (hel bakke) | 176.2 cm³ | 218 g | Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten |
+| `skuffe2-ruller-poser__ruller-b.stl` | 4×4×8 | 167.5 × 167.6 × 56.0 | 165 × 333 × 50 (hel bakke) | 176.2 cm³ | 218 g | Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten |
+| `skuffe2-ruller-poser__termometre.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 103.3 cm³ | 128 g | Bagerst: stegetermometer, trådtermometer, snor (80 x 164 mm) |
+| `skuffe2-ruller-poser__istad-store-a.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 333 × 50 (hel bakke) | 98.4 cm³ | 122 g | ISTAD 29,5 cm på langs (80 x 332 mm) |
+| `skuffe2-ruller-poser__istad-store-b.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 333 × 50 (hel bakke) | 98.4 cm³ | 122 g | ISTAD 29,5 cm på langs (80 x 332 mm) |
+| `skuffe2-ruller-poser__lange-ting.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | Bagerst: trægafler, papirsugerør, sushi-måtte (80 x 248 mm) |
+| `skuffe2-ruller-poser__istad-mellem.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 23 cm på langs (80 x 248 mm) |
+| `skuffe2-ruller-poser__smaating.stl` | 4×3×8 | 167.5 × 125.5 × 56.0 | 165 × 123 × 50 (hel bakke) | 152.6 cm³ | 189 g | Bagerst, to rum 80 x 122: tandstikker + barberblade · tændstikker + fødselsdagslys |
+| `skuffe2-ruller-poser__istad-smaa.stl` | 2×5×8 | 83.5 × 209.5 × 56.0 | 81 × 207 × 50 (hel bakke) | 126.7 cm³ | 157 g | ISTAD 19 cm på langs (80 x 206 mm) |
+| `skuffe2-ruller-poser__poseklemmer.stl` | 2×3×8 | 83.5 × 125.5 × 56.0 | 81 × 123 × 50 (hel bakke) | 79.9 cm³ | 99 g | Poseklemmer (80 x 122 mm) |
+| `skuffe2-ruller-poser__elastikker.stl` | 2×2×8 | 83.5 × 83.5 × 56.0 | 81 × 81 × 50 (hel bakke) | 56.5 cm³ | 70 g | Elastikker, løse (80 x 80 mm) |
+| `skuffe2-ruller-poser__mellemlaegspapir.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af |
 
 ## loese-indsatser
 
@@ -38,4 +38,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
 
-**I alt ca. 4399 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4460 g PLA** (20 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
