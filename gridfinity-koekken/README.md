@@ -13,7 +13,7 @@ STL-filerne laves igen på få sekunder.
 
 ## Hvad er lavet
 
-* **`stl/`** – 22 færdige STL-filer (12 til bestikskuffen, 10 til rulle/pose-skuffen). Se `printliste.md`.
+* **`stl/`** – 26 færdige STL-filer (13 til bestikskuffen, 13 til rulle/pose-skuffen). Se `printliste.md`.
 * **`plan.py`** – selve planen: hvilke bakker, hvor store, hvor de står, skillevægge, knivbakke-parametre.
 * **`gridfinity.py`** – lille Gridfinity-bibliotek (fodprofil 0,8 / 1,8 / 2,15 mm, 42 mm pitch, 4 mm hjørner).
 * **`generate.py`** – laver STL, `layout.svg` og `printliste.md`. **`preview.py`** laver PNG-billederne.
@@ -29,19 +29,22 @@ STL-filerne laves igen på få sekunder.
    Ender 3 (220 × 220), så sæt den til **5** (209,5 mm) og kør `python3 generate.py` igen.
    Delte bakker (`-a`, `-b`) har åbne ender mod hinanden og låses sammen af basepladen.
 
-### Mål jeg har skønnet ud fra billederne – mål efter, før du printer
+### Mål der er lagt til grund
 
-| Ting | Skal kunne være i | Bakke |
-|---|---|---|
-| Længste køkkenkniv (samlet længde) | ≤ 374 mm | `knivbakke` 4×9 |
-| Bagepapir- og folie-æsker | ≤ 500 mm lange, to æsker ≤ 122 mm tilsammen i bredden | `ruller` 3×12 |
-| ISTAD-æsker (grøn og rød) | ≤ 248 × 122 mm, ≤ 43 mm høje | `fryseposer-store/-smaa` 6×3 |
-| Mellemlægspapir-æske (12 × 14,5 cm ark) | ≤ 152 × 164 mm | `papir-klemmer`, venstre rum |
-| Poser på rulle, trægafler, sugerør, sushi-måtte | ≤ 248 mm lange | `lange-ting` 6×2 |
-| Stegetermometer | ≤ 164 mm | `termometre` 3×4 |
-| Ringe til glas | ≤ 122 mm i diameter | `ringe` 3×3 |
+Opmålte (fra dig) og skønnede mål. Ret i `plan.py`, hvis noget ikke passer.
 
-Passer noget ikke, så ret tallene i `plan.py` (fx `dividers_x=(152.0,)` eller `units_y`).
+| Ting | Mål | Skal kunne være i | Bakke |
+|---|---|---|---|
+| Længste køkkenkniv | 33 cm | ≤ 374 mm | `knivbakke` 4×9 |
+| Store skeer | 21 cm | ≤ 248 mm | `store-skeer` 6×2 og `skeer` 2×6 |
+| Sølvpapir- og film-æsker | 31 cm | ≤ 332 mm lange, to æsker ≤ 122 mm tilsammen i bredden (skøn: mål bredden) | `ruller` 8×3 |
+| ISTAD stor / mellem / lille | 29,5 / 23 / 19 × 7,5 cm | ≤ 332 / 248 / 206 × 80 mm | `fryseposer-store/-mellem/-smaa` |
+| Mellemlægspapir-æske | 15 × 12,5 cm | ≤ 164 × 130 mm | `papir-taendstikker`, bagerste rum |
+| Poser på rulle, trægafler, sugerør, sushi-måtte | skøn ≤ 24 cm | ≤ 248 mm | `lange-ting` 6×2 |
+| Stegetermometer | skøn ≤ 16 cm | ≤ 164 mm | `termometre` 4×3 |
+| Ringe til glas | skøn ≤ 12 cm | ≤ 122 mm i diameter | `ringe` 3×3 |
+
+Æskernes højde skal være under 43 mm for at ligge under kanten (de må stikke op til ca. 55 mm i alt).
 
 ## Skuffe 1 – bestik
 
@@ -55,28 +58,26 @@ Bagkanten er øverst på tegningen; forkanten (mod dig) nederst.
   lange sorte redskaber der i dag ligger løst i siden.
 * **Værktøj 3×3** og **Måleskeer 3×3** forrest til venstre: hvidløgspresser, rivejern, pizzahjul,
   proptrækker, te-si, måleskeer.
-* **Seks bestikrum 2×6** (80 × 248 mm indvendigt, 42 mm høje med greb-hak i forkanten).
-  Forrest det der bruges mest: **gafler, spiseknive, spiseskeer**. Bagved **teskeer,
-  børnebestik/dessert, servering/blandet**. Spiseknive på 24 cm kan ligge fladt.
+* **Store skeer 6×2** bagerst på tværs (248 × 80 mm): skeerne på 21 cm og serveringsbestik.
+* **Teskeer, børnebestik, kagegafler 2×4** (80 × 164 mm): korte rum til det korte bestik.
+* **Gafler, spiseknive, spiseskeer 2×6** forrest (80 × 248 mm). Alle bestikrum er 42 mm høje med greb-hak i forkanten.
 
 ## Skuffe 2 – ruller, poser og småting
 
-* **Ruller 3×12** langs venstre side (122 × 500 mm indvendigt): bagepapir og folie/film side om side.
-  Så lang at selv en 45 cm-æske kan være der.
-* **Fryseposer store 6×3** og **Fryseposer små 6×3**: de to ISTAD-æsker.
-* **Lange ting 6×2**: poser på rulle, trægafler, papirsugerør, sushi-måtte og den lille ISTAD 0,4 L-æske.
-* **Papir | klemmer 6×4** med skillevæg: mellemlægspapir-æsken til venstre (152 mm), alle
-  poseklemmer til højre (94 mm).
-* Højre kolonne: **Ringe 3×3**, **Elastikker 3×3** (smid pap-æsken ud, hæld elastikkerne løst i,
-  snoren kan ligge ovenpå), **Termometre 3×4** (plus tændstikker), **Småting 3×2**
-  (tandstikker, barberblade, fødselsdagslys).
+* **Ruller 8×3** bagerst (332 × 122 mm indvendigt): sølvpapir og film side om side.
+* **Papir | tændstikker 4×5** bagerst til højre med skillevæg: mellemlægspapiret i det bageste rum
+  (164 × 130 mm), tændstikker og snor i det forreste (164 × 73 mm).
+* **Fryseposer store 8×2, mellem 6×2, små 5×2**: én bakke pr. ISTAD-æske, alle 80 mm brede.
+* **Lange ting 6×2**: poser på rulle, trægafler, papirsugerør, sushi-måtte.
+* **Småting 4×2** (tandstikker, barberblade, fødselsdagslys) og **Elastikker 3×2** (smid pap-æsken ud).
+* Forrest: **Termometre 4×3**, **Ringe 3×3** og **Poseklemmer 5×3** (206 × 122 mm til alle klemmerne).
 * Gaveposerne med gule blade og festtingene hører nok ikke til i køkkenskuffen – der er ikke sat plads af til dem.
 
 ## Print
 
 * PLA eller PETG, 0,2 mm lag, 3 perimetre, 10–15 % infill, ingen support (filerne står rigtigt).
   Bunden er massiv i modellen, så sliceren fylder den med infill; vægten i `printliste.md` er regnet
-  massivt og er derfor i overkanten (ca. 4,2 kg i alt for det hele).
+  massivt og er derfor i overkanten (se totalen nederst i `printliste.md`).
 * Vægge er 1,6 mm, gulvet 6 mm over fodens bund. Alt kan vaskes i hånden; PETG tåler opvaskemaskine bedre.
 * Print de små 3×3-bakker først og tjek at de passer i din baseplade, før du printer de store.
 
