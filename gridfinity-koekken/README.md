@@ -13,21 +13,28 @@ STL-filerne laves igen på få sekunder.
 
 ## Hvad er lavet
 
-* **`stl/`** – printklare STL-filer (7 dele til bestikskuffen inkl. den løse teske-indsats, 14 til rulle/pose-skuffen; 21 i alt). Se `printliste.md`.
+* **`stl/`** – printklare STL-filer (6 dele til bestikskuffen, 14 til rulle/pose-skuffen, plus kanalen i to dele pr. skuffe). Se `printliste.md`.
 * **`plan.py`** – selve planen: hvilke bakker, hvor store, hvor de står, skillevægge, knivbakke-parametre.
 * **`gridfinity.py`** – lille Gridfinity-bibliotek (fodprofil 0,8 / 1,8 / 2,15 mm, 42 mm pitch, 4 mm hjørner).
 * **`generate.py`** – laver STL, `layout.svg` og `printliste.md`. **`preview.py`** laver PNG-billederne.
 
 ## Forudsætninger
 
-1. **Basepladen er 12 × 12 enheder** (504 × 504 mm) af skeleton-typen, så bakkerne står reelt på skuffebunden.
-   Hvis din baseplade er anderledes, ret `DRAWER_UNITS` i `plan.py`.
-2. **Højde.** Bestikskuffens bakker er 8 enheder = 56 mm, ca. 57 mm i alt. Knivene står lodret og den
-   bredeste klinge (santoku, 45 mm) ender i ca. 53 mm. Alt under de 60 mm.
+1. **Basepladen** (samme i begge skuffer) er 12 × 12 celler af skeleton-typen, 4,25 mm tyk, med en **22,5 mm stribe
+   forrest** langs hele bredden. Bakkerne står reelt på skuffebunden.
+2. **Højde.** Bakkerne er 8 enheder = 56 mm, og det går lige under skuffesiden. Knivene står lodret og den
+   bredeste klinge (santoku, 45 mm) ender i ca. 53 mm.
 3. **Printer: Bambu P1S** (256 × 256 mm). `MAX_PRINT_UNITS = 6` deler lange bakker i stykker på højst 251,5 mm.
    Delte bakker (`-a`, `-b`) har åbne ender mod hinanden og låses sammen af basepladen.
-4. **Vægge** er 1,26 mm = 3 linjer à 0,42 mm, både ydervægge og skillevægge. Stift nok til 56 mm høje vægge, og
-   tyndere end det bliver svajende på de lange stræk.
+4. **Vægge** er 1,26 mm = 3 linjer à 0,42 mm, både ydervægge og skillevægge.
+5. **Bolthoveder** til skuffehåndtaget sidder på indersiden af fronten. Kanalen forrest har derfor ingen forvæg:
+   skuffefronten er væggen, og bolthovederne rager bare ind i kanalen.
+
+## Kanalen forrest (begge skuffer)
+
+På basepladens 22,5 mm-stribe står en kanal på 22 × 503 × 50 mm, printet i to halvdele (`kanal-a` og `kanal-b`,
+åbne mod hinanden og mod skuffefronten). Den holdes af skuffefronten på den ene side og bakkerækken på den anden.
+Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. Print to sæt.
 
 ### Mål der er lagt til grund (bestikskuffen)
 
@@ -37,10 +44,11 @@ STL-filerne laves igen på få sekunder.
 | Brødkniv | 39 cm | langs væggen i redskabsbakken, gennem slids i skillevæggen |
 | Santoku-klinge, ryg til æg | 45 mm | lodret slids, bund 7 mm over skuffebunden |
 | Bamix-skær | ø36 mm, 4 stk. | småtingsrum 59 × 80 mm forrest i knivbakken |
-| Store skeer | 21 cm | rum 75 × 249 mm |
-| Spisepinde og lange teskeer | ca. 24 cm | rum 61 × 249 mm i to lag |
+| Store skeer | 21 cm | sammen med spiseskeerne, rum 61 × 249 mm (testprintet) |
+| Spisepinde | ca. 24 cm | kanalen forrest, 22 × 503 mm |
+| Lange teskeer | ca. 24 cm | rum 61 × 249 mm |
 | Spiseknive, gafler, spiseskeer | 1,5 enhed brede | rum 61 × 249 mm |
-| Teskeer, børnebestik, kagegafler | korte | tværrum 172 × 82 mm |
+| Teskeer, børnebestik, kagegafler | korte | tværrum 168 × 82 mm |
 
 ## Skuffe 1 – bestik
 
@@ -57,16 +65,16 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
   * Forrest til venstre, foran de lange knives håndtag: to småtingsrum på 59 × 80 mm. Bamix-skærene i det ene,
     det andet frit.
   * Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden. Ret `KnifeTray(...)` i `plan.py`.
-* **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, tre rum i fuld højde:
-  199 mm (piskeris, ostehøvl, grillspyd, lange redskaber), 199 mm (hvidløgspresser, rivejern, pizzahjul, proptrækker)
-  og 100 mm (måleskeer, småting). **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod
-  bagvæggen og går gennem en 4 mm slids i den første skillevæg; håndtaget ender i rum 2. Den koster ingen plads
-  i knivbakken, hvor fire knive over 29 cm ikke kan få hver sin fri kolonne i 164 mm bredde.
-* **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer og
-  spisepinde. Spisepinde-rummet har to lister 22 mm over bunden, og den løse **teske-indsats** (60 × 248 × 34 mm)
-  hviler på dem med de lange teskeer, mens spisepindene ligger nedenunder. Indsatsen har greb-hak i begge ender.
-* **Bestik-kort 6×6** (forrest): til venstre et rum på 75 × 249 mm til de store skeer på 21 cm. Til højre tre tværrum på
-  172 × 82 mm til teskeer, børnebestik og kagegafler.
+* **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, to rum i fuld højde på 249 mm:
+  piskeris, ostehøvl og lange redskaber i det ene, hvidløgspresser, rivejern og proptrækker i det andet.
+  **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod bagvæggen og går gennem en 4 mm
+  slids i skillevæggen; håndtaget ender i rum 2. Den koster ingen plads i knivbakken, hvor fire knive over 29 cm
+  ikke kan få hver sin fri kolonne i 164 mm bredde.
+* **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer (også dem på
+  21 cm) og lange teskeer. Testprintet bekræftede, at 61 mm er nok til alle tre hovedtyper.
+* **Bestik-kort 6×6** (forrest): til venstre en kolonne på 80 × 249 mm til måleskeer, pizzahjul, te-si og
+  småværktøj. Til højre tre tværrum på 168 × 82 mm til teskeer, børnebestik og kagegafler.
+* **Kanalen** forrest: spisepinde og grillspyd.
 
 ## Skuffe 2 – ruller, poser og småting
 
@@ -82,7 +90,7 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
 * **Poseklemmer 2×4**: alle klemmer (13,5 / 10,5 / 5 cm) i ét rum på 80 × 164 mm i fuld højde.
   **Elastikker 1×2** (37 × 80 mm) lige foran, bag papiret, med et frit 1×2-rum ved siden af.
 * **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
-  Lange ting 2×6 (trægafler, papirsugerør, sushi-måtte) og Småting 4×2 med skillevæg (tandstikker og barberblade
+  Lange ting 2×6 (trægafler, sushi-måtte, poser på rulle; sugerør ligger i kanalen) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).
 
 ## Print

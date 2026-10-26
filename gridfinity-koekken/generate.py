@@ -38,7 +38,7 @@ def layout_svg(drawers, drawer_units, path):
     pad, gap_between = 40, 60
     dw, dh = drawer_units[0] * PITCH * s, drawer_units[1] * PITCH * s
     total_w = pad * 2 + len(drawers) * dw + (len(drawers) - 1) * gap_between
-    total_h = pad * 2 + dh + 30
+    total_h = pad * 2 + dh + 55
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{total_w}" height="{total_h}" '
            f'viewBox="0 0 {total_w} {total_h}" font-family="Helvetica, Arial, sans-serif">',
            '<rect width="100%" height="100%" fill="#faf8f3"/>']
@@ -85,7 +85,9 @@ def layout_svg(drawers, drawer_units, path):
             fs = 11 if min(w, h) > 70 else 9
             out.append(f'<text x="{cx}" y="{cy - 2}" font-size="{fs}" text-anchor="middle" font-weight="bold">{b.name}</text>')
             out.append(f'<text x="{cx}" y="{cy + 11}" font-size="{fs - 2}" text-anchor="middle" fill="#444">{b.units_x}×{b.units_y}×{b.units_z}u</text>')
-        out.append(f'<text x="{ox + dw / 2}" y="{oy + dh + 18}" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>')
+        out.append(f'<rect x="{ox}" y="{oy + dh}" width="{dw}" height="{22.5 * s}" fill="#d9c7a0" stroke="#333" stroke-width="1"/>')
+        out.append(f'<text x="{ox + dw / 2}" y="{oy + dh + 15}" font-size="9" text-anchor="middle">kanal 22 × 503 mm (spisepinde · sugerør · grillspyd)</text>')
+        out.append(f'<text x="{ox + dw / 2}" y="{oy + dh + 40}" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>')
     out.append('</svg>')
     with open(path, "w") as f:
         f.write("\n".join(out))

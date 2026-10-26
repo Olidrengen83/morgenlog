@@ -22,8 +22,8 @@ DRAWER_UNITS = (12, 12)
 H = 8
 W_IN6 = 6 * 42 - 0.5 - 2 * 1.26          # 248,98 mm indvendigt i en 6-bred bakke
 C4 = (W_IN6 - 3 * 1.26) / 4              # 61,3 mm: fire rum i forreste bakke
-C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i bageste bakke
-STORE_SKEER_B = 75.0                     # bredde på rummet til 21 cm-skeerne
+C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i den korte bakke
+SMAA_KOL = 80.0                          # kolonne til måleskeer og småværktøj i bestik-kort
 
 BESTIK = [
     # Fordeling bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm.
@@ -32,27 +32,30 @@ BESTIK = [
     BinSpec("knivbakke", 4, 12, H, pos=(0, 0),
             knife=KnifeTray(front_x0=68.0),
             label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
-    # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i første skillevæg.
-    BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(200.0, 400.0),
-            divider_slots=((200.0, 9.0, 4.0),),
-            label="Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer). Brødkniv 39 cm langs venstre væg gennem slids i skillevæg 1"),
-    BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
-            dividers_x=(STORE_SKEER_B + 0.63,),
-            walls=((STORE_SKEER_B + 1.26, C3, W_IN6, C3 + 1.26),
-                   (STORE_SKEER_B + 1.26, 2 * C3 + 1.26, W_IN6, 2 * C3 + 2.52)),
-            label="Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler"),
+    # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen.
+    BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
+            divider_slots=((250.0, 9.0, 4.0),),
+            label="To rum i fuld højde 81 x 249: piskeris, ostehøvl, lange redskaber · hvidløgspresser, rivejern, proptrækker. Brødkniv 39 cm langs venstre væg gennem slids"),
     BinSpec("bestik-lang", 6, 6, H, pos=(6, 0),
             dividers_x=(C4 + 0.63, 2 * C4 + 1.89, 3 * C4 + 3.15),
-            rails=((3 * C4 + 3.78, W_IN6, 0.0, W_IN6, 22.0),),
             front_notch=True, notch_radius=12,
             notch_xs=tuple(1.26 + C4 / 2 + i * (C4 + 1.26) for i in range(4)),
-            label="Fire rum 61 x 249: spiseknive, gafler, spiseskeer, spisepinde (nederst) med løs indsats til lange teskeer ovenpå"),
+            label="Fire rum 61 x 249: spiseknive, gafler, spiseskeer (også 21 cm), lange teskeer"),
+    BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
+            dividers_x=(SMAA_KOL + 0.63,),
+            walls=((SMAA_KOL + 1.26, C3, W_IN6, C3 + 1.26),
+                   (SMAA_KOL + 1.26, 2 * C3 + 1.26, W_IN6, 2 * C3 + 2.52)),
+            label="Tv.: måleskeer, pizzahjul, te-si, småværktøj (80 x 249) · th. tre tværrum 168 x 82: teskeer, børnebestik, kagegafler"),
 ]
 
-# Løse indsatser uden Gridfinity-fod
+# Kanal på basepladens 22,5 mm-stribe forrest i skuffen. Ingen forvæg: skuffefronten er væggen,
+# så bolthovederne til håndtaget bare rager ind i kanalen. To dele, åbne mod hinanden.
+KANAL_W, KANAL_H, KANAL_L = 22.0, 50.0, 251.5
 EXTRA = [
-    TraySpec("teske-indsats", width=C4 - 0.8, length=W_IN6 - 0.8, height=56 - 22,
-             label="Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder"),
+    TraySpec("kanal-a", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
+             open_sides=("x0", "y1"), label="Forreste kanal, venstre halvdel (spisepinde / sugerør / grillspyd)"),
+    TraySpec("kanal-b", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
+             open_sides=("x0", "y0"), label="Forreste kanal, højre halvdel. Print to sæt: ét til hver skuffe"),
 ]
 
 # --- Skuffe 2: ruller, poser og småting ------------------------------------
@@ -68,7 +71,7 @@ RULLER = [
     BinSpec("istad-store", 2, 8, H, pos=(4, 4),
             label="ISTAD 29,5 cm på langs (80 x 332 mm)"),
     BinSpec("lange-ting", 2, 6, H, pos=(6, 0),
-            label="Bagerst: trægafler, papirsugerør, sushi-måtte (80 x 248 mm)"),
+            label="Bagerst: trægafler, sushi-måtte, poser på rulle (80 x 248 mm). Sugerør ligger i kanalen forrest"),
     BinSpec("istad-mellem", 2, 6, H, pos=(6, 6),
             label="ISTAD 23 cm på langs (80 x 248 mm)"),
     BinSpec("smaating", 4, 2, H, pos=(8, 0), dividers_x=(81.0,),

@@ -248,6 +248,7 @@ class TraySpec:
     wall: float = 1.26
     floor: float = 1.26
     end_notch_radius: float = 10.0
+    open_sides: Tuple[str, ...] = ()   # fjernede vægge: "x0" (venstre), "x1" (højre), "y0" (bag), "y1" (for)
     label: str = ""
 
 
@@ -256,6 +257,16 @@ def build_tray(t: TraySpec) -> Manifold:
     inner = _slab(_rrect(t.width - 2 * t.wall, t.length - 2 * t.wall, 1.0), t.floor, t.height + 1
                   ).translate((t.wall, t.wall, 0))
     m = outer - inner
+    big, cw = 10.0, t.wall + 1.2   # cw dækker også den indvendige hjørnerunding
+    for s in t.open_sides:   # skær væggen (og hjørnerundingen) væk på den side
+        if s == "x0":
+            m = m - Manifold.cube((cw, t.length + 2 * big, t.height)).translate((0, -big, t.floor))
+        elif s == "x1":
+            m = m - Manifold.cube((cw, t.length + 2 * big, t.height)).translate((t.width - cw, -big, t.floor))
+        elif s == "y0":
+            m = m - Manifold.cube((t.width + 2 * big, cw, t.height)).translate((-big, 0, t.floor))
+        elif s == "y1":
+            m = m - Manifold.cube((t.width + 2 * big, cw, t.height)).translate((-big, t.length - cw, t.floor))
     if t.end_notch_radius > 0:
         r = t.end_notch_radius
         cyl = Manifold.cylinder(t.wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))

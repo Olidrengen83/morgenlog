@@ -9,10 +9,10 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `skuffe1-bestik__knivbakke-a.stl` | 4×6×8 | 167.5 × 251.6 × 56.0 | 165 × 501 × 50 (hel bakke) | 323.0 cm³ | 401 g | 13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.) |
 | `skuffe1-bestik__knivbakke-b.stl` | 4×6×8 | 167.5 × 251.6 × 56.0 | 165 × 501 × 50 (hel bakke) | 324.7 cm³ | 403 g | 13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.) |
-| `skuffe1-bestik__redskaber-a.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 150.0 cm³ | 186 g | Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer). Brødkniv 39 cm langs venstre væg gennem slids i skillevæg 1 |
-| `skuffe1-bestik__redskaber-b.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 150.3 cm³ | 186 g | Tre rum i fuld højde: 81 x 199 (piskeris, ostehøvl, spyd), 81 x 199 (værktøj), 81 x 100 (måleskeer). Brødkniv 39 cm langs venstre væg gennem slids i skillevæg 1 |
-| `skuffe1-bestik__bestik-kort.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 426.2 cm³ | 528 g | Tv.: store skeer 21 cm (75 x 249) · th. tre tværrum 172 x 82: teskeer, børnebestik, kagegafler |
-| `skuffe1-bestik__bestik-lang.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 437.7 cm³ | 543 g | Fire rum 61 x 249: spiseknive, gafler, spiseskeer, spisepinde (nederst) med løs indsats til lange teskeer ovenpå |
+| `skuffe1-bestik__redskaber-a.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 148.7 cm³ | 184 g | To rum i fuld højde 81 x 249: piskeris, ostehøvl, lange redskaber · hvidløgspresser, rivejern, proptrækker. Brødkniv 39 cm langs venstre væg gennem slids |
+| `skuffe1-bestik__redskaber-b.stl` | 2×6×8 | 83.5 × 251.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 145.2 cm³ | 180 g | To rum i fuld højde 81 x 249: piskeris, ostehøvl, lange redskaber · hvidløgspresser, rivejern, proptrækker. Brødkniv 39 cm langs venstre væg gennem slids |
+| `skuffe1-bestik__bestik-lang.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 434.7 cm³ | 539 g | Fire rum 61 x 249: spiseknive, gafler, spiseskeer (også 21 cm), lange teskeer |
+| `skuffe1-bestik__bestik-kort.stl` | 6×6×8 | 251.5 × 251.5 × 56.0 | 249 × 249 × 50 (hel bakke) | 425.6 cm³ | 528 g | Tv.: måleskeer, pizzahjul, te-si, småværktøj (80 x 249) · th. tre tværrum 168 x 82: teskeer, børnebestik, kagegafler |
 
 ## skuffe2-ruller-poser
 
@@ -24,7 +24,7 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe2-ruller-poser__termometre.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 103.3 cm³ | 128 g | Bagerst: stegetermometer, trådtermometer, snor (80 x 164 mm) |
 | `skuffe2-ruller-poser__istad-store-a.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 333 × 50 (hel bakke) | 98.4 cm³ | 122 g | ISTAD 29,5 cm på langs (80 x 332 mm) |
 | `skuffe2-ruller-poser__istad-store-b.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 333 × 50 (hel bakke) | 98.4 cm³ | 122 g | ISTAD 29,5 cm på langs (80 x 332 mm) |
-| `skuffe2-ruller-poser__lange-ting.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | Bagerst: trægafler, papirsugerør, sushi-måtte (80 x 248 mm) |
+| `skuffe2-ruller-poser__lange-ting.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | Bagerst: trægafler, sushi-måtte, poser på rulle (80 x 248 mm). Sugerør ligger i kanalen forrest |
 | `skuffe2-ruller-poser__istad-mellem.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 23 cm på langs (80 x 248 mm) |
 | `skuffe2-ruller-poser__smaating.stl` | 4×2×8 | 167.5 × 83.5 × 56.0 | 165 × 81 × 50 (hel bakke) | 108.4 cm³ | 134 g | Bagerst, to rum 80 x 80: tandstikker + barberblade · tændstikker + fødselsdagslys |
 | `skuffe2-ruller-poser__istad-smaa.stl` | 2×6×8 | 83.5 × 251.5 × 56.0 | 81 × 249 × 50 (hel bakke) | 150.1 cm³ | 186 g | ISTAD 19 cm på langs (80 x 248 mm), ender bag papiret |
@@ -37,6 +37,7 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 
 | Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |
 |---|---|---|---|---|---|---|
-| `indsats__teske-indsats.stl` | – | 60.5 × 248.2 × 34.0 | – | 43.7 cm³ | 54 g | Øverste lag i rum 4 i bestik-lang: lange teskeer. Hviler på lister 22 mm over bunden, spisepinde nedenunder |
+| `indsats__kanal-a.stl` | – | 22.0 × 251.5 × 50.0 | – | 27.2 cm³ | 34 g | Forreste kanal, venstre halvdel (spisepinde / sugerør / grillspyd) |
+| `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 50.0 | – | 27.2 cm³ | 34 g | Forreste kanal, højre halvdel. Print to sæt: ét til hver skuffe |
 
-**I alt ca. 4475 g PLA** (21 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4476 g PLA** (22 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

@@ -93,9 +93,12 @@ def render_layout(fname):
             fs = 10 if min(b.W, b.L) > 100 else 8
             ax.text(x + b.W / 2, y + b.L / 2 + 6, b.name, ha="center", va="center", fontsize=fs, fontweight="bold")
             ax.text(x + b.W / 2, y + b.L / 2 - 8, f"{b.units_x}×{b.units_y}×{b.units_z}u", ha="center", va="center", fontsize=fs - 2, color="#333")
-        ax.set_xlim(-10, W + 10); ax.set_ylim(-30, D + 10); ax.set_aspect("equal"); ax.set_axis_off()
+        # kanal på basepladens 22,5 mm-stribe forrest
+        ax.add_patch(mpatches.Rectangle((0, -22.5), W, 22.5, fc="#d9c7a0", ec="#333", lw=1.2))
+        ax.text(W / 2, -11, "kanal 22 × 503 mm: spisepinde · sugerør · grillspyd (åben mod skuffefronten)", ha="center", va="center", fontsize=8)
+        ax.set_xlim(-10, W + 10); ax.set_ylim(-55, D + 10); ax.set_aspect("equal"); ax.set_axis_off()
         ax.set_title(f"{dname}  ·  {plan.DRAWER_UNITS[0]}×{plan.DRAWER_UNITS[1]} enheder (bagkant øverst)", fontsize=13)
-        ax.text(W / 2, -18, "▼ forkant (mod dig) ▼", ha="center", fontsize=11, color="#444")
+        ax.text(W / 2, -42, "▼ forkant (mod dig) ▼", ha="center", fontsize=11, color="#444")
     plt.tight_layout(); fig.subplots_adjust(top=0.94)
     plt.savefig(os.path.join(OUT, fname), dpi=100); plt.close(fig)
 
