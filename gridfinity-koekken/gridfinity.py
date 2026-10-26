@@ -250,6 +250,7 @@ class TraySpec:
     floor: float = 1.26
     end_notch_radius: float = 10.0
     open_sides: Tuple[str, ...] = ()   # fjernede vægge: "x0" (venstre), "x1" (højre), "y0" (bag), "y1" (for)
+    x0_slots: Tuple[Tuple[float, float, float, float], ...] = ()  # aflange huller i x0-væggen: (y_c, z_c, bredde, højde)
     label: str = ""
 
 
@@ -268,6 +269,15 @@ def build_tray(t: TraySpec) -> Manifold:
             m = m - Manifold.cube((t.width + 2 * big, cw, t.height)).translate((-big, 0, t.floor))
         elif s == "y1":
             m = m - Manifold.cube((t.width + 2 * big, cw, t.height)).translate((-big, t.length - cw, t.floor))
+    for (yc, zc, sw, sh) in t.x0_slots:   # stadion-formet hul gennem x0-væggen
+        r = sw / 2
+        prof = CrossSection.square((sw, max(sh - sw, 0.01))).translate((-r, -(sh - sw) / 2)).offset(0.0) \
+            if sh > sw else CrossSection.circle(r, SEGMENTS)
+        if sh > sw:
+            prof = prof + CrossSection.circle(r, SEGMENTS).translate((0, (sh - sw) / 2)) \
+                        + CrossSection.circle(r, SEGMENTS).translate((0, -(sh - sw) / 2))
+        cutter = prof.extrude(t.wall + 2).rotate((0, 90, 0)).rotate((90, 0, 0))   # z -> x retning
+        m = m - cutter.translate((-1, yc, zc))
     if t.end_notch_radius > 0:
         r = t.end_notch_radius
         cyl = Manifold.cylinder(t.wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))

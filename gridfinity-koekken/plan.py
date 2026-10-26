@@ -61,14 +61,19 @@ BESTIK = [
             label="Forrest: børnebestik (165 x 61) · frit/dessertskeer (165 x 61) · pizzahjul, te-si, småværktøj (83 x 123)"),
 ]
 
-# Kanal på basepladens 22,5 mm-stribe forrest i skuffen. Ingen forvæg: skuffefronten er væggen,
-# så bolthovederne til håndtaget bare rager ind i kanalen. To dele, åbne mod hinanden.
+# Kanal på basepladens 22,5 mm-stribe forrest i skuffen. To dele, åbne mod hinanden midt i skuffen.
+# Forvæggen har aflange huller til håndtagets bolthoveder (ø10, 37 mm over bunden, 209 mm fra hver side).
+# Kanalen er 503 mm i en 510 mm skuffe, så bolten sidder 205,5 mm fra kanalens yderende.
+# Striben er 4,25 mm høj, så boltens centrum er 32,75 mm over kanalens underside.
 KANAL_W, KANAL_H, KANAL_L = 22.0, 50.0, 251.5
+BOLT_Y, BOLT_Z = 209.0 - (510.0 - 2 * KANAL_L) / 2, 37.0 - 4.25
 EXTRA = [
     TraySpec("kanal-a", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
-             open_sides=("x0", "y1"), label="Forreste kanal, venstre halvdel (spisepinde / sugerør / grillspyd)"),
+             open_sides=("y1",), x0_slots=((BOLT_Y, BOLT_Z, 16.0, 26.0),),
+             label="Forreste kanal, venstre halvdel, hul til bolthoved (spisepinde / grillspyd / sugerør)"),
     TraySpec("kanal-b", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
-             open_sides=("x0", "y0"), label="Forreste kanal, højre halvdel. Print to sæt: ét til hver skuffe"),
+             open_sides=("y0",), x0_slots=((KANAL_L - BOLT_Y, BOLT_Z, 16.0, 26.0),),
+             label="Forreste kanal, højre halvdel, hul til bolthoved. Print to sæt: ét til hver skuffe"),
 ]
 
 # --- Skuffe 2: ruller, poser og småting ------------------------------------

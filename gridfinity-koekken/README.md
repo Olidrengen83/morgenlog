@@ -27,15 +27,14 @@ STL-filerne laves igen på få sekunder.
 3. **Printer: Bambu P1S** (256 × 256 mm). `MAX_PRINT_UNITS = 6` deler lange bakker i stykker på højst 251,5 mm.
    Delte bakker (`-a`, `-b`) har åbne ender mod hinanden og låses sammen af basepladen.
 4. **Vægge** er 1,26 mm = 3 linjer à 0,42 mm, både ydervægge og skillevægge.
-5. **Bolthoveder** til skuffehåndtaget sidder på indersiden af fronten: ø10 mm, ca. 37 mm over bunden, 209 mm fra
-   hver side. Kanalen forrest har derfor ingen forvæg: skuffefronten er væggen, og bolthovederne rager bare ind i
-   kanalen (de ligger 32–42 mm oppe, kanalens bund er ved 6 mm og kanten ved 54 mm, og samlingen mellem de to
-   kanaldele ligger midt i skuffen, 46 mm fra nærmeste bolt).
+5. **Bolthoveder** til skuffehåndtaget sidder på indersiden af fronten: ø10 mm, 37 mm over bunden, 209 mm fra
+   hver side, ens i begge skuffer. Kanalens forvæg har et aflangt hul på 16 × 26 mm ud for hver bolt (centrum
+   205,5 mm fra kanalens yderende og 32,75 mm over kanalens underside, da striben er 4,25 mm høj).
 
 ## Kanalen forrest (begge skuffer)
 
 På basepladens 22,5 mm-stribe står en kanal på 22 × 503 × 50 mm, printet i to halvdele (`kanal-a` og `kanal-b`,
-åbne mod hinanden og mod skuffefronten). Den holdes af skuffefronten på den ene side og bakkerækken på den anden.
+åbne mod hinanden midt i skuffen). Forvæggen har huller til håndtagets bolthoveder.
 Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. Print to sæt.
 
 ### Mål der er lagt til grund (bestikskuffen)
