@@ -62,8 +62,10 @@ EXTRA = [
 # Prioritet: det daglige forrest eller i kolonner, hvor æskens ende griber ved forkanten.
 # ISTAD-æskerne (29,5 / 23 / 19 x 7,5 cm) ligger på langs i 2 enheder brede kolonner.
 RULLER = [
-    BinSpec("pynt-ringe", 4, 4, H, pos=(0, 0),
-            label="BAGERST, sjældent: ringe til glas, fødselsdagsflag, parasoller, lys (164 x 164 mm)"),
+    BinSpec("pynt", 4, 2, H, pos=(0, 0),
+            label="BAGERST, sjældent: fødselsdagsflag, parasoller, kagelys (164 x 80 mm)"),
+    BinSpec("frit-4x2", 4, 2, H, pos=(0, 2),
+            label="Frit rum 164 x 80 mm bagerst (reserve, fx fyrfadslys eller servietringe)"),
     BinSpec("ruller", 4, 8, H, pos=(0, 4),
             label="Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten"),
     BinSpec("termometre", 2, 4, H, pos=(4, 0),

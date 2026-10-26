@@ -18,7 +18,8 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 
 | Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |
 |---|---|---|---|---|---|---|
-| `skuffe2-ruller-poser__pynt-ringe.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | BAGERST, sjældent: ringe til glas, fødselsdagsflag, parasoller, lys (164 x 164 mm) |
+| `skuffe2-ruller-poser__pynt.stl` | 4×2×8 | 167.5 × 83.5 × 56.0 | 165 × 81 × 50 (hel bakke) | 103.3 cm³ | 128 g | BAGERST, sjældent: fødselsdagsflag, parasoller, kagelys (164 x 80 mm) |
+| `skuffe2-ruller-poser__frit-4x2.stl` | 4×2×8 | 167.5 × 83.5 × 56.0 | 165 × 81 × 50 (hel bakke) | 103.3 cm³ | 128 g | Frit rum 164 x 80 mm bagerst (reserve, fx fyrfadslys eller servietringe) |
 | `skuffe2-ruller-poser__ruller-a.stl` | 4×4×8 | 167.5 × 167.6 × 56.0 | 165 × 333 × 50 (hel bakke) | 176.2 cm³ | 218 g | Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten |
 | `skuffe2-ruller-poser__ruller-b.stl` | 4×4×8 | 167.5 × 167.6 × 56.0 | 165 × 333 × 50 (hel bakke) | 176.2 cm³ | 218 g | Film, sølvpapir, cellofan og fryseposer på rulle på langs (164 x 332 mm) – gribes i forkanten |
 | `skuffe2-ruller-poser__termometre.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 103.3 cm³ | 128 g | Bagerst: stegetermometer, trådtermometer, snor (80 x 164 mm) |
@@ -40,4 +41,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `indsats__kanal-a.stl` | – | 22.0 × 251.5 × 50.0 | – | 27.2 cm³ | 34 g | Forreste kanal, venstre halvdel (spisepinde / sugerør / grillspyd) |
 | `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 50.0 | – | 27.2 cm³ | 34 g | Forreste kanal, højre halvdel. Print to sæt: ét til hver skuffe |
 
-**I alt ca. 4476 g PLA** (22 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4501 g PLA** (23 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

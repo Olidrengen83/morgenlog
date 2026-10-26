@@ -90,41 +90,44 @@
 <line x1="604.0" y1="484.0" x2="1108.0" y2="484.0" stroke="#c9bfae" stroke-width="0.5"/>
 <line x1="604.0" y1="526.0" x2="1108.0" y2="526.0" stroke="#c9bfae" stroke-width="0.5"/>
 <line x1="604.0" y1="568.0" x2="1108.0" y2="568.0" stroke="#c9bfae" stroke-width="0.5"/>
-<rect x="605.0" y="65.0" width="166.5" height="166.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
-<text x="688.25" y="146.25" font-size="11" text-anchor="middle" font-weight="bold">pynt-ringe</text>
-<text x="688.25" y="159.25" font-size="9" text-anchor="middle" fill="#444">4×4×8u</text>
-<rect x="605.0" y="233.0" width="166.5" height="334.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="605.0" y="65.0" width="166.5" height="82.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="688.25" y="104.25" font-size="11" text-anchor="middle" font-weight="bold">pynt</text>
+<text x="688.25" y="117.25" font-size="9" text-anchor="middle" fill="#444">4×2×8u</text>
+<rect x="605.0" y="149.0" width="166.5" height="82.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<text x="688.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">frit-4x2</text>
+<text x="688.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">4×2×8u</text>
+<rect x="605.0" y="233.0" width="166.5" height="334.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="688.25" y="398.25" font-size="11" text-anchor="middle" font-weight="bold">ruller</text>
 <text x="688.25" y="411.25" font-size="9" text-anchor="middle" fill="#444">4×8×8u</text>
-<rect x="773.0" y="65.0" width="82.5" height="166.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="773.0" y="65.0" width="82.5" height="166.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="814.25" y="146.25" font-size="11" text-anchor="middle" font-weight="bold">termometre</text>
 <text x="814.25" y="159.25" font-size="9" text-anchor="middle" fill="#444">2×4×8u</text>
-<rect x="773.0" y="233.0" width="82.5" height="334.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="773.0" y="233.0" width="82.5" height="334.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="814.25" y="398.25" font-size="11" text-anchor="middle" font-weight="bold">istad-store</text>
 <text x="814.25" y="411.25" font-size="9" text-anchor="middle" fill="#444">2×8×8u</text>
-<rect x="857.0" y="65.0" width="82.5" height="250.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="857.0" y="65.0" width="82.5" height="250.5" rx="4" fill="#fff3b8" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="898.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">lange-ting</text>
 <text x="898.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">2×6×8u</text>
-<rect x="857.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#fff3b8" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="857.0" y="317.0" width="82.5" height="250.5" rx="4" fill="#d2eff0" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="898.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">istad-mellem</text>
 <text x="898.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">2×6×8u</text>
-<rect x="941.0" y="65.0" width="166.5" height="82.5" rx="4" fill="#d2eff0" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="941.0" y="65.0" width="166.5" height="82.5" rx="4" fill="#f2d9c8" stroke="#3b3b3b" stroke-width="1.2"/>
 <line x1="1023.26" y1="67.0" x2="1023.26" y2="145.5" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1024.25" y="104.25" font-size="11" text-anchor="middle" font-weight="bold">smaating</text>
 <text x="1024.25" y="117.25" font-size="9" text-anchor="middle" fill="#444">4×2×8u</text>
-<rect x="941.0" y="149.0" width="82.5" height="250.5" rx="4" fill="#f2d9c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="941.0" y="149.0" width="82.5" height="250.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="982.25" y="272.25" font-size="11" text-anchor="middle" font-weight="bold">istad-smaa</text>
 <text x="982.25" y="285.25" font-size="9" text-anchor="middle" fill="#444">2×6×8u</text>
-<rect x="1025.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#cfe3f5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="1025.0" y="149.0" width="82.5" height="166.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1066.25" y="230.25" font-size="11" text-anchor="middle" font-weight="bold">poseklemmer</text>
 <text x="1066.25" y="243.25" font-size="9" text-anchor="middle" fill="#444">2×4×8u</text>
-<rect x="1025.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="1025.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1045.25" y="356.25" font-size="9" text-anchor="middle" font-weight="bold">elastikker</text>
 <text x="1045.25" y="369.25" font-size="7" text-anchor="middle" fill="#444">1×2×8u</text>
-<rect x="1067.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="1067.0" y="317.0" width="40.5" height="82.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1087.25" y="356.25" font-size="9" text-anchor="middle" font-weight="bold">frit-1x2</text>
 <text x="1087.25" y="369.25" font-size="7" text-anchor="middle" fill="#444">1×2×8u</text>
-<rect x="941.0" y="401.0" width="166.5" height="166.5" rx="4" fill="#f3d4e1" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="941.0" y="401.0" width="166.5" height="166.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="1024.25" y="482.25" font-size="11" text-anchor="middle" font-weight="bold">mellemlaegspapir</text>
 <text x="1024.25" y="495.25" font-size="9" text-anchor="middle" fill="#444">4×4×8u</text>
 <rect x="604.0" y="568.0" width="504.0" height="22.5" fill="#d9c7a0" stroke="#333" stroke-width="1"/>

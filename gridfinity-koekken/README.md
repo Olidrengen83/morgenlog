@@ -78,7 +78,7 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 
 ## Skuffe 2 – ruller, poser og småting
 
-Tolv bakker, alle 8 enheder høje. Det daglige ligger forrest eller i kolonner på langs, så æskens ende sidder
+Tretten bakker, alle 8 enheder høje. Ringene til henkogningsglas opbevares i et af glassene i skabet og har ikke plads her. Det daglige ligger forrest eller i kolonner på langs, så æskens ende sidder
 ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
 
 * **Ruller 4×8** (164 × 332 mm, to halvdele) langs venstre side: film, sølvpapir, cellofan og fryseposer på rulle
@@ -89,7 +89,7 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
 * **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
 * **Poseklemmer 2×4**: alle klemmer (13,5 / 10,5 / 5 cm) i ét rum på 80 × 164 mm i fuld højde.
   **Elastikker 1×2** (37 × 80 mm) lige foran, bag papiret, med et frit 1×2-rum ved siden af.
-* **Bagerst:** Pynt-ringe 4×4 (ringe til glas, fødselsdagsflag, parasoller), Termometre 2×4 (plus snor),
+* **Bagerst:** Pynt 4×2 (fødselsdagsflag, parasoller, kagelys), et frit 4×2-rum som reserve, Termometre 2×4 (plus snor),
   Lange ting 2×6 (trægafler, sushi-måtte, poser på rulle; sugerør ligger i kanalen) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).
 
