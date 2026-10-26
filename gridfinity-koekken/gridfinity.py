@@ -251,6 +251,7 @@ class TraySpec:
     end_notch_radius: float = 10.0
     open_sides: Tuple[str, ...] = ()   # fjernede vægge: "x0" (venstre), "x1" (højre), "y0" (bag), "y1" (for)
     x0_slots: Tuple[Tuple[float, float, float, float], ...] = ()  # aflange huller i x0-væggen: (y_c, z_c, bredde, højde)
+    teeth: Tuple[Tuple[float, float, float, float, float], ...] = ()  # tænder under bunden: (y_c, x0, x1, bredde_y, højde)
     label: str = ""
 
 
@@ -282,6 +283,10 @@ def build_tray(t: TraySpec) -> Manifold:
         r = t.end_notch_radius
         cyl = Manifold.cylinder(t.wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))
         m = m - cyl.translate((t.width / 2, -2, t.height)) - cyl.translate((t.width / 2, t.length - t.wall - 2, t.height))
+    for (yc, x0, x1, wy, h) in t.teeth:   # tænder der går ned i basepladens lommer
+        m = m + Manifold.cube((x1 - x0, wy, h + 0.5)).translate((x0, yc - wy / 2, -h))
+    if t.teeth:
+        m = m.translate((0, 0, max(h for *_, h in t.teeth)))
     return m
 
 
