@@ -27,8 +27,10 @@ STL-filerne laves igen på få sekunder.
 3. **Printer: Bambu P1S** (256 × 256 mm). `MAX_PRINT_UNITS = 6` deler lange bakker i stykker på højst 251,5 mm.
    Delte bakker (`-a`, `-b`) har åbne ender mod hinanden og låses sammen af basepladen.
 4. **Vægge** er 1,26 mm = 3 linjer à 0,42 mm, både ydervægge og skillevægge.
-5. **Bolthoveder** til skuffehåndtaget sidder på indersiden af fronten. Kanalen forrest har derfor ingen forvæg:
-   skuffefronten er væggen, og bolthovederne rager bare ind i kanalen.
+5. **Bolthoveder** til skuffehåndtaget sidder på indersiden af fronten: ø10 mm, ca. 37 mm over bunden, 209 mm fra
+   hver side. Kanalen forrest har derfor ingen forvæg: skuffefronten er væggen, og bolthovederne rager bare ind i
+   kanalen (de ligger 32–42 mm oppe, kanalens bund er ved 6 mm og kanten ved 54 mm, og samlingen mellem de to
+   kanaldele ligger midt i skuffen, 46 mm fra nærmeste bolt).
 
 ## Kanalen forrest (begge skuffer)
 
