@@ -35,7 +35,8 @@ STL-filerne laves igen på få sekunder.
 
 På basepladens 22,5 mm-stribe står en kanal på 22 × 503 × 50 mm, printet i to halvdele (`kanal-a` og `kanal-b`,
 åbne mod hinanden midt i skuffen). Forvæggen har huller til håndtagets bolthoveder, og under bunden sidder en tand
-pr. celle (17 × 18 × 3 mm, 42 mm deling), der går ned i stribens lommer og låser kanalen fast.
+pr. celle (19,5 mm bred, 17 mm lang, 3,4 mm høj, 42 mm deling), der går ned i stribens riller (20,5 mm brede ved
+bunden, skrå sider) og låser kanalen fast.
 Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. Print to sæt.
 
 ### Mål der er lagt til grund (bestikskuffen)

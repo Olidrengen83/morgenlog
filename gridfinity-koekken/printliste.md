@@ -41,7 +41,7 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 
 | Fil | Enheder | Mål (mm) | Indvendigt (mm) | Volumen | ≈ PLA | Indhold |
 |---|---|---|---|---|---|---|
-| `indsats__kanal-a.stl` | – | 22.0 × 251.5 × 53.0 | – | 47.0 cm³ | 58 g | Forreste kanal, venstre halvdel, hul til bolthoved, tænder i bunden (spisepinde / grillspyd / sugerør) |
-| `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 53.0 | – | 47.0 cm³ | 58 g | Forreste kanal, højre halvdel, hul til bolthoved, tænder i bunden. Print to sæt: ét til hver skuffe |
+| `indsats__kanal-a.stl` | – | 22.0 × 251.5 × 53.4 | – | 48.6 cm³ | 60 g | Forreste kanal, venstre halvdel, hul til bolthoved, tænder i bunden (spisepinde / grillspyd / sugerør) |
+| `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 53.4 | – | 48.6 cm³ | 60 g | Forreste kanal, højre halvdel, hul til bolthoved, tænder i bunden. Print to sæt: ét til hver skuffe |
 
-**I alt ca. 4608 g PLA** (26 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4612 g PLA** (26 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
