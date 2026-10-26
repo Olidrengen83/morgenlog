@@ -13,7 +13,7 @@ def part(name, x, y, rot=0):
     if rot:
         m.apply_transform(trimesh.transformations.rotation_matrix(np.radians(rot), [0, 0, 1]))
     m.apply_translation(-m.bounds[0]); m.apply_translation([x, y, 0])
-    assert m.bounds[1][0] <= BED and m.bounds[1][1] <= BED, f"{name} udenfor pladen: {m.bounds[1][:2]}"
+    assert m.bounds[1][0] <= BED and (m.bounds[1][1] <= BED or y >= BED), f"{name} udenfor pladen: {m.bounds[1][:2]}"
     assert not (m.bounds[0][0] < 18 and m.bounds[0][1] < 28), f"{name} rammer udelukkelseszonen"
     return name, m
 
@@ -34,6 +34,9 @@ for plade, parts in PLADER.items():
     sc.export(os.path.join(OUT, plade + ".3mf"))
     rows.append((plade, [n.split("__")[1] for n, _ in parts], sum(m.volume for _, m in parts) / 1000))
     print(plade, rows[-1][1])
+# Den samlede fil indeholder ogsaa bestik-lang-a (= testbakken), saa man selv kan tage den fra.
+_, m_a = part("skuffe1-bestik__bestik-lang-a", 2, 300)
+alle.add_geometry(m_a, node_name="skuffe1-bestik__bestik-lang-a", geom_name="skuffe1-bestik__bestik-lang-a")
 alle.export(os.path.join(OUT, "skuffe1-bestik-alle-dele.3mf"))
 
 with open(os.path.join(HERE, "printplan.md"), "w") as f:
@@ -42,8 +45,8 @@ with open(os.path.join(HERE, "printplan.md"), "w") as f:
             "| Plade | Dele | Volumen (massivt) |\n|---|---|---|\n")
     for plade, names, vol in rows:
         f.write(f"| `stl/print/{plade}.3mf` | {', '.join(names)} | {vol:.0f} cm³ |\n")
-    f.write(f"\n`stl/print/skuffe1-bestik-alle-dele.3mf` har alle {sum(len(p) for p in PLADER.values())} dele i én fil, "
-            "hvis du hellere vil arrangere selv.\n\n"
+    f.write(f"\n`stl/print/skuffe1-bestik-alle-dele.3mf` har alle {sum(len(p) for p in PLADER.values()) + 1} dele i én fil "
+            "inkl. bestik-lang-a, hvis du hellere vil arrangere selv.\n\n"
             f"**Udeladt:** {UDELADT}.\n\n"
             "Fem plader er minimum: zonen gør, at ingen del kan være over ca. 238 mm i begge retninger, og to 6×3-bakker "
             "kan ikke dele plade uden at den forreste rammer zonen.\n")
