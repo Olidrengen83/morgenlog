@@ -110,7 +110,7 @@ def main():
                 continue
             t0 = time.time()
             m = build_bin(b)
-            parts = split(b, m, args.max)
+            parts = split(b, m, b.max_units or args.max)
             for pname, pm, dims in parts:
                 info = export_stl(pm, os.path.join(args.out, f"{dname}__{pname}.stl"))
                 grams = info["volume_cm3"] * PLA_DENSITY

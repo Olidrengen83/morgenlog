@@ -124,6 +124,7 @@ class BinSpec:
     walls: Tuple[Tuple[float, float, float, float], ...] = ()  # fritstående vægge (x0,y0,x1,y1) indv.
     rails: Tuple[Tuple[float, float, float, float, float], ...] = ()  # (x0,x1,y0,y1,z_top) lister
     divider_slots: Tuple[Tuple[float, float, float], ...] = ()  # (y-skillevæg, x-centrum, bredde): lodret slids i skillevæg
+    max_units: Optional[int] = None   # egen grænse for segmentlængde (ellers generatorens --max)
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)

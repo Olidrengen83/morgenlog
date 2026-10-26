@@ -10,7 +10,7 @@ from gridfinity import PITCH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W = plan.DRAWER_UNITS[0] * PITCH; D = plan.DRAWER_UNITS[1] * PITCH
-C4, C3, SK, C2 = plan.C4, plan.C3, plan.SMAA_KOL, plan.C2
+C4, C3, C2, KL, C2K = plan.C4, plan.C3, plan.C2, plan.KORT_L, plan.C2K
 IN6, IN3 = plan.W_IN6, plan.W_IN3
 
 # Rum pr. bakke: (x0, y0, x1, y1 i mm indvendigt fra bagkant/venstre, tekst)
@@ -27,11 +27,13 @@ ROOMS = {
     ],
     "bestik-lang-a": [(0, 0, C2, IN6, "Spiseknive"), (C2 + 1.26, 0, IN3, IN6, "Gafler")],
     "bestik-lang-b": [(0, 0, C2, IN6, "Spiseskeer\n(også 21 cm)"), (C2 + 1.26, 0, IN3, IN6, "Lange\nteskeer")],
-    "bestik-kort": [
-        (0, 0, SK, IN6, "Måleskeer,\npizzahjul, te-si,\nsmåværktøj"),
-        (SK + 1.26, 0, IN6, C3, "Teskeer"),
-        (SK + 1.26, C3 + 1.26, IN6, 2 * C3 + 1.26, "Børnebestik"),
-        (SK + 1.26, 2 * C3 + 2.52, IN6, IN6, "Kagegafler"),
+    "bestik-kort-a": [
+        (0, 0, KL, C2K, "Teskeer"), (0, C2K + 1.26, KL, 2 * C2K + 1.26, "Kagegafler"),
+        (KL + 1.26, 0, IN6, 2 * C2K + 1.26, "Måleskeer"),
+    ],
+    "bestik-kort-b": [
+        (0, 0, KL, C2K, "Børnebestik"), (0, C2K + 1.26, KL, 2 * C2K + 1.26, "frit (dessertskeer)"),
+        (KL + 1.26, 0, IN6, 2 * C2K + 1.26, "Pizzahjul,\nte-si,\nsmåværktøj"),
     ],
     "pynt": [(0, 0, 165, 81, "Flag, parasoller, kagelys")],
     "frit-4x2": [(0, 0, 165, 81, "frit (reserve)")],

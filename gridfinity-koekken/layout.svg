@@ -55,12 +55,16 @@
 <path d="M 502.80999999999995 315.5 a 10 10 0 0 0 20 0" fill="#faf8f3" stroke="#3b3b3b" stroke-width="1"/>
 <text x="481.25" y="188.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-lang-b</text>
 <text x="481.25" y="201.25" font-size="9" text-anchor="middle" fill="#444">3×6×8u</text>
-<rect x="293.0" y="317.0" width="250.5" height="250.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="374.89" y1="319.0" x2="374.89" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
-<rect x="375.52" y="400.4133333333333" width="167.71999999999997" height="1.2600000000000051" fill="#3b3b3b"/>
-<rect x="375.52" y="483.8266666666666" width="167.71999999999997" height="1.2600000000000193" fill="#3b3b3b"/>
-<text x="418.25" y="440.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-kort</text>
-<text x="418.25" y="453.25" font-size="9" text-anchor="middle" fill="#444">6×6×8u</text>
+<rect x="293.0" y="317.0" width="250.5" height="124.5" rx="4" fill="#e9dcf5" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="459.89" y1="319.0" x2="459.89" y2="439.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="294.26" y="379.12" width="165.0" height="1.259999999999998" fill="#3b3b3b"/>
+<text x="418.25" y="377.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-kort-a</text>
+<text x="418.25" y="390.25" font-size="9" text-anchor="middle" fill="#444">6×3×8u</text>
+<rect x="293.0" y="443.0" width="250.5" height="124.5" rx="4" fill="#fff3b8" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="459.89" y1="445.0" x2="459.89" y2="565.5" stroke="#3b3b3b" stroke-width="1.2"/>
+<rect x="294.26" y="505.12" width="165.0" height="1.259999999999998" fill="#3b3b3b"/>
+<text x="418.25" y="503.25" font-size="11" text-anchor="middle" font-weight="bold">bestik-kort-b</text>
+<text x="418.25" y="516.25" font-size="9" text-anchor="middle" fill="#444">6×3×8u</text>
 <rect x="40.0" y="568.0" width="504.0" height="22.5" fill="#d9c7a0" stroke="#333" stroke-width="1"/>
 <text x="292.0" y="583.0" font-size="9" text-anchor="middle">kanal 22 × 503 mm (spisepinde · sugerør · grillspyd)</text>
 <text x="292.0" y="608.0" font-size="12" text-anchor="middle" fill="#444">▼ forkant (mod dig) ▼</text>

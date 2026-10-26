@@ -25,7 +25,9 @@ C4 = (W_IN6 - 3 * 1.26) / 4              # 61,3 mm (bruges ikke længere til bes
 W_IN3 = 3 * 42 - 0.5 - 2 * 1.26          # 122,98 mm indvendigt i en 3-bred bakke
 C2 = (W_IN3 - 1.26) / 2                  # 60,9 mm: to rum i en 3x6 (som testbakken)
 C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i den korte bakke
-SMAA_KOL = 80.0                          # kolonne til måleskeer og småværktøj i bestik-kort
+KORT_L = 165.0                           # længde på tværrummene til kort bestik
+W_IN3D = 3 * 42 - 0.5 - 2 * 1.26         # 122,98 mm indvendig dybde i en 6x3
+C2K = (W_IN3D - 1.26) / 2                # 60,86 mm: to tværrum i dybden
 
 BESTIK = [
     # Fordeling bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm.
@@ -36,7 +38,7 @@ BESTIK = [
             label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
     # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen.
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
-            divider_slots=((250.0, 9.0, 4.0),),
+            divider_slots=((250.0, 9.0, 4.0),), max_units=4,
             label="To rum i fuld højde 81 x 249: piskeris, ostehøvl, lange redskaber · hvidløgspresser, rivejern, proptrækker. Brødkniv 39 cm langs venstre væg gennem slids"),
     # bestik-lang som to 3x6-bakker: "-a" er identisk med testbakken (allerede printet).
     BinSpec("bestik-lang-a", 3, 6, H, pos=(6, 0),
@@ -47,11 +49,16 @@ BESTIK = [
             dividers_x=(C2 + 0.63,), front_notch=True, notch_radius=12,
             notch_xs=(1.26 + C2 / 2, 1.26 + C2 + 1.26 + C2 / 2),
             label="To rum 61 x 249: spiseskeer (også 21 cm), lange teskeer"),
-    BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
-            dividers_x=(SMAA_KOL + 0.63,),
-            walls=((SMAA_KOL + 1.26, C3, W_IN6, C3 + 1.26),
-                   (SMAA_KOL + 1.26, 2 * C3 + 1.26, W_IN6, 2 * C3 + 2.52)),
-            label="Tv.: måleskeer, pizzahjul, te-si, småværktøj (80 x 249) · th. tre tværrum 168 x 82: teskeer, børnebestik, kagegafler"),
+    # bestik-kort som to 6x3-bakker (P1S' udelukkelseszone forhindrer 251 x 251 mm dele).
+    # Hver: to tværrum 165 x 61 mm (kort bestik) + et rum 83 x 123 mm.
+    BinSpec("bestik-kort-a", 6, 3, H, pos=(6, 6),
+            dividers_x=(KORT_L + 0.63,),
+            walls=((0.0, C2K, KORT_L, C2K + 1.26),),
+            label="Bagerst: teskeer (165 x 61) · kagegafler (165 x 61) · måleskeer (83 x 123)"),
+    BinSpec("bestik-kort-b", 6, 3, H, pos=(6, 9),
+            dividers_x=(KORT_L + 0.63,),
+            walls=((0.0, C2K, KORT_L, C2K + 1.26),),
+            label="Forrest: børnebestik (165 x 61) · frit/dessertskeer (165 x 61) · pizzahjul, te-si, småværktøj (83 x 123)"),
 ]
 
 # Kanal på basepladens 22,5 mm-stribe forrest i skuffen. Ingen forvæg: skuffefronten er væggen,
