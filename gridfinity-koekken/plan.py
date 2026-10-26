@@ -21,7 +21,9 @@ DRAWER_UNITS = (12, 12)
 # Vægge og skillevægge 1,26 mm (3 linjer på P1S).
 H = 8
 W_IN6 = 6 * 42 - 0.5 - 2 * 1.26          # 248,98 mm indvendigt i en 6-bred bakke
-C4 = (W_IN6 - 3 * 1.26) / 4              # 61,3 mm: fire rum i forreste bakke
+C4 = (W_IN6 - 3 * 1.26) / 4              # 61,3 mm (bruges ikke længere til bestik-lang)
+W_IN3 = 3 * 42 - 0.5 - 2 * 1.26          # 122,98 mm indvendigt i en 3-bred bakke
+C2 = (W_IN3 - 1.26) / 2                  # 60,9 mm: to rum i en 3x6 (som testbakken)
 C3 = (W_IN6 - 2 * 1.26) / 3              # 82,15 mm: tre tværrum i den korte bakke
 SMAA_KOL = 80.0                          # kolonne til måleskeer og småværktøj i bestik-kort
 
@@ -36,11 +38,15 @@ BESTIK = [
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
             divider_slots=((250.0, 9.0, 4.0),),
             label="To rum i fuld højde 81 x 249: piskeris, ostehøvl, lange redskaber · hvidløgspresser, rivejern, proptrækker. Brødkniv 39 cm langs venstre væg gennem slids"),
-    BinSpec("bestik-lang", 6, 6, H, pos=(6, 0),
-            dividers_x=(C4 + 0.63, 2 * C4 + 1.89, 3 * C4 + 3.15),
-            front_notch=True, notch_radius=12,
-            notch_xs=tuple(1.26 + C4 / 2 + i * (C4 + 1.26) for i in range(4)),
-            label="Fire rum 61 x 249: spiseknive, gafler, spiseskeer (også 21 cm), lange teskeer"),
+    # bestik-lang som to 3x6-bakker: "-a" er identisk med testbakken (allerede printet).
+    BinSpec("bestik-lang-a", 3, 6, H, pos=(6, 0),
+            dividers_x=(C2 + 0.63,), front_notch=True, notch_radius=12,
+            notch_xs=(1.26 + C2 / 2, 1.26 + C2 + 1.26 + C2 / 2),
+            label="To rum 61 x 249: spiseknive, gafler (= testbakken)"),
+    BinSpec("bestik-lang-b", 3, 6, H, pos=(9, 0),
+            dividers_x=(C2 + 0.63,), front_notch=True, notch_radius=12,
+            notch_xs=(1.26 + C2 / 2, 1.26 + C2 + 1.26 + C2 / 2),
+            label="To rum 61 x 249: spiseskeer (også 21 cm), lange teskeer"),
     BinSpec("bestik-kort", 6, 6, H, pos=(6, 6),
             dividers_x=(SMAA_KOL + 0.63,),
             walls=((SMAA_KOL + 1.26, C3, W_IN6, C3 + 1.26),

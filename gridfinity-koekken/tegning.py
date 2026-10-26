@@ -10,8 +10,8 @@ from gridfinity import PITCH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W = plan.DRAWER_UNITS[0] * PITCH; D = plan.DRAWER_UNITS[1] * PITCH
-C4, C3, SK = plan.C4, plan.C3, plan.SMAA_KOL
-IN6 = plan.W_IN6
+C4, C3, SK, C2 = plan.C4, plan.C3, plan.SMAA_KOL, plan.C2
+IN6, IN3 = plan.W_IN6, plan.W_IN3
 
 # Rum pr. bakke: (x0, y0, x1, y1 i mm indvendigt fra bagkant/venstre, tekst)
 ROOMS = {
@@ -25,12 +25,8 @@ ROOMS = {
         (0, 0, 81, 250, "Piskeris, ostehøvl,\nlange redskaber\n\nBrødkniv 39 cm\nlangs venstre væg"),
         (0, 250, 81, 500, "Hvidløgspresser,\nrivejern, dåseåbner,\nproptrækker"),
     ],
-    "bestik-lang": [
-        (0, 0, C4, IN6, "Spiseknive"),
-        (C4 + 1.26, 0, 2 * C4 + 1.26, IN6, "Gafler"),
-        (2 * C4 + 2.52, 0, 3 * C4 + 2.52, IN6, "Spiseskeer\n(også 21 cm)"),
-        (3 * C4 + 3.78, 0, IN6, IN6, "Lange\nteskeer"),
-    ],
+    "bestik-lang-a": [(0, 0, C2, IN6, "Spiseknive"), (C2 + 1.26, 0, IN3, IN6, "Gafler")],
+    "bestik-lang-b": [(0, 0, C2, IN6, "Spiseskeer\n(også 21 cm)"), (C2 + 1.26, 0, IN3, IN6, "Lange\nteskeer")],
     "bestik-kort": [
         (0, 0, SK, IN6, "Måleskeer,\npizzahjul, te-si,\nsmåværktøj"),
         (SK + 1.26, 0, IN6, C3, "Teskeer"),
