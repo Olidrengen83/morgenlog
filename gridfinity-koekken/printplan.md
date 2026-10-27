@@ -9,8 +9,9 @@ Bambu P1S. Delene er placeret uden om udelukkelseszonen forrest til venstre, så
 | `stl/print/skuffe1-plade-3.3mf` | bestik-kort-a, redskaber-c | 336 cm³ |
 | `stl/print/skuffe1-plade-4.3mf` | bestik-kort-b | 228 cm³ |
 | `stl/print/skuffe1-plade-5.3mf` | bestik-lang-b, kanal-a, kanal-b | 330 cm³ |
+| `stl/print/kanaler.3mf` | kanal-a, kanal-b | 105 cm³ |
 
-`stl/print/skuffe1-bestik-alle-dele.3mf` har alle 11 dele i én fil inkl. bestik-lang-a, hvis du hellere vil arrangere selv.
+`stl/print/skuffe1-bestik-alle-dele.3mf` har alle 13 dele i én fil inkl. bestik-lang-a, hvis du hellere vil arrangere selv.
 
 **Udeladt:** bestik-lang-a (identisk med testbakken, allerede printet); redskaber-a og -b er printet; kun endestykket c (med bane til steakknivene) er på plade 2.
 

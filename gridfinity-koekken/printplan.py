@@ -26,6 +26,8 @@ PLADER = {
     "skuffe1-plade-4": [part("skuffe1-bestik__bestik-kort-b", 2, 129)],
     # kanalerne printes liggende paa bagvaeggen (drejet 90 grader om y), saa taendernes profil og bolthullet bliver paene
     "skuffe1-plade-5": [part("skuffe1-bestik__bestik-lang-b", 128.5, 2), part("indsats__kanal-a", 18.5, 2, roty=90), part("indsats__kanal-b", 73.5, 2, roty=90)],
+    # kun kanalerne (begge skuffer bruger samme sæt): print denne plade én gang pr. skuffe
+    "kanaler": [part("indsats__kanal-a", 40, 2, roty=90), part("indsats__kanal-b", 130, 2, roty=90)],
 }
 UDELADT = "bestik-lang-a (identisk med testbakken, allerede printet); redskaber-a og -b er printet; kun endestykket c (med bane til steakknivene) er på plade 2"
 
