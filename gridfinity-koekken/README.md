@@ -56,23 +56,24 @@ Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. P
 
 ## Skuffe 1 – bestik
 
-Fire bakker. Bagkanten er øverst på tegningen; forkanten (mod dig) nederst. De to 6×6-bakker har samme
+Fire bakker. Tegningerne viser skuffen oppefra med forkanten (mod dig) nederst, så venstre og højre er som du ser det. De to 6×6-bakker har samme
 fodaftryk og kan byttes om når som helst, uden nyt print. Prioriteten er udnyttelse, ikke udseende:
 alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for to bakkevægge, er det.
 
 * **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
   * Bagerst: tre ribber med 6 lodrette slidser i 25 mm deling til de lange knive, spidserne mod bagvæggen.
-    Fra venstre: 33, 31, 31, 25, 22, 22 cm. Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden.
+    Set forfra, fra venstre: 33, 31, 31, 25, 22, 22 cm. Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden.
   * Under håndtagene ligger bølgeformede hvileribber med rund overkant (radius 3 mm, ingen kanter): én ved 222 mm
     i hele bredden og én ved 300 mm under de tre lange knive. Bølgedalene ligger ud for hver kolonne, 6 mm over
     bunden, så håndtaget hviler i en dal og kniven ligger plant med let tryk ned i slidserne.
   * Håndtagene starter lige foran ribbe 3 (194–200 mm) og slutter ved 307 mm (22 cm) til 330 mm (33 cm).
   * Forrest til højre, bag 22 cm-håndtagene: et **værktøjsrum på 77 × 188 mm** (hvidløgspresser, dåseåbner, proptrækker).
-  * Forrest til venstre, foran de tre lange knives håndtag: to småtingsrum på 84 × 80 mm. Bamix-skærene i det ene,
+  * Forrest til venstre, foran de tre lange knives håndtag: to småtingsrum på 84 × 80 mm. (Knivbakken er spejlvendt i
+    `plan.py` med `mirror_x=True`, så det passer set forfra.) Bamix-skærene i det ene,
     det andet frit. Ret `KnifeTray(...)` i `plan.py`.
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i tre stykker, skillevæg ved 250 mm. Bagerst 81 × 249 mm:
   piskeris, ostehøvl, rivejern og lange redskaber. Forrest: **de fem steakknive (22 cm) og to urteknive løst i en bane på 56 × 249 mm**, indrammet af en
-  langsgående væg i det forreste endestykke. **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen
+  langsgående væg i det forreste endestykke. **Brødkniven på 39 cm** ligger på højkant langs højre væg (set forfra) med spidsen
   mod bagvæggen, går gennem en 4 mm slids i skillevæggen, og håndtaget ligger i banen på 23 mm mellem væggen og
   steakknivenes bane.
 * **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer (også dem på

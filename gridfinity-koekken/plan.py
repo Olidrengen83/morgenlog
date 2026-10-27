@@ -33,7 +33,9 @@ BESTIK = [
     # Bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm i lodrette slidser.
     # Håndtagene starter lige foran ribbe 3 (194–200 mm) og ender ved 307 (22 cm) til 330 (33 cm).
     # Forrest th. (bag 22 cm-håndtagene): værktøjsrum 77 x 188 mm. Forrest tv.: to småtingsrum 84 x 80 mm.
+    # mirror_x: set forfra ligger de store knive og småtingsrummene til venstre, værktøjsrummet til højre.
     BinSpec("knivbakke", 4, 12, H, pos=(0, 0), knife=KnifeTray(box_y0=310.0, field_y0=334.0, field_dividers=(417.0,)),
+            mirror_x=True,
             label="6 lange knive i slidser bagerst · værktøjsrum 77 x 188 forrest th. (hvidløgspresser, dåseåbner, proptrækker) · to småtingsrum 84 x 80 forrest tv. (Bamix-skær, frit)"),
     # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen ved 250 mm (som printet).
     # Forreste rum (81 x 249) indrammer steak- og urteknivene; bagerste rum (81 x 249) til lange redskaber.

@@ -16,13 +16,13 @@ IN6, IN3 = plan.W_IN6, plan.W_IN3
 # Rum pr. bakke: (x0, y0, x1, y1 i mm indvendigt fra bagkant/venstre, tekst)
 ROOMS = {
     "knivbakke": [
-        (0, 0, 165, 300, "KNIVE, LANGE\nfra venstre: 33 · 31 · 31 · 25 · 22 · 22 cm\nspidser mod bagvæg, lodrette slidser,\nhåndtag 194–330 mm, hvileribbe ved 212 (limes)"),
+        (0, 0, 165, 300, "KNIVE, LANGE\nset forfra, fra venstre: 33 · 31 · 31 · 25 · 22 · 22 cm\nspidser mod bagvæg, lodrette slidser,\nhåndtag 194–330 mm, hvileribbe ved 212 (limes)"),
         (87, 310, 165, 500, "VÆRKTØJ\nhvidløgspresser,\ndåseåbner,\nproptrækker"),
         (0, 334, 84, 417, "Bamix-skær"),
         (0, 417, 84, 500, "frit"),
     ],
     "redskaber": [
-        (0, 0, 81, 250, "Piskeris, ostehøvl,\nrivejern, lange\nredskaber\n\nBrødkniv 39 cm\nlangs venstre væg"),
+        (0, 0, 81, 250, "Piskeris, ostehøvl,\nrivejern, lange\nredskaber\n\nBrødkniv 39 cm\nlangs højre væg"),
         (0, 250, 23, 500, "brød-\nkniv"), (25, 250, 81, 500, "STEAKKNIVE\n5 × 22 cm\n+ 2 urteknive,\nløst"),
     ],
     "bestik-lang-a": [(0, 0, C2, IN6, "Spiseknive"), (C2 + 1.26, 0, IN3, IN6, "Gafler")],
@@ -60,6 +60,8 @@ for ax, (dname, bins) in zip(axes, plan.DRAWERS.items()):
         ax.add_patch(mp.FancyBboxPatch((x, ytop - b.L), b.W, b.L, boxstyle="round,pad=0,rounding_size=4",
                                        fc=FILL[bi % len(FILL)], ec="#333", lw=1.4))
         for (x0, y0, x1, y1, txt) in ROOMS.get(b.name, []):
+            if not b.mirror_x:   # set oppefra: spejl lokale x (en spejlet bakke er allerede "rigtig")
+                x0, x1 = b.W - 2 * b.wall - x1, b.W - 2 * b.wall - x0
             rx, ry = x + b.wall + x0, ytop - b.wall - y1
             rw, rh = x1 - x0, y1 - y0
             ax.add_patch(mp.Rectangle((rx, ry), rw, rh, fc="none", ec="#333", lw=0.9, ls="--"))
@@ -70,7 +72,7 @@ for ax, (dname, bins) in zip(axes, plan.DRAWERS.items()):
     ax.text(W / 2, -11, KANAL[dname], ha="center", va="center", fontsize=9, fontweight="bold")
     ax.text(W / 2, D + 8, "▲ bagkant", ha="center", fontsize=10, color="#444")
     ax.text(W / 2, -36, "▼ forkant (mod dig) ▼", ha="center", fontsize=11, color="#444")
-    ax.set_title(dname, fontsize=14)
+    ax.set_title(dname + "  (set oppefra, forfra)", fontsize=14)
     ax.set_xlim(-8, W + 8); ax.set_ylim(-48, D + 20); ax.set_aspect("equal"); ax.set_axis_off()
 plt.tight_layout(); fig.subplots_adjust(top=0.95)
 out = os.path.join(HERE, "preview", "plan-med-navne.png")

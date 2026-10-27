@@ -126,6 +126,7 @@ class BinSpec:
     rails: Tuple[Tuple[float, float, float, float, float], ...] = ()  # (x0,x1,y0,y1,z_top) lister
     divider_slots: Tuple[Tuple[float, float, float], ...] = ()  # (y-skillevæg, x-centrum, bredde): lodret slids i skillevæg
     max_units: Optional[int] = None   # egen grænse for segmentlængde (ellers generatorens --max)
+    mirror_x: bool = False            # spejlvend hele bakken om dens midterplan (x)
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)
@@ -200,6 +201,8 @@ def build_bin(spec: BinSpec) -> Manifold:
         xs = list(spec.notch_xs) or [W / 2 if spec.notch_x is None else spec.notch_x]
         for nx in xs:
             m = m - cyl.translate((nx, L - wall - 2, H))
+    if spec.mirror_x:
+        m = m.mirror((1, 0, 0)).translate((W, 0, 0))
     return m
 
 

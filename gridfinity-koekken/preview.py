@@ -69,26 +69,30 @@ def render_layout(fname):
             x, y = b.pos[0] * PITCH + 0.25, D - (b.pos[1] * PITCH + 0.25) - b.L
             ax.add_patch(mpatches.FancyBboxPatch((x, y), b.W, b.L, boxstyle="round,pad=0,rounding_size=4",
                                                  fc=COLORS[bi % len(COLORS)], ec="#333", lw=1.2))
+            iwb = b.W - 2 * b.wall
             for dx in b.dividers_x:
-                ax.plot([x + b.wall + dx] * 2, [y + 2, y + b.L - 2], color="#333", lw=1.5)
+                ax.plot([x + b.wall + iwb - dx] * 2, [y + 2, y + b.L - 2], color="#333", lw=1.5)
             for dy in b.dividers_y:
                 ax.plot([x + 2, x + b.W - 2], [y + b.L - b.wall - dy] * 2, color="#333", lw=1.5)
             for (wx0, wy0, wx1, wy1) in b.walls:
-                ax.add_patch(mpatches.Rectangle((x + b.wall + wx0, y + b.L - b.wall - wy1), wx1 - wx0, wy1 - wy0, fc="#333", ec="none"))
+                ax.add_patch(mpatches.Rectangle((x + b.wall + iwb - wx1, y + b.L - b.wall - wy1), wx1 - wx0, wy1 - wy0, fc="#333", ec="none"))
             for (rx0, rx1, ry0, ry1, _z) in b.rails:
-                ax.add_patch(mpatches.Rectangle((x + b.wall + rx0, y + b.L - b.wall - ry1), rx1 - rx0, ry1 - ry0, fc="none", ec="#333", lw=1, ls=":"))
+                ax.add_patch(mpatches.Rectangle((x + b.wall + iwb - rx1, y + b.L - b.wall - ry1), rx1 - rx0, ry1 - ry0, fc="none", ec="#333", lw=1, ls=":"))
             if b.knife is not None:
-                k = b.knife; iw = b.W - 2 * b.wall
+                k = b.knife; iw = iwb
+                sgn = -1 if b.mirror_x else 1   # spejlet bakke + spejlet visning = som lokalt
+                def X(lx):  # lokal x -> tegning (set oppefra)
+                    return x + b.wall + (lx if b.mirror_x else iw - lx)
                 for ry in k.back_ribs:
                     ax.plot([x + b.wall, x + b.wall + iw], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
-                fx = x + b.wall + k.front_x_from
+                fx = X(k.front_x_from)
                 ax.plot([fx, fx], [y, y + b.L - b.wall - min(k.box_y0, k.field_y0)], color="#333", lw=2)
-                ax.plot([fx, x + b.W], [y + b.L - b.wall - k.box_y0] * 2, color="#333", lw=2)
+                ax.plot([fx, X(iw)], [y + b.L - b.wall - k.box_y0] * 2, color="#333", lw=2)
                 for fd in (k.field_y0,) + tuple(k.field_dividers):
-                    ax.plot([x, fx], [y + b.L - b.wall - fd] * 2, color="#333", lw=2)
+                    ax.plot([X(0), fx], [y + b.L - b.wall - fd] * 2, color="#333", lw=2)
             if b.front_notch:
                 for nx in (list(b.notch_xs) or [b.W / 2]):
-                    ax.add_patch(mpatches.Wedge((x + nx, y), 10, 0, 180, fc="#faf8f3", ec="#333", lw=1))
+                    ax.add_patch(mpatches.Wedge((x + b.W - nx, y), 10, 0, 180, fc="#faf8f3", ec="#333", lw=1))
             fs = 10 if min(b.W, b.L) > 100 else 8
             ax.text(x + b.W / 2, y + b.L / 2 + 6, b.name, ha="center", va="center", fontsize=fs, fontweight="bold")
             ax.text(x + b.W / 2, y + b.L / 2 - 8, f"{b.units_x}×{b.units_y}×{b.units_z}u", ha="center", va="center", fontsize=fs - 2, color="#333")
@@ -96,7 +100,7 @@ def render_layout(fname):
         ax.add_patch(mpatches.Rectangle((0, -22.5), W, 22.5, fc="#d9c7a0", ec="#333", lw=1.2))
         ax.text(W / 2, -11, "kanal 22 × 503 mm: spisepinde · sugerør · grillspyd (åben mod skuffefronten)", ha="center", va="center", fontsize=8)
         ax.set_xlim(-10, W + 10); ax.set_ylim(-55, D + 10); ax.set_aspect("equal"); ax.set_axis_off()
-        ax.set_title(f"{dname}  ·  {plan.DRAWER_UNITS[0]}×{plan.DRAWER_UNITS[1]} enheder (bagkant øverst)", fontsize=13)
+        ax.set_title(f"{dname}  ·  {plan.DRAWER_UNITS[0]}×{plan.DRAWER_UNITS[1]} enheder (set oppefra, bagkant øverst)", fontsize=13)
         ax.text(W / 2, -42, "▼ forkant (mod dig) ▼", ha="center", fontsize=11, color="#444")
     plt.tight_layout(); fig.subplots_adjust(top=0.94)
     plt.savefig(os.path.join(OUT, fname), dpi=100); plt.close(fig)
