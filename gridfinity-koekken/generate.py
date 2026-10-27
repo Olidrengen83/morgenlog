@@ -72,10 +72,9 @@ def layout_svg(drawers, drawer_units, path):
                 iw = b.W - 2 * b.wall
                 for ry in k.back_ribs:
                     out.append(f'<line x1="{x + b.wall * s}" y1="{y + (b.wall + ry) * s}" x2="{x + (b.wall + iw) * s}" y2="{y + (b.wall + ry) * s}" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>')
-                for ry in k.front_ribs:
-                    out.append(f'<line x1="{x + (b.wall + k.front_x_from) * s}" y1="{y + (b.wall + ry) * s}" x2="{x + (b.wall + iw) * s}" y2="{y + (b.wall + ry) * s}" stroke="#3b3b3b" stroke-width="2" stroke-dasharray="4 3"/>')
-                fy = y + (b.wall + k.field_y0) * s
+                fy = y + (b.wall + min(k.box_y0, k.field_y0)) * s
                 out.append(f'<line x1="{x + (b.wall + k.front_x_from) * s}" y1="{fy}" x2="{x + (b.wall + k.front_x_from) * s}" y2="{y + h - 2}" stroke="#3b3b3b" stroke-width="2"/>')
+                out.append(f'<line x1="{x + (b.wall + k.front_x_from) * s}" y1="{y + (b.wall + k.box_y0) * s}" x2="{x + w - 2}" y2="{y + (b.wall + k.box_y0) * s}" stroke="#3b3b3b" stroke-width="2"/>')
                 for fd in (k.field_y0,) + tuple(k.field_dividers):
                     out.append(f'<line x1="{x + 2}" y1="{y + (b.wall + fd) * s}" x2="{x + (b.wall + k.front_x_from) * s}" y2="{y + (b.wall + fd) * s}" stroke="#3b3b3b" stroke-width="2"/>')
             if b.front_notch:

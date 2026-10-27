@@ -81,10 +81,9 @@ def render_layout(fname):
                 k = b.knife; iw = b.W - 2 * b.wall
                 for ry in k.back_ribs:
                     ax.plot([x + b.wall, x + b.wall + iw], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
-                for ry in k.front_ribs:
-                    ax.plot([x + b.wall + k.front_x_from, x + b.wall + iw], [y + b.L - b.wall - ry] * 2, color="#333", lw=2, ls="--")
                 fx = x + b.wall + k.front_x_from
-                ax.plot([fx, fx], [y, y + b.L - b.wall - k.field_y0], color="#333", lw=2)
+                ax.plot([fx, fx], [y, y + b.L - b.wall - min(k.box_y0, k.field_y0)], color="#333", lw=2)
+                ax.plot([fx, x + b.W], [y + b.L - b.wall - k.box_y0] * 2, color="#333", lw=2)
                 for fd in (k.field_y0,) + tuple(k.field_dividers):
                     ax.plot([x, fx], [y + b.L - b.wall - fd] * 2, color="#333", lw=2)
             if b.front_notch:

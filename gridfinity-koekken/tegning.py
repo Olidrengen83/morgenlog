@@ -16,10 +16,10 @@ IN6, IN3 = plan.W_IN6, plan.W_IN3
 # Rum pr. bakke: (x0, y0, x1, y1 i mm indvendigt fra bagkant/venstre, tekst)
 ROOMS = {
     "knivbakke": [
-        (0, 0, 165, 335, "KNIVE, LANGE\nfra venstre: 33 · 31 · 31 · 25 · 22 · 22 cm\nspidser mod bagvæg, 6 lodrette slidser"),
-        (62, 290, 165, 500, "KNIVE, KORTE\n18 · 18 · 21 · 21 · 21 · 21 · 21 cm\n(urteknivene foran de to 31 cm)"),
-        (0, 338, 59, 419, "Bamix-skær"),
-        (0, 419, 59, 500, "frit\n(knivsliber,\nproptrækker)"),
+        (0, 0, 165, 280, "KNIVE, LANGE\nfra venstre: 33 · 31 · 31 · 25 · 22 · 22 cm\nspidser mod bagvæg, lodrette slidser,\nbølgede hvileribber under håndtagene"),
+        (87, 285, 165, 500, "KNIVRUM\n5 steakknive +\n2 urteknive,\nløst"),
+        (0, 338, 84, 419, "Bamix-skær"),
+        (0, 419, 84, 500, "frit\n(knivsliber,\nproptrækker)"),
     ],
     "redskaber": [
         (0, 0, 81, 250, "Piskeris, ostehøvl,\nlange redskaber\n\nBrødkniv 39 cm\nlangs venstre væg"),

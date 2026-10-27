@@ -5,7 +5,7 @@ Bambu P1S. Delene er placeret uden om udelukkelseszonen forrest til venstre, så
 | Plade | Dele | Volumen (massivt) |
 |---|---|---|
 | `stl/print/skuffe1-plade-1.3mf` | knivbakke-a, redskaber-a | 434 cm³ |
-| `stl/print/skuffe1-plade-2.3mf` | knivbakke-b, redskaber-b | 443 cm³ |
+| `stl/print/skuffe1-plade-2.3mf` | knivbakke-b, redskaber-b | 434 cm³ |
 | `stl/print/skuffe1-plade-3.3mf` | bestik-kort-a, redskaber-c | 326 cm³ |
 | `stl/print/skuffe1-plade-4.3mf` | bestik-kort-b | 228 cm³ |
 | `stl/print/skuffe1-plade-5.3mf` | bestik-lang-b, kanal-a, kanal-b | 330 cm³ |

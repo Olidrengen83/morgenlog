@@ -43,10 +43,11 @@ Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. P
 
 | Ting | Mål | Plads |
 |---|---|---|
-| Køkkenknive | 33 · 31 · 31 · 25 · 22 · 22 cm (lange) og 5 × 21 + 2 × 18 cm (korte) | knivbakke 4×12, 500 mm indvendigt |
+| Køkkenknive, lange | 33 · 31 · 31 · 25 · 22 · 22 cm | slidser bagerst i knivbakken |
+| Køkkenknive, korte | 5 × 21 cm og 2 × 18 cm | løst i knivrum 77 × 213 mm forrest |
 | Brødkniv | 39 cm | langs væggen i redskabsbakken, gennem slids i skillevæggen |
 | Santoku-klinge, ryg til æg | 45 mm | lodret slids, bund 7 mm over skuffebunden |
-| Bamix-skær | ø36 mm, 4 stk. | småtingsrum 59 × 80 mm forrest i knivbakken |
+| Bamix-skær | ø36 mm, 4 stk. | småtingsrum 84 × 80 mm forrest i knivbakken |
 | Store skeer | 21 cm | sammen med spiseskeerne, rum 61 × 249 mm (testprintet) |
 | Spisepinde | ca. 24 cm | kanalen forrest, 22 × 503 mm |
 | Lange teskeer | ca. 24 cm | rum 61 × 249 mm |
@@ -61,17 +62,14 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 
 * **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
   * Bagerst: tre ribber med 6 lodrette slidser i 25 mm deling til de lange knive, spidserne mod bagvæggen.
-    Fra venstre: 33, 31, 31, 25, 22, 22 cm.
-  * Forrest: to ribber (330 og 385 mm fra bagvæggen, begge inden for de korte knives klinger) med 7 slidser i 15 mm
-    deling, skubbet mod højre. Fra venstre: 18, 18, 21, 21, 21, 21, 21 cm.
-    Fordelingen er ikke tilfældig: de to urteknive ligger foran de to 31 cm-knive (31 + 18 = 49 cm i en 50 cm kolonne),
-    og steakknivene ligger foran 25/22/22, som slutter senest 25 cm inde. Byttes der rundt, støder spidser og håndtag sammen.
-  * Forrest til venstre, foran de lange knives håndtag: to småtingsrum på 59 × 80 mm. Bamix-skærene i det ene,
-    det andet frit.
-  * Under håndtagene ligger bølgeformede hvileribber med rund overkant (radius 3 mm, ingen kanter): to bagerst
-    (222 og 300 mm) og én forrest (470 mm). Bølgedalene ligger ud for hver kolonne, 6 mm over bunden, så håndtaget
-    hviler i en dal og kniven ligger plant med let tryk ned i slidserne.
-  * Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden. Ret `KnifeTray(...)` i `plan.py`.
+    Fra venstre: 33, 31, 31, 25, 22, 22 cm. Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden.
+  * Under håndtagene ligger bølgeformede hvileribber med rund overkant (radius 3 mm, ingen kanter): én ved 222 mm
+    i hele bredden og én ved 300 mm under de tre lange knive. Bølgedalene ligger ud for hver kolonne, 6 mm over
+    bunden, så håndtaget hviler i en dal og kniven ligger plant med let tryk ned i slidserne.
+  * Forrest til højre: ét åbent **knivrum på 77 × 213 mm** til de fem steakknive og to urteknive, der bare lægges i.
+    Det ligger bag ved 25/22/22 cm-knivene, som slutter senest 265 mm inde.
+  * Forrest til venstre, foran de tre lange knives håndtag: to småtingsrum på 84 × 80 mm. Bamix-skærene i det ene,
+    det andet frit. Ret `KnifeTray(...)` i `plan.py`.
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, to rum i fuld højde på 249 mm:
   piskeris, ostehøvl og lange redskaber i det ene, hvidløgspresser, rivejern og proptrækker i det andet.
   **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod bagvæggen og går gennem en 4 mm

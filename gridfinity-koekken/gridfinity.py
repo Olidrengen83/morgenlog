@@ -81,34 +81,29 @@ def _cell() -> Manifold:
 
 @dataclass
 class KnifeTray:
-    """Knivbakke med to rækker lodrette slidser. Spidser mod y=0 (bagenden).
+    """Knivbakke. Spidser mod y=0 (bagenden).
 
-    Bagerste række: lange knive, spids mod bagvæggen, holdt af `back_ribs`.
-    Forreste række: korte knive, spids bagud, holdt af `front_ribs` (kun fra
-    `front_x_from` og ud til højre væg). Til venstre for den forreste række er
-    der et frit felt (x < front_x_from, y > field_y0), delt af tværvægge ved
-    `field_dividers`. Alle x/y er indvendige mål fra venstre/bageste væg.
+    Bagerst: lange knive i lodrette slidser i `back_ribs`, kolonner ved back_x0 + n*back_pitch.
+    Forrest til højre (x >= front_x_from, y >= box_y0): ét åbent rum til korte knive, der bare lægges i.
+    Forrest til venstre (x < front_x_from, y >= field_y0): småtingsrum, delt ved `field_dividers`.
+    Under håndtagene bagerst ligger bølgeformede hvileribber (`back_cradles`: (y, x0, x1), x1=None = til væg).
+    Alle x/y er indvendige mål fra venstre/bageste væg.
     """
     back_slots: int = 6
     back_pitch: float = 25.0
     back_x0: float = 20.0
     back_ribs: Tuple[float, ...] = (45.0, 120.0, 195.0)
-    front_slots: int = 7
-    front_pitch: float = 15.0
-    front_x0: float = 70.0
-    front_ribs: Tuple[float, ...] = (330.0, 385.0)   # begge inden for steak- og urteknivenes klinger
-    front_x_from: float = 62.0
-    field_y0: float = 338.0
+    front_x_from: float = 87.0       # skillevæg mellem småtingsrum (tv.) og knivrum (th.)
+    box_y0: float = 285.0            # knivrummets bagvæg (de bageste knive th. slutter senest 265)
+    field_y0: float = 338.0          # småtingsrum starter her (33 cm-kniven slutter ved 330)
     field_dividers: Tuple[float, ...] = (419.0,)
     slot_width: float = 4.0
-    slot_bottom: float = 1.0        # slidsbund over gulvet
+    slot_bottom: float = 1.0
     rib_thickness: float = 3.0
-    # Bølgeformede hvileribber under håndtagene (rund overkant, dal ud for hver kolonne)
-    back_cradles: Tuple[float, ...] = (222.0, 300.0)
-    front_cradles: Tuple[float, ...] = (470.0,)
-    cradle_trough: float = 6.0      # dalens bund over gulvet
-    cradle_amp: float = 4.0         # bølgehøjde (top = dal + 2*amp)
-    cradle_r: float = 3.0           # radius på den runde overkant
+    back_cradles: Tuple[Tuple[float, float, Optional[float]], ...] = ((222.0, 0.0, None), (300.0, 0.0, 84.0))
+    cradle_trough: float = 6.0
+    cradle_amp: float = 4.0
+    cradle_r: float = 3.0
 
 
 @dataclass
@@ -213,39 +208,37 @@ def _knife_features(spec: BinSpec) -> Manifold:
     W, L, H = spec.W, spec.L, spec.H
     wall, fz = spec.wall, spec.floor_top
     iw, il = W - 2 * wall, L - 2 * wall
+    t = k.rib_thickness
     parts = []
 
     def rib_with_slots(x_from, x_to, y, xs):
-        rib = Manifold.cube((x_to - x_from + 0.4, k.rib_thickness, H - fz + 0.5)).translate(
-            (wall + x_from - 0.2, wall + y, fz - 0.5))
+        rib = Manifold.cube((x_to - x_from + 0.4, t, H - fz + 0.5)).translate((wall + x_from - 0.2, wall + y, fz - 0.5))
         zb = fz + k.slot_bottom + k.slot_width / 2
         for xs_ in xs:
-            cutter = Manifold.cube((k.slot_width, k.rib_thickness + 2, H)).translate(
-                (wall + xs_ - k.slot_width / 2, wall + y - 1, zb))
-            rnd = (Manifold.cylinder(k.rib_thickness + 2, k.slot_width / 2, k.slot_width / 2, 16)
+            cutter = Manifold.cube((k.slot_width, t + 2, H)).translate((wall + xs_ - k.slot_width / 2, wall + y - 1, zb))
+            rnd = (Manifold.cylinder(t + 2, k.slot_width / 2, k.slot_width / 2, 16)
                    .rotate((-90, 0, 0)).translate((wall + xs_, wall + y - 1, zb)))
             rib = rib - cutter - rnd
         return rib
 
     back_xs = [k.back_x0 + i * k.back_pitch for i in range(k.back_slots)]
-    front_xs = [k.front_x0 + i * k.front_pitch for i in range(k.front_slots)]
-    if back_xs[-1] + 6 > iw or front_xs[-1] + 6 > iw or front_xs[0] - k.slot_width < k.front_x_from:
+    if back_xs[-1] + 6 > iw:
         raise ValueError(f"{spec.name}: slidserne passer ikke i {iw:.0f} mm indvendig bredde")
     for y in k.back_ribs:
         parts.append(rib_with_slots(0, iw, y, back_xs))
-    for y in k.front_ribs:
-        parts.append(rib_with_slots(k.front_x_from, iw, y, front_xs))
     # Hvileribber med bølget, rund overkant
-    for y in k.back_cradles:
-        parts.append(_wave_bar(0.0, iw, y, back_xs[0], k.back_pitch, k.cradle_amp, fz + k.cradle_trough, k.cradle_r, fz)
-                     .translate((wall, wall, 0)))
-    for y in k.front_cradles:
-        parts.append(_wave_bar(k.front_x_from, iw, y, front_xs[0], k.front_pitch, k.cradle_amp, fz + k.cradle_trough, k.cradle_r, fz)
-                     .translate((wall, wall, 0)))
-    # Det frie felt: langsgående væg + tværvægge
-    t = k.rib_thickness
-    parts.append(Manifold.cube((t, il - k.field_y0 + t + 0.2, H - fz + 0.5)).translate(
-        (wall + k.front_x_from - t, wall + k.field_y0 - t, fz - 0.5)))
+    for (y, x0, x1) in k.back_cradles:
+        x1 = iw if x1 is None else x1
+        parts.append(_wave_bar(x0, x1, y, back_xs[0], k.back_pitch, k.cradle_amp,
+                               fz + k.cradle_trough, k.cradle_r, fz).translate((wall, wall, 0)))
+    # Langsgående skillevæg fra knivrummets bagvæg til forvæggen
+    y_start = min(k.box_y0, k.field_y0)
+    parts.append(Manifold.cube((t, il - y_start + t + 0.2, H - fz + 0.5)).translate(
+        (wall + k.front_x_from - t, wall + y_start - t, fz - 0.5)))
+    # Knivrummets bagvæg (th.)
+    parts.append(Manifold.cube((iw - k.front_x_from + t + 0.2, t, H - fz + 0.5)).translate(
+        (wall + k.front_x_from - t, wall + k.box_y0 - t, fz - 0.5)))
+    # Småtingsrummenes tværvægge (tv.)
     for y in (k.field_y0,) + tuple(k.field_dividers):
         parts.append(Manifold.cube((k.front_x_from + 0.4, t, H - fz + 0.5)).translate(
             (wall - 0.2, wall + y - t, fz - 0.5)))

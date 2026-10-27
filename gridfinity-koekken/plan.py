@@ -30,12 +30,11 @@ W_IN3D = 3 * 42 - 0.5 - 2 * 1.26         # 122,98 mm indvendig dybde i en 6x3
 C2K = (W_IN3D - 1.26) / 2                # 60,86 mm: to tværrum i dybden
 
 BESTIK = [
-    # Fordeling bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm.
-    # Forrest (x = 68, 83, 98 … 158): 18 · 18 · 21 · 21 · 21 · 21 · 21 cm.
-    # De to 18 cm ligger foran de to 31 cm (31 + 18 = 49 cm), steakknivene foran 25/22/22.
-    BinSpec("knivbakke", 4, 12, H, pos=(0, 0),
-            knife=KnifeTray(front_x0=68.0),
-            label="13 knive i to rækker (6 lange bagerst, 7 korte forrest) + to småtingsrum 59 x 80 mm forrest tv. (Bamix-skær m.m.)"),
+    # Bagerst (x = 20, 45, 70, 95, 120, 145): 33 · 31 · 31 · 25 · 22 · 22 cm i lodrette slidser.
+    # Forrest th.: ét rum 77 x 213 mm til steakknive og urteknive, der bare lægges i.
+    # Forrest tv.: to småtingsrum 84 x 80 mm (Bamix-skær m.m.).
+    BinSpec("knivbakke", 4, 12, H, pos=(0, 0), knife=KnifeTray(),
+            label="6 lange knive i slidser bagerst · knivrum 77 x 213 forrest th. (5 steak + 2 urteknive løst) · to småtingsrum 84 x 80 forrest tv."),
     # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen.
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
             divider_slots=((250.0, 9.0, 4.0),), max_units=4,
