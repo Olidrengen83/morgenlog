@@ -9,9 +9,9 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 |---|---|---|---|---|---|---|
 | `skuffe1-bestik__knivbakke-a.stl` | 4×6×8 | 167.5 × 251.6 × 56.0 | 165 × 501 × 50 (hel bakke) | 335.4 cm³ | 416 g | 6 lange knive i slidser bagerst · værktøjsrum 77 x 188 forrest th. (hvidløgspresser, dåseåbner, proptrækker) · to småtingsrum 84 x 80 forrest tv. (Bamix-skær, frit) |
 | `skuffe1-bestik__knivbakke-b.stl` | 4×6×8 | 167.5 × 251.6 × 56.0 | 165 × 501 × 50 (hel bakke) | 331.7 cm³ | 411 g | 6 lange knive i slidser bagerst · værktøjsrum 77 x 188 forrest th. (hvidløgspresser, dåseåbner, proptrækker) · to småtingsrum 84 x 80 forrest tv. (Bamix-skær, frit) |
-| `skuffe1-bestik__redskaber-a.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 98.4 cm³ | 122 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 249: 5 steakknive (22 cm) + 2 urteknive, løst |
-| `skuffe1-bestik__redskaber-b.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 98.4 cm³ | 122 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 249: 5 steakknive (22 cm) + 2 urteknive, løst |
-| `skuffe1-bestik__redskaber-c.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 98.4 cm³ | 122 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 249: 5 steakknive (22 cm) + 2 urteknive, løst |
+| `skuffe1-bestik__redskaber-a.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 98.4 cm³ | 122 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber · forrest: brødknivens håndtag i bane langs væggen + 5 steakknive (22 cm) og 2 urteknive i bane 56 x 249 |
+| `skuffe1-bestik__redskaber-b.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 98.4 cm³ | 122 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber · forrest: brødknivens håndtag i bane langs væggen + 5 steakknive (22 cm) og 2 urteknive i bane 56 x 249 |
+| `skuffe1-bestik__redskaber-c.stl` | 2×4×8 | 83.5 × 167.6 × 56.0 | 81 × 501 × 50 (hel bakke) | 108.4 cm³ | 134 g | Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber · forrest: brødknivens håndtag i bane langs væggen + 5 steakknive (22 cm) og 2 urteknive i bane 56 x 249 |
 | `skuffe1-bestik__bestik-lang-a.stl` | 3×6×8 | 125.5 × 251.5 × 56.0 | 123 × 249 × 50 (hel bakke) | 224.9 cm³ | 279 g | To rum 61 x 249: spiseknive, gafler (= testbakken) |
 | `skuffe1-bestik__bestik-lang-b.stl` | 3×6×8 | 125.5 × 251.5 × 56.0 | 123 × 249 × 50 (hel bakke) | 224.9 cm³ | 279 g | To rum 61 x 249: spiseskeer (også 21 cm), lange teskeer |
 | `skuffe1-bestik__bestik-kort-a.stl` | 6×3×8 | 251.5 × 125.5 × 56.0 | 249 × 123 × 50 (hel bakke) | 227.9 cm³ | 283 g | Bagerst: teskeer (165 x 61) · kagegafler (165 x 61) · måleskeer (83 x 123) |
@@ -45,4 +45,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 53.4 | – | 52.4 cm³ | 65 g | Forreste kanal, højre, lukket rum. Print to sæt: ét til hver skuffe |
 | `indsats__hvileribbe-222.stl` | – | 164.4 × 6.0 × 17.0 | – | 12.3 cm³ | 15 g | Løs hvileribbe (lim) til allerede printet knivbakke-a: 164 x 6 mm, 222 mm fra bagvæggen, dal nr. 1 ud for slids nr. 1 |
 
-**I alt ca. 4661 g PLA** (27 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4673 g PLA** (27 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

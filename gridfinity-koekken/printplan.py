@@ -21,13 +21,13 @@ def part(name, x, y, rot=0, roty=0):
 
 PLADER = {
     "skuffe1-plade-1": [part("skuffe1-bestik__knivbakke-a", 86, 2), part("skuffe1-bestik__redskaber-a", 1, 86)],
-    "skuffe1-plade-2": [part("skuffe1-bestik__knivbakke-b", 86, 2)],   # redskaber-b er allerede printet
+    "skuffe1-plade-2": [part("skuffe1-bestik__knivbakke-b", 86, 2), part("skuffe1-bestik__redskaber-c", 1, 86)],  # a og b er printet
     "skuffe1-plade-3": [part("skuffe1-bestik__bestik-kort-a", 2, 129), part("skuffe1-bestik__redskaber-c", 20, 32, rot=90)],
     "skuffe1-plade-4": [part("skuffe1-bestik__bestik-kort-b", 2, 129)],
     # kanalerne printes liggende paa bagvaeggen (drejet 90 grader om y), saa taendernes profil og bolthullet bliver paene
     "skuffe1-plade-5": [part("skuffe1-bestik__bestik-lang-b", 128.5, 2), part("indsats__kanal-a", 18.5, 2, roty=90), part("indsats__kanal-b", 73.5, 2, roty=90)],
 }
-UDELADT = "bestik-lang-a (identisk med testbakken, allerede printet); redskaber-b er printet og taget af plade 2"
+UDELADT = "bestik-lang-a (identisk med testbakken, allerede printet); redskaber-a og -b er printet; kun endestykket c (med bane til steakknivene) er på plade 2"
 
 alle = trimesh.Scene(); rows = []
 for plade, parts in PLADER.items():

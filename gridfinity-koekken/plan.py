@@ -37,9 +37,12 @@ BESTIK = [
             label="6 lange knive i slidser bagerst · værktøjsrum 77 x 188 forrest th. (hvidløgspresser, dåseåbner, proptrækker) · to småtingsrum 84 x 80 forrest tv. (Bamix-skær, frit)"),
     # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen ved 250 mm (som printet).
     # Forreste rum (81 x 249) indrammer steak- og urteknivene; bagerste rum (81 x 249) til lange redskaber.
+    # I det forreste endestykke (c) en langsgående væg 24 mm fra venstre væg: bane til brødknivens håndtag,
+    # og en indrammet bane 56 x 249 mm til steak- og urteknivene op mod skillevæggen.
     BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
             divider_slots=((250.0, 9.0, 4.0),), max_units=4,
-            label="Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 249: 5 steakknive (22 cm) + 2 urteknive, løst"),
+            walls=((23.4, 340.0, 24.66, 498.98),),
+            label="Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber · forrest: brødknivens håndtag i bane langs væggen + 5 steakknive (22 cm) og 2 urteknive i bane 56 x 249"),
     # bestik-lang som to 3x6-bakker: "-a" er identisk med testbakken (allerede printet).
     BinSpec("bestik-lang-a", 3, 6, H, pos=(6, 0),
             dividers_x=(C2 + 0.63,), front_notch=True, notch_radius=12,

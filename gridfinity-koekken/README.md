@@ -71,9 +71,10 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
   * Forrest til venstre, foran de tre lange knives håndtag: to småtingsrum på 84 × 80 mm. Bamix-skærene i det ene,
     det andet frit. Ret `KnifeTray(...)` i `plan.py`.
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i tre stykker, skillevæg ved 250 mm. Bagerst 81 × 249 mm:
-  piskeris, ostehøvl, rivejern og lange redskaber. Forrest 81 × 249 mm: **de fem steakknive (22 cm) og to urteknive,
-  løst**. **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod bagvæggen og går gennem en 4 mm
-  slids i skillevæggen; håndtaget ender i knivrummet.
+  piskeris, ostehøvl, rivejern og lange redskaber. Forrest: **de fem steakknive (22 cm) og to urteknive løst i en bane på 56 × 249 mm**, indrammet af en
+  langsgående væg i det forreste endestykke. **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen
+  mod bagvæggen, går gennem en 4 mm slids i skillevæggen, og håndtaget ligger i banen på 23 mm mellem væggen og
+  steakknivenes bane.
 * **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer (også dem på
   21 cm) og lange teskeer. Testprintet bekræftede, at 61 mm er nok til alle tre hovedtyper.
 * **Bestik-kort 6×6** (forrest): til venstre en kolonne på 80 × 249 mm til måleskeer, pizzahjul, te-si og
