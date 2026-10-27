@@ -96,13 +96,19 @@ class KnifeTray:
     front_slots: int = 7
     front_pitch: float = 15.0
     front_x0: float = 70.0
-    front_ribs: Tuple[float, ...] = (350.0, 430.0)
+    front_ribs: Tuple[float, ...] = (330.0, 385.0)   # begge inden for steak- og urteknivenes klinger
     front_x_from: float = 62.0
     field_y0: float = 338.0
     field_dividers: Tuple[float, ...] = (419.0,)
     slot_width: float = 4.0
     slot_bottom: float = 1.0        # slidsbund over gulvet
     rib_thickness: float = 3.0
+    # Bølgeformede hvileribber under håndtagene (rund overkant, dal ud for hver kolonne)
+    back_cradles: Tuple[float, ...] = (222.0, 300.0)
+    front_cradles: Tuple[float, ...] = (470.0,)
+    cradle_trough: float = 6.0      # dalens bund over gulvet
+    cradle_amp: float = 4.0         # bølgehøjde (top = dal + 2*amp)
+    cradle_r: float = 3.0           # radius på den runde overkant
 
 
 @dataclass
@@ -229,6 +235,13 @@ def _knife_features(spec: BinSpec) -> Manifold:
         parts.append(rib_with_slots(0, iw, y, back_xs))
     for y in k.front_ribs:
         parts.append(rib_with_slots(k.front_x_from, iw, y, front_xs))
+    # Hvileribber med bølget, rund overkant
+    for y in k.back_cradles:
+        parts.append(_wave_bar(0.0, iw, y, back_xs[0], k.back_pitch, k.cradle_amp, fz + k.cradle_trough, k.cradle_r, fz)
+                     .translate((wall, wall, 0)))
+    for y in k.front_cradles:
+        parts.append(_wave_bar(k.front_x_from, iw, y, front_xs[0], k.front_pitch, k.cradle_amp, fz + k.cradle_trough, k.cradle_r, fz)
+                     .translate((wall, wall, 0)))
     # Det frie felt: langsgående væg + tværvægge
     t = k.rib_thickness
     parts.append(Manifold.cube((t, il - k.field_y0 + t + 0.2, H - fz + 0.5)).translate(
@@ -237,6 +250,49 @@ def _knife_features(spec: BinSpec) -> Manifold:
         parts.append(Manifold.cube((k.front_x_from + 0.4, t, H - fz + 0.5)).translate(
             (wall - 0.2, wall + y - t, fz - 0.5)))
     return Manifold.batch_boolean(parts, __import__("manifold3d").OpType.Add)
+
+
+def _wave_bar(x0: float, x1: float, y: float, c0: float, pitch: float, amp: float,
+              z_trough: float, r: float, floor_z: float) -> Manifold:
+    """Ribbe langs x fra x0 til x1 med bølget overkant: dal (z_trough) ved c0 + n*pitch,
+    top ved z_trough + 2*amp. Tværsnittet er en halvcirkel (radius r) oven på en plade ned i
+    gulvet, så overkanten er rund uden kanter. Bygges som ét sammenhængende, lukket net."""
+    import numpy as np
+    from manifold3d import Mesh
+    step = 1.0
+    n = max(2, int(round((x1 - x0) / step)) + 1)
+    xs = np.linspace(x0, x1, n)
+    zs = z_trough + amp * (1 - np.cos(2 * np.pi * (xs - c0) / pitch))
+    # Profil i (y, z) relativt til bølgehøjden: halvcirkel + rektangel ned til gulvet
+    k = 12
+    th = np.linspace(0, np.pi, k + 1)
+    prof = [(r * np.cos(t), r * np.sin(t)) for t in th]           # fra (+r,0) over toppen til (-r,0)
+    prof += [(-r, floor_z - 0.5 - z_trough), (r, floor_z - 0.5 - z_trough)]
+    m_pts = len(prof)
+    verts = []
+    for xi, zi in zip(xs, zs):
+        for (py, pz) in prof:
+            dz = pz if pz >= 0 else (floor_z - 0.5 - zi)          # bunden ligger fast i gulvet
+            verts.append((xi, y + py, zi + dz))
+    verts = np.array(verts, dtype=np.float64)
+    tris = []
+    for i in range(n - 1):
+        for j in range(m_pts):
+            a0 = i * m_pts + j; a1 = i * m_pts + (j + 1) % m_pts
+            b0 = a0 + m_pts; b1 = a1 + m_pts
+            tris.append((a0, b0, a1)); tris.append((a1, b0, b1))
+    for j in range(1, m_pts - 1):                                  # endeflader (konveks profil -> vifte)
+        tris.append((0, j + 1, j))
+        base = (n - 1) * m_pts
+        tris.append((base, base + j, base + j + 1))
+    n_side = 2 * (n - 1) * m_pts
+    side, caps = tris[:n_side], tris[n_side:]
+    flip = lambda ts: [(t[0], t[2], t[1]) for t in ts]
+    for s, c in ((side, caps), (flip(side), caps), (side, flip(caps)), (flip(side), flip(caps))):
+        m = Manifold(Mesh(vert_properties=verts.astype(np.float32), tri_verts=np.array(s + c, dtype=np.uint32)))
+        if m.status() == m.status().NoError and m.volume() > 0:
+            return m
+    raise RuntimeError("wave bar: kunne ikke bygge et gyldigt net")
 
 
 @dataclass
@@ -283,8 +339,12 @@ def build_tray(t: TraySpec) -> Manifold:
         r = t.end_notch_radius
         cyl = Manifold.cylinder(t.wall + 4, r, r, SEGMENTS).rotate((-90, 0, 0))
         m = m - cyl.translate((t.width / 2, -2, t.height)) - cyl.translate((t.width / 2, t.length - t.wall - 2, t.height))
-    for (yc, x0, x1, wy, h) in t.teeth:   # tænder der går ned i basepladens lommer
-        m = m + Manifold.cube((x1 - x0, wy, h + 0.5)).translate((x0, yc - wy / 2, -h))
+    for (yc, x0, x1, wy, h) in t.teeth:   # tænder med basepladens 2:1-profil (bred top, smal bund)
+        eps = 0.01
+        bot = Manifold.cube((x1 - x0, wy, eps)).translate((x0, yc - wy / 2, -h))
+        wt = wy + 4 * h   # 2 mm bredere pr. side pr. mm højde
+        top = Manifold.cube((x1 - x0, wt, eps)).translate((x0, yc - wt / 2, -eps))
+        m = m + Manifold.batch_hull([bot, top]) + Manifold.cube((x1 - x0, wt, 0.6)).translate((x0, yc - wt / 2, -0.01))
     if t.teeth:
         m = m.translate((0, 0, max(h for *_, h in t.teeth)))
     return m

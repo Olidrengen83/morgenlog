@@ -7,9 +7,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 STL = os.path.join(HERE, "stl"); OUT = os.path.join(STL, "print"); os.makedirs(OUT, exist_ok=True)
 BED = 256.0
 
-def part(name, x, y, rot=0):
-    """Placerer delens nederste venstre hjoerne i (x, y) paa pladen; rot=90 drejer den om z."""
+def part(name, x, y, rot=0, roty=0):
+    """Placerer delens nederste venstre hjoerne i (x, y) paa pladen; rot drejer om z, roty om y (laegger delen paa siden)."""
     m = trimesh.load(os.path.join(STL, name + ".stl"))
+    if roty:
+        m.apply_transform(trimesh.transformations.rotation_matrix(np.radians(roty), [0, 1, 0]))
     if rot:
         m.apply_transform(trimesh.transformations.rotation_matrix(np.radians(rot), [0, 0, 1]))
     m.apply_translation(-m.bounds[0]); m.apply_translation([x, y, 0])
@@ -22,7 +24,8 @@ PLADER = {
     "skuffe1-plade-2": [part("skuffe1-bestik__knivbakke-b", 86, 2), part("skuffe1-bestik__redskaber-b", 1, 86)],
     "skuffe1-plade-3": [part("skuffe1-bestik__bestik-kort-a", 2, 129), part("skuffe1-bestik__redskaber-c", 20, 32, rot=90)],
     "skuffe1-plade-4": [part("skuffe1-bestik__bestik-kort-b", 2, 129)],
-    "skuffe1-plade-5": [part("skuffe1-bestik__bestik-lang-b", 128, 2), part("indsats__kanal-a", 22, 2), part("indsats__kanal-b", 46, 2)],
+    # kanalerne printes liggende paa bagvaeggen (drejet 90 grader om y), saa taendernes profil og bolthullet bliver paene
+    "skuffe1-plade-5": [part("skuffe1-bestik__bestik-lang-b", 128.5, 2), part("indsats__kanal-a", 18.5, 2, roty=90), part("indsats__kanal-b", 73.5, 2, roty=90)],
 }
 UDELADT = "bestik-lang-a (identisk med testbakken, allerede printet)"
 

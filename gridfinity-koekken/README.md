@@ -33,10 +33,10 @@ STL-filerne laves igen på få sekunder.
 
 ## Kanalen forrest (begge skuffer)
 
-På basepladens 22,5 mm-stribe står en kanal på 22 × 503 × 50 mm, printet i to halvdele (`kanal-a` og `kanal-b`,
-åbne mod hinanden midt i skuffen). Forvæggen har huller til håndtagets bolthoveder, og under bunden sidder en tand
-pr. celle (19,5 mm bred, 17 mm lang, 3,4 mm høj, 42 mm deling), der går ned i stribens riller (20,5 mm brede ved
-bunden, skrå sider) og låser kanalen fast.
+På basepladens 22,5 mm-stribe står to lukkede kanaler på 22 × 251,5 × 50 mm (`kanal-a` og `kanal-b`), der mødes
+midt i skuffen. Forvæggen har huller til håndtagets bolthoveder, og under bunden sidder en tand
+pr. celle (42 mm deling) med stribens egen 2:1-profil: 19,5 mm bred i bunden, 33 mm ved kanalens bund, 3,4 mm høj,
+så bunden følger rillerne og låser kanalen fast. Kanalerne printes liggende på bagvæggen (sådan ligger de i pladefilen).
 Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. Print to sæt.
 
 ### Mål der er lagt til grund (bestikskuffen)
@@ -62,11 +62,15 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
 * **Knivbakke 4×12** (164 × 500 mm indvendigt), printes i to halvdele.
   * Bagerst: tre ribber med 6 lodrette slidser i 25 mm deling til de lange knive, spidserne mod bagvæggen.
     Fra venstre: 33, 31, 31, 25, 22, 22 cm.
-  * Forrest: to ribber med 7 slidser i 15 mm deling, skubbet mod højre. Fra venstre: 18, 18, 21, 21, 21, 21, 21 cm.
+  * Forrest: to ribber (330 og 385 mm fra bagvæggen, begge inden for de korte knives klinger) med 7 slidser i 15 mm
+    deling, skubbet mod højre. Fra venstre: 18, 18, 21, 21, 21, 21, 21 cm.
     Fordelingen er ikke tilfældig: de to urteknive ligger foran de to 31 cm-knive (31 + 18 = 49 cm i en 50 cm kolonne),
     og steakknivene ligger foran 25/22/22, som slutter senest 25 cm inde. Byttes der rundt, støder spidser og håndtag sammen.
   * Forrest til venstre, foran de lange knives håndtag: to småtingsrum på 59 × 80 mm. Bamix-skærene i det ene,
     det andet frit.
+  * Under håndtagene ligger bølgeformede hvileribber med rund overkant (radius 3 mm, ingen kanter): to bagerst
+    (222 og 300 mm) og én forrest (470 mm). Bølgedalene ligger ud for hver kolonne, 6 mm over bunden, så håndtaget
+    hviler i en dal og kniven ligger plant med let tryk ned i slidserne.
   * Slidserne er 4 mm brede med rund bund 7 mm over skuffebunden. Ret `KnifeTray(...)` i `plan.py`.
 * **Redskaber 2×12** (81 × 500 mm indvendigt), printes i to halvdele, to rum i fuld højde på 249 mm:
   piskeris, ostehøvl og lange redskaber i det ene, hvidløgspresser, rivejern og proptrækker i det andet.

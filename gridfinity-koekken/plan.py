@@ -61,12 +61,12 @@ BESTIK = [
             label="Forrest: børnebestik (165 x 61) · frit/dessertskeer (165 x 61) · pizzahjul, te-si, småværktøj (83 x 123)"),
 ]
 
-# Kanal på basepladens 22,5 mm-stribe forrest i skuffen. To dele, åbne mod hinanden midt i skuffen.
-# Forvæggen har aflange huller til håndtagets bolthoveder (ø10, 37 mm over bunden, 209 mm fra hver side).
-# Kanalen er 503 mm i en 510 mm skuffe, så bolten sidder 205,5 mm fra kanalens yderende.
+# Kanal på basepladens 22,5 mm-stribe forrest i skuffen: to lukkede, separate rum à 251,5 mm.
+# Forvæggen har et aflangt hul til håndtagets bolthoved (ø10, 37 mm over bunden, 209 mm fra hver side).
+# Kanalen er 2 x 251,5 = 503 mm i en 510 mm skuffe, så bolten sidder 205,5 mm fra kanalens yderende.
 # Striben er 4,25 mm høj, så boltens centrum er 32,75 mm over kanalens underside.
-# Under bunden sidder en tand pr. celle (42 mm deling), 19,5 mm bred og 3,4 mm høj, der går ned i stribens
-# riller (20,5 mm brede 0,5 mm over bunden, 2:1 skrå sider op til 35 mm øverst). Kanalen hviler på knudernes top. Cellerne er centreret i skuffen: første cellemidte 24 mm fra siden.
+# Under bunden sidder en tand pr. celle (42 mm deling) med stribens 2:1-profil: 19,5 mm bred i bunden,
+# 3,4 mm høj, 33 mm bred ved kanalens bund (rillen er 20,5 mm nederst og 35 mm øverst).
 KANAL_W, KANAL_H, KANAL_L = 22.0, 50.0, 251.5
 BOLT_Y, BOLT_Z = 209.0 - (510.0 - 2 * KANAL_L) / 2, 37.0 - 4.25
 TAND_Y0 = 24.0 - (510.0 - 2 * KANAL_L) / 2          # 20,5 mm: første tand fra kanalens yderende
@@ -74,11 +74,11 @@ TAENDER_A = tuple((TAND_Y0 + i * 42.0, 2.0, 19.0, 19.5, 3.4) for i in range(6))
 TAENDER_B = tuple((KANAL_L - y, x0, x1, wy, h) for (y, x0, x1, wy, h) in TAENDER_A)
 EXTRA = [
     TraySpec("kanal-a", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
-             open_sides=("y1",), x0_slots=((BOLT_Y, BOLT_Z, 16.0, 26.0),), teeth=TAENDER_A,
-             label="Forreste kanal, venstre halvdel, hul til bolthoved, tænder i bunden (spisepinde / grillspyd / sugerør)"),
+             x0_slots=((BOLT_Y, BOLT_Z, 16.0, 26.0),), teeth=TAENDER_A,
+             label="Forreste kanal, venstre, lukket rum med hul til bolthoved og profilerede tænder (spisepinde / grillspyd)"),
     TraySpec("kanal-b", width=KANAL_W, length=KANAL_L, height=KANAL_H, floor=2.0, end_notch_radius=0,
-             open_sides=("y0",), x0_slots=((KANAL_L - BOLT_Y, BOLT_Z, 16.0, 26.0),), teeth=TAENDER_B,
-             label="Forreste kanal, højre halvdel, hul til bolthoved, tænder i bunden. Print to sæt: ét til hver skuffe"),
+             x0_slots=((KANAL_L - BOLT_Y, BOLT_Z, 16.0, 26.0),), teeth=TAENDER_B,
+             label="Forreste kanal, højre, lukket rum. Print to sæt: ét til hver skuffe"),
 ]
 
 # --- Skuffe 2: ruller, poser og småting ------------------------------------
