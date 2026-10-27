@@ -35,11 +35,11 @@ BESTIK = [
     # Forrest th. (bag 22 cm-håndtagene): værktøjsrum 77 x 188 mm. Forrest tv.: to småtingsrum 84 x 80 mm.
     BinSpec("knivbakke", 4, 12, H, pos=(0, 0), knife=KnifeTray(box_y0=310.0, field_y0=334.0, field_dividers=(417.0,)),
             label="6 lange knive i slidser bagerst · værktøjsrum 77 x 188 forrest th. (hvidløgspresser, dåseåbner, proptrækker) · to småtingsrum 84 x 80 forrest tv. (Bamix-skær, frit)"),
-    # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen ved 270 mm.
-    # Forreste rum (81 x 229) indrammer steak- og urteknivene; bagerste rum (81 x 269) til lange redskaber.
-    BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(270.0,),
-            divider_slots=((270.0, 9.0, 4.0),), max_units=4,
-            label="Bagerst 81 x 269: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 229: 5 steakknive (22 cm) + 2 urteknive, løst"),
+    # Brødkniven på 39 cm ligger langs venstre væg og går gennem en slids i skillevæggen ved 250 mm (som printet).
+    # Forreste rum (81 x 249) indrammer steak- og urteknivene; bagerste rum (81 x 249) til lange redskaber.
+    BinSpec("redskaber", 2, 12, H, pos=(4, 0), dividers_y=(250.0,),
+            divider_slots=((250.0, 9.0, 4.0),), max_units=4,
+            label="Bagerst 81 x 249: piskeris, ostehøvl, rivejern, lange redskaber + brødkniv langs væggen · forrest 81 x 249: 5 steakknive (22 cm) + 2 urteknive, løst"),
     # bestik-lang som to 3x6-bakker: "-a" er identisk med testbakken (allerede printet).
     BinSpec("bestik-lang-a", 3, 6, H, pos=(6, 0),
             dividers_x=(C2 + 0.63,), front_notch=True, notch_radius=12,

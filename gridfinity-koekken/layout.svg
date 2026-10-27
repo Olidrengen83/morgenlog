@@ -39,7 +39,7 @@
 <text x="124.25" y="314.25" font-size="11" text-anchor="middle" font-weight="bold">knivbakke</text>
 <text x="124.25" y="327.25" font-size="9" text-anchor="middle" fill="#444">4×12×8u</text>
 <rect x="209.0" y="65.0" width="82.5" height="502.5" rx="4" fill="#f5e2c8" stroke="#3b3b3b" stroke-width="1.2"/>
-<line x1="211.0" y1="336.26" x2="289.5" y2="336.26" stroke="#3b3b3b" stroke-width="1.2"/>
+<line x1="211.0" y1="316.26" x2="289.5" y2="316.26" stroke="#3b3b3b" stroke-width="1.2"/>
 <text x="250.25" y="314.25" font-size="11" text-anchor="middle" font-weight="bold">redskaber</text>
 <text x="250.25" y="327.25" font-size="9" text-anchor="middle" fill="#444">2×12×8u</text>
 <rect x="293.0" y="65.0" width="124.5" height="250.5" rx="4" fill="#d9f0d3" stroke="#3b3b3b" stroke-width="1.2"/>

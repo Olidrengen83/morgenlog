@@ -22,8 +22,8 @@ ROOMS = {
         (0, 417, 84, 500, "frit"),
     ],
     "redskaber": [
-        (0, 0, 81, 270, "Piskeris, ostehøvl,\nrivejern, lange\nredskaber\n\nBrødkniv 39 cm\nlangs venstre væg"),
-        (0, 270, 81, 500, "STEAKKNIVE\n5 × 22 cm\n+ 2 urteknive,\nløst"),
+        (0, 0, 81, 250, "Piskeris, ostehøvl,\nrivejern, lange\nredskaber\n\nBrødkniv 39 cm\nlangs venstre væg"),
+        (0, 250, 81, 500, "STEAKKNIVE\n5 × 22 cm\n+ 2 urteknive,\nløst"),
     ],
     "bestik-lang-a": [(0, 0, C2, IN6, "Spiseknive"), (C2 + 1.26, 0, IN3, IN6, "Gafler")],
     "bestik-lang-b": [(0, 0, C2, IN6, "Spiseskeer\n(også 21 cm)"), (C2 + 1.26, 0, IN3, IN6, "Lange\nteskeer")],

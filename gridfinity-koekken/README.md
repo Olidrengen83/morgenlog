@@ -44,7 +44,7 @@ Skuffe 1: spisepinde og grillspyd. Skuffe 2: sugerør og andet langt og tyndt. P
 | Ting | Mål | Plads |
 |---|---|---|
 | Køkkenknive, lange | 33 · 31 · 31 · 25 · 22 · 22 cm | slidser bagerst i knivbakken |
-| Køkkenknive, korte | 5 × 22 cm og 2 urteknive | løst i redskabsbakkens forreste rum, 81 × 229 mm |
+| Køkkenknive, korte | 5 × 22 cm og 2 urteknive | løst i redskabsbakkens forreste rum, 81 × 249 mm |
 | Brødkniv | 39 cm | langs væggen i redskabsbakken, gennem slids i skillevæggen |
 | Santoku-klinge, ryg til æg | 45 mm | lodret slids, bund 7 mm over skuffebunden |
 | Bamix-skær | ø36 mm, 4 stk. | småtingsrum 84 × 80 mm forrest i knivbakken |
@@ -70,8 +70,8 @@ alle rum er i fuld højde, og alt der kan deles med en skillevæg i stedet for t
   * Forrest til højre, bag 22 cm-håndtagene: et **værktøjsrum på 77 × 188 mm** (hvidløgspresser, dåseåbner, proptrækker).
   * Forrest til venstre, foran de tre lange knives håndtag: to småtingsrum på 84 × 80 mm. Bamix-skærene i det ene,
     det andet frit. Ret `KnifeTray(...)` i `plan.py`.
-* **Redskaber 2×12** (81 × 500 mm indvendigt), printes i tre stykker, skillevæg ved 270 mm. Bagerst 81 × 269 mm:
-  piskeris, ostehøvl, rivejern og lange redskaber. Forrest 81 × 229 mm: **de fem steakknive (22 cm) og to urteknive,
+* **Redskaber 2×12** (81 × 500 mm indvendigt), printes i tre stykker, skillevæg ved 250 mm. Bagerst 81 × 249 mm:
+  piskeris, ostehøvl, rivejern og lange redskaber. Forrest 81 × 249 mm: **de fem steakknive (22 cm) og to urteknive,
   løst**. **Brødkniven på 39 cm** ligger på højkant langs venstre væg med spidsen mod bagvæggen og går gennem en 4 mm
   slids i skillevæggen; håndtaget ender i knivrummet.
 * **Bestik-lang 6×6** (bagerst): fire rum på 61 × 249 mm med greb-hak: spiseknive, gafler, spiseskeer (også dem på
