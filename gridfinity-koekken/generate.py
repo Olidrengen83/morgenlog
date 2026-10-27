@@ -129,6 +129,18 @@ def main():
         print(f"  {t.name:28s} indsats  {info['size_mm'][0]:6.1f} x {info['size_mm'][1]:6.1f} x {info['size_mm'][2]:4.1f} mm  "
               f"{info['volume_cm3']:6.1f} cm3 ≈ {grams:4.0f} g")
 
+    for name, builder, label in getattr(plan, "EXTRA_BUILD", []):
+        if args.only and args.only not in name:
+            continue
+        info = export_stl(builder(), os.path.join(args.out, f"indsats__{name}.stl"))
+        grams = info["volume_cm3"] * PLA_DENSITY
+        class _L:  # minimal objekt til printlisten
+            pass
+        obj = _L(); obj.label = label
+        rows.append(("loese-indsatser", obj, name, ("-", "-"), info, grams))
+        print(f"  {name:28s} indsats  {info['size_mm'][0]:6.1f} x {info['size_mm'][1]:6.1f} x {info['size_mm'][2]:4.1f} mm  "
+              f"{info['volume_cm3']:6.1f} cm3 ≈ {grams:4.0f} g" + ("" if info["watertight"] else "  !! IKKE VANDTÆT"))
+
     layout_svg(plan.DRAWERS, plan.DRAWER_UNITS, os.path.join(HERE, "layout.svg"))
 
     # Oversigt til README

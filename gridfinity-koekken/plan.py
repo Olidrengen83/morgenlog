@@ -80,6 +80,17 @@ EXTRA = [
              label="Forreste kanal, højre, lukket rum. Print to sæt: ét til hver skuffe"),
 ]
 
+# Løs hvileribbe til den allerede printede knivbakke-a (uden ribben ved 222 mm): limes i bunden
+# på tværs, 222 mm fra bagvæggen indvendigt, med bølgedalene ud for slidserne (første dal 20 mm fra venstre væg).
+def _hvileribbe():
+    from gridfinity import _wave_bar
+    k = KnifeTray()
+    return _wave_bar(0.0, 164.98 - 0.6, 0.0, 20.0 - 0.3, k.back_pitch, k.cradle_amp,
+                     k.cradle_trough, k.cradle_r, 0.5).translate((0, k.cradle_r, 0))
+
+EXTRA_BUILD = [("hvileribbe-222", _hvileribbe,
+                "Løs hvileribbe (lim) til allerede printet knivbakke-a: 164 x 6 mm, 222 mm fra bagvæggen, dal nr. 1 ud for slids nr. 1")]
+
 # --- Skuffe 2: ruller, poser og småting ------------------------------------
 # Prioritet: det daglige forrest eller i kolonner, hvor æskens ende griber ved forkanten.
 # ISTAD-æskerne (29,5 / 23 / 19 x 7,5 cm) ligger på langs i 2 enheder brede kolonner.
