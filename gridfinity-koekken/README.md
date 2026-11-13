@@ -92,12 +92,19 @@ ved forkanten og kan gribes direkte. Det sjældne ligger bagerst.
   en af dem flyttes, eller kolonnen gøres 5 enheder bred (så skal kolonnerne til højre rykkes).
 * **ISTAD i tre kolonner** på langs, alle 80 mm brede: 29,5 cm i 2×8 (332 mm, to halvdele), 23 cm i 2×6 (248 mm) og
   19 cm i 2×6 (248 mm). De to store ender ved forkanten, den lille lige bag papiret.
-* **Mellemlægspapir 4×4** forrest til højre (164 × 164 mm til æsken på 15 × 12,5 cm, plus tændstikker ved siden af).
+* **Mellemlægspapir 4×4** forrest: arkene (12 × 14,5 cm) ligger løst i et rum på 126 × 165 mm. Fra 105 mm buer bunden
+  op til 18 mm ved forvæggen, så stakkens forkant løftes ca. 8 mm og vifter ud, og der er 20 mm fri fingerplads
+  foran stakken. Ved siden af et rum på 38 × 165 mm til tændstikker og snor.
 * **Poseklemmer 2×4**: alle klemmer (13,5 / 10,5 / 5 cm) i ét rum på 80 × 164 mm i fuld højde.
   **Elastikker 1×2** (37 × 80 mm) lige foran, bag papiret, med et frit 1×2-rum ved siden af.
 * **Bagerst:** Pynt 4×2 (fødselsdagsflag, parasoller, kagelys), et frit 4×2-rum som reserve, Termometre 2×4 (plus snor),
   Lange ting 2×6 (trægafler, sushi-måtte, poser på rulle; sugerør ligger i kanalen) og Småting 4×2 med skillevæg (tandstikker og barberblade
   i det ene rum, tændstikker og fødselsdagslys i det andet).
+
+## Printplan
+
+Se `printplan.md`: fem plader pr. skuffe i `stl/print/`, placeret uden om P1S'ens udelukkelseszone, plus `kanaler.3mf`.
+Oversigt over skuffe 2's plader: `preview/skuffe2-plader.png`.
 
 ## Print
 

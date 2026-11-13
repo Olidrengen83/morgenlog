@@ -125,8 +125,12 @@ RULLER = [
             label="Elastikker, løse (37 x 80 mm)"),
     BinSpec("frit-1x2", 1, 2, H, pos=(11, 6),
             label="Frit smalt rum 37 x 80 mm (fx tændstikæske, snor, blyant)"),
-    BinSpec("mellemlaegspapir", 4, 4, H, pos=(8, 8),
-            label="FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af"),
+    # Mellemlægspapir løst (ark 12 x 14,5 cm): rum 126 x 165 mm. Arkene ligger fra bagvæggen til 145 mm.
+    # Fra 105 mm buer bunden op til 18 mm ved forvæggen, så stakkens forkant løftes ca. 8 mm og vifter ud,
+    # og der er 20 mm fri fingerplads foran stakken. Siderum 38 x 165 mm til tændstikker og snor.
+    BinSpec("mellemlaegspapir", 4, 4, H, pos=(8, 8), dividers_x=(126.63,),
+            ramps=((0.0, 126.0, 105.0, 18.0),),
+            label="FORREST: mellemlægspapir løst i rum 126 x 165 med buet bund forrest (fingerplads 20 mm) · siderum 38 x 165: tændstikker, snor"),
 ]
 
 DRAWERS = {

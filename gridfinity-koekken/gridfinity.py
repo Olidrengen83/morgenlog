@@ -127,6 +127,8 @@ class BinSpec:
     divider_slots: Tuple[Tuple[float, float, float], ...] = ()  # (y-skillevæg, x-centrum, bredde): lodret slids i skillevæg
     max_units: Optional[int] = None   # egen grænse for segmentlængde (ellers generatorens --max)
     mirror_x: bool = False            # spejlvend hele bakken om dens midterplan (x)
+    # Buet bund mod forvæggen: (x0, x1, y_start, stigning). Bunden stiger som en parabel fra y_start til forvæggen.
+    ramps: Tuple[Tuple[float, float, float, float], ...] = ()
     knife: Optional[KnifeTray] = None
     label: str = ""                   # fritekst til plan/README
     pos: Tuple[int, int] = (0, 0)     # placering i skuffen (enheder, x fra venstre, y fra bagkant)
@@ -190,6 +192,10 @@ def build_bin(spec: BinSpec) -> Manifold:
         for xa in (x0, x1 - 3.0):
             m = m + Manifold.cube((3.0, y1 - y0, 2.0)).translate((wall + xa, wall + y0, zt - 2.0))
 
+    # Buede bunde (ramper) mod forvæggen
+    for (x0, x1, y_start, rise) in spec.ramps:
+        m = m + _floor_ramp(x0, x1, y_start, L - 2 * wall, rise, spec.floor_top).translate((wall, wall, 0))
+
     # Knivbakke-features
     if spec.knife is not None:
         m = m + _knife_features(spec)
@@ -246,6 +252,24 @@ def _knife_features(spec: BinSpec) -> Manifold:
         parts.append(Manifold.cube((k.front_x_from + 0.4, t, H - fz + 0.5)).translate(
             (wall - 0.2, wall + y - t, fz - 0.5)))
     return Manifold.batch_boolean(parts, __import__("manifold3d").OpType.Add)
+
+
+def _floor_ramp(x0: float, x1: float, y_start: float, y_end: float, rise: float, floor_z: float) -> Manifold:
+    """Buet bund: fra y_start stiger bunden som en parabel (blød start, stejlest forrest) op til
+    floor_z + rise ved y_end. Bygges som en profil i y-z, ekstruderet langs x."""
+    import numpy as np
+    n = 40
+    b = floor_z - 0.5
+    pts = [(y_start, b), (y_end + 0.2, b)]
+    for i in range(n, -1, -1):
+        t = i / n
+        pts.append((y_start + t * (y_end + 0.2 - y_start), floor_z + rise * t * t))
+    prism = CrossSection([pts]).extrude(x1 - x0)
+    if prism.is_empty():
+        prism = CrossSection([pts[::-1]]).extrude(x1 - x0)
+    # ekstruderingens (X, Y, Z) = (y, z, x)  ->  (x, y, z)
+    M = np.array([[0, 0, 1, x0], [1, 0, 0, 0], [0, 1, 0, 0]], dtype=np.float64)
+    return prism.transform(M)
 
 
 def _wave_bar(x0: float, x1: float, y: float, c0: float, pitch: float, amp: float,

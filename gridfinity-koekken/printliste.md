@@ -35,7 +35,7 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `skuffe2-ruller-poser__poseklemmer.stl` | 2×4×8 | 83.5 × 167.5 × 56.0 | 81 × 165 × 50 (hel bakke) | 103.3 cm³ | 128 g | Alle poseklemmer (13,5 / 10,5 / 5 cm) i ét rum 80 x 164 mm, fuld højde |
 | `skuffe2-ruller-poser__elastikker.stl` | 1×2×8 | 41.5 × 83.5 × 56.0 | 39 × 81 × 50 (hel bakke) | 33.1 cm³ | 41 g | Elastikker, løse (37 x 80 mm) |
 | `skuffe2-ruller-poser__frit-1x2.stl` | 1×2×8 | 41.5 × 83.5 × 56.0 | 39 × 81 × 50 (hel bakke) | 33.1 cm³ | 41 g | Frit smalt rum 37 x 80 mm (fx tændstikæske, snor, blyant) |
-| `skuffe2-ruller-poser__mellemlaegspapir.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 186.4 cm³ | 231 g | FORREST: mellemlægspapir 15 x 12,5 cm (164 x 164 mm), plads til tændstikker ved siden af |
+| `skuffe2-ruller-poser__mellemlaegspapir.stl` | 4×4×8 | 167.5 × 167.5 × 56.0 | 165 × 165 × 50 (hel bakke) | 241.8 cm³ | 300 g | FORREST: mellemlægspapir løst i rum 126 x 165 med buet bund forrest (fingerplads 20 mm) · siderum 38 x 165: tændstikker, snor |
 
 ## loese-indsatser
 
@@ -45,4 +45,4 @@ Genereret med `MAX_PRINT_UNITS = 6` (længste stykke 251.5 mm).
 | `indsats__kanal-b.stl` | – | 22.0 × 251.5 × 53.4 | – | 52.4 cm³ | 65 g | Forreste kanal, højre, lukket rum. Print to sæt: ét til hver skuffe |
 | `indsats__hvileribbe-222.stl` | – | 164.4 × 6.0 × 17.0 | – | 12.3 cm³ | 15 g | Løs hvileribbe (lim) til allerede printet knivbakke-a: 164 x 6 mm, 222 mm fra bagvæggen, dal nr. 1 ud for slids nr. 1 |
 
-**I alt ca. 4673 g PLA** (27 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).
+**I alt ca. 4742 g PLA** (27 dele, massivt regnet; reelt forbrug er typisk 10-20 % mindre afhængigt af bund-infill).

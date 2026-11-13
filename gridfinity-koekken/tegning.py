@@ -47,7 +47,7 @@ ROOMS = {
     "poseklemmer": [(0, 0, 81, 165, "Poseklemmer\n(alle tre str.)")],
     "elastikker": [(0, 0, 39, 81, "Elas-\ntikker")],
     "frit-1x2": [(0, 0, 39, 81, "frit\n(snor)")],
-    "mellemlaegspapir": [(0, 0, 165, 165, "MELLEMLÆGSPAPIR\n+ tændstikker")],
+    "mellemlaegspapir": [(0, 0, 126, 165, "MELLEMLÆGSPAPIR\nløst, buet bund forrest"), (127.3, 0, 165, 165, "tænd-\nstikker,\nsnor")],
 }
 KANAL = {"skuffe1-bestik": "KANAL: spisepinde · grillspyd", "skuffe2-ruller-poser": "KANAL: sugerør"}
 FILL = ["#cfe3f5", "#f5e2c8", "#d9f0d3", "#f3d4e1", "#e9dcf5", "#fff3b8", "#d2eff0", "#f2d9c8"]
