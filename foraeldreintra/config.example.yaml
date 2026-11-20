@@ -1,37 +1,33 @@
-# Kopiér til config.yaml og ret til. Adgangskoder skrives ALDRIG her –
-# kun navnet på den miljøvariabel, de ligger i.
+# Kopiér til config.yaml og ret til. Adgangskoden skrives ALDRIG her –
+# den ligger i miljøvariablerne FI_USER og FI_PASS.
 
 timezone: Europe/Copenhagen
 model: claude-opus-5-5
 max_pages: 25          # max antal sider pr. barn pr. kørsel
 keep_past_days: 30     # hvor længe gamle begivenheder bliver liggende
 
+# Ét ForældreIntra-login, der giver adgang til alle tre børn.
+account:
+  url: https://skolenavn.m.skoleintra.dk/   # adressen du logger ind på
+  login: direct                              # ForældreIntra-brugernavn/adgangskode
+  username_env: FI_USER
+  password_env: FI_PASS
+
+# Én linje pr. indgang. `match` er barnets navn, som det står i ForældreIntra's
+# barnevælger – kun nødvendig hvis det afviger fra `name`.
 children:
   - name: Barn1
-    url: https://skolenavn.m.skoleintra.dk/   # adressen du logger ind på
-    login: direct                              # "direct" (ForældreIntra-login) eller "unilogin"
-    username_env: FI_BARN1_USER
-    password_env: FI_BARN1_PASS
-    color_id: "9"                              # Google-farve 1–11 (valgfri)
-    # calendar_id: xxx@group.calendar.google.com   # egen kalender kun til dette barn (valgfri)
-    # extra_urls: [https://skolenavn.m.skoleintra.dk/parent/123/Barn1/Calendar]
-
+    color_id: "9"          # Google-farve 1–11 (valgfri)
   - name: Barn2
-    url: https://skolenavn.m.skoleintra.dk/
-    login: direct
-    username_env: FI_BARN2_USER
-    password_env: FI_BARN2_PASS
+    match: Barn2 Mellemnavn
     color_id: "10"
-
   - name: Barn3
-    url: https://andenskole.m.skoleintra.dk/
-    login: direct
-    username_env: FI_BARN3_USER
-    password_env: FI_BARN3_PASS
     color_id: "6"
+    # calendar_id: xxx@group.calendar.google.com   # egen kalender kun til dette barn
+    # extra_urls: [https://skolenavn.m.skoleintra.dk/parent/123/Barn3/Calendar]
 
 google_calendar:
   enabled: false
-  # Fælles kalender (bruges for børn uden eget calendar_id; titler får [Navn] foran).
-  # Del kalenderen med servicekontoens e-mail med "Foretag ændringer i begivenheder".
+  # Din private Google-kalender (se README). "primary" virker ikke med en
+  # servicekonto – brug kalenderens ID, fx din gmail-adresse eller en ny "Skole"-kalender.
   calendar_id: xxx@group.calendar.google.com

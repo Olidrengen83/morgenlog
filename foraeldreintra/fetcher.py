@@ -47,24 +47,57 @@ FILE_EXT = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".jpg", ".jpeg",
 @dataclass
 class Child:
     name: str
-    url: str
-    login: str = "direct"            # "direct" eller "unilogin"
-    username_env: str = ""
-    password_env: str = ""
+    match: Optional[str] = None        # navnet som det står i ForældreIntra (default: name)
     calendar_id: Optional[str] = None  # Google-kalender kun for dette barn
     color_id: Optional[str] = None     # Google farve "1".."11"
     extra_urls: list[str] = field(default_factory=list)
+    # Kun hvis barnet har sit EGET login (ellers bruges `account`):
+    url: Optional[str] = None
+    login: Optional[str] = None
+    username_env: Optional[str] = None
+    password_env: Optional[str] = None
 
     @property
     def slug(self) -> str:
-        s = re.sub(r"[^a-z0-9]+", "-", self.name.lower().replace("æ", "ae")
-                   .replace("ø", "oe").replace("å", "aa"))
-        return s.strip("-") or "barn"
+        return _fold_name(self.name).replace(" ", "-") or "barn"
+
+    @property
+    def needle(self) -> str:
+        return _fold_name(self.match or self.name)
+
+
+@dataclass
+class Account:
+    url: str
+    login: str = "direct"            # "direct" (ForældreIntra-login) eller "unilogin"
+    username_env: str = "FI_USER"
+    password_env: str = "FI_PASS"
+
+    @property
+    def key(self) -> tuple:
+        return (self.url, self.login, self.username_env, self.password_env)
+
+
+def _fold_name(s: str) -> str:
+    s = s.lower().replace("æ", "ae").replace("ø", "oe").replace("å", "aa")
+    return re.sub(r"[^a-z0-9]+", " ", s).strip()
+
+
+SHARED = Child(name="Fælles")
 
 
 def load_config(path: Path) -> dict:
     cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
     cfg["children"] = [Child(**c) for c in cfg["children"]]
+    base = cfg.get("account") or {}
+    # Gruppér børnene pr. login: ét login kan have flere børn (indgange).
+    groups: dict[tuple, tuple[Account, list[Child]]] = {}
+    for c in cfg["children"]:
+        acc = Account(**{**base, **{k: v for k, v in {
+            "url": c.url, "login": c.login, "username_env": c.username_env,
+            "password_env": c.password_env}.items() if v}})
+        groups.setdefault(acc.key, (acc, []))[1].append(c)
+    cfg["accounts"] = list(groups.values())
     cfg.setdefault("max_pages", 25)
     cfg.setdefault("keywords", DEFAULT_KEYWORDS)
     cfg.setdefault("timezone", "Europe/Copenhagen")
@@ -136,15 +169,15 @@ USER_SEL = ("input[type=text], input[type=email], input[name*=user i], "
 PASS_SEL = "input[type=password]"
 
 
-def login(page, child: Child) -> None:
-    user = os.environ.get(child.username_env, "")
-    pw = os.environ.get(child.password_env, "")
+def login(page, acc: Account) -> None:
+    user = os.environ.get(acc.username_env, "")
+    pw = os.environ.get(acc.password_env, "")
     if not user or not pw:
-        raise LoginError(f"Mangler {child.username_env}/{child.password_env} i miljøet")
+        raise LoginError(f"Mangler {acc.username_env}/{acc.password_env} i miljøet")
 
-    page.goto(child.url, wait_until="networkidle")
+    page.goto(acc.url, wait_until="networkidle")
 
-    if child.login == "unilogin":
+    if acc.login == "unilogin":
         _click_text(page, r"unilogin")
         # UniLogin: brugernavn → Næste → adgangskode → Log ind
         u = _visible(page, USER_SEL)
@@ -202,7 +235,7 @@ def _page_text(page) -> str:
     return "\n".join(out)
 
 
-def _links(page, base_host: str) -> list[tuple[str, str]]:
+def _links(page, base_host: str, skip: bool = True) -> list[tuple[str, str]]:
     raw = page.evaluate("""() => Array.from(document.querySelectorAll('a[href]'))
         .map(a => [a.href, (a.innerText || a.title || '').trim()])""")
     seen, out = set(), []
@@ -212,7 +245,7 @@ def _links(page, base_host: str) -> list[tuple[str, str]]:
         if u.scheme not in ("http", "https") or u.hostname != base_host:
             continue
         low = (href + " " + label).lower()
-        if any(w in low for w in SKIP_WORDS) or u.path.lower().endswith(FILE_EXT):
+        if skip and (any(w in low for w in SKIP_WORDS) or u.path.lower().endswith(FILE_EXT)):
             continue
         if href not in seen:
             seen.add(href)
@@ -220,7 +253,33 @@ def _links(page, base_host: str) -> list[tuple[str, str]]:
     return out
 
 
-def crawl(child: Child, cfg: dict, debug_dir: Optional[Path]) -> list[Page]:
+CHILD_PATH = re.compile(r"(/parent/\d+/[^/?#]+)", re.I)
+
+
+def _child_prefix(href: str) -> Optional[str]:
+    m = CHILD_PATH.search(urlparse(href).path)
+    return m.group(1) if m else None
+
+
+def _find_child(page, host: str, child: Child, home: str) -> Optional[str]:
+    """Find barnets startside (fx /parent/1234/Emma/Index) fra barnevælgeren."""
+    from urllib.parse import unquote
+    for href, label in _links(page, host, skip=False):
+        hay = _fold_name(unquote(href) + " " + label)
+        if child.needle and re.search(rf"\b{re.escape(child.needle)}\b", hay):
+            return href
+    # Ingen link med navnet – prøv at klikke på navnet (dropdown-vælger).
+    page.goto(home, wait_until="networkidle")
+    _click_text(page, r"skift barn|vælg barn|mine børn")
+    pat = re.escape(child.match or child.name)
+    if _click_text(page, rf"\b{pat}\b"):
+        return page.url
+    return None
+
+
+def crawl_account(acc: Account, children: list[Child], cfg: dict,
+                  debug_dir: Optional[Path]) -> dict[str, list[Page]]:
+    """Ét login → sider pr. barn. Returnerer {child.slug: [Page, ...]}."""
     from playwright.sync_api import sync_playwright
 
     keywords = [k.lower() for k in cfg["keywords"]]
@@ -229,71 +288,101 @@ def crawl(child: Child, cfg: dict, debug_dir: Optional[Path]) -> list[Page]:
     if os.environ.get("CHROMIUM_PATH"):
         launch["executable_path"] = os.environ["CHROMIUM_PATH"]
 
+    def score(link: tuple[str, str]) -> int:
+        low = (link[0] + " " + link[1]).lower()
+        return sum(k in low for k in keywords)
+
+    result: dict[str, list[Page]] = {}
     with sync_playwright() as pw:
         browser = pw.chromium.launch(**launch)
         ctx = browser.new_context(locale="da-DK", timezone_id=cfg["timezone"])
         page = ctx.new_page()
         page.set_default_timeout(30_000)
-        try:
-            login(page, child)
-        except Exception:
+
+        def dump(tag: str):
             if debug_dir:
                 debug_dir.mkdir(parents=True, exist_ok=True)
-                page.screenshot(path=str(debug_dir / f"{child.slug}-login.png"), full_page=True)
-                (debug_dir / f"{child.slug}-login.html").write_text(page.content(), encoding="utf-8")
+                page.screenshot(path=str(debug_dir / f"{tag}.png"), full_page=True)
+                (debug_dir / f"{tag}.html").write_text(page.content(), encoding="utf-8")
+
+        try:
+            login(page, acc)
+        except Exception:
+            dump("login")
             raise
+        home = page.url
+        host = urlparse(home).hostname
 
-        host = urlparse(page.url).hostname
-        pages: list[Page] = []
-        visited: set[str] = set()
+        # Find alle børns startsider først, så vi kan holde dem adskilt.
+        starts: dict[str, Optional[str]] = {}
+        if len(children) == 1 and not children[0].match:
+            starts[children[0].slug] = home
+        else:
+            for c in children:
+                page.goto(home, wait_until="networkidle")
+                starts[c.slug] = _find_child(page, host, c, home)
+        prefixes = {slug: _child_prefix(u) for slug, u in starts.items() if u}
 
-        def grab(url: Optional[str] = None) -> Optional[Page]:
-            if url:
-                if url in visited:
-                    return None
-                try:
-                    page.goto(url, wait_until="networkidle")
-                except Exception as e:
-                    print(f"  ! kunne ikke åbne {url}: {e}", file=sys.stderr)
-                    return None
-            visited.add(page.url.split("#")[0])
-            if url:
-                visited.add(url)
-            p = Page(page.url, page.title(), _page_text(page))
-            if p.text:
-                pages.append(p)
-            return p
-
-        grab()  # forsiden efter login
-        start_links = _links(page, host)
-
-        def score(link: tuple[str, str]) -> int:
-            low = (link[0] + " " + link[1]).lower()
-            return sum(k in low for k in keywords)
-
-        sections = [l for l in start_links if score(l) > 0]
-        sections.sort(key=score, reverse=True)
-        queue = [u for u in child.extra_urls] + [u for u, _ in sections]
-
-        # Niveau 1: sektioner. Niveau 2: enkelte opslag/beskeder i sektionerne.
-        level2: list[str] = []
-        for url in queue:
-            if len(pages) >= max_pages:
-                break
-            if grab(urljoin(child.url, url)) is None:
+        for child in children:
+            start = starts.get(child.slug)
+            print(f"  {child.name}: start {start or '(ikke fundet)'}")
+            if not start:
+                page.goto(home, wait_until="networkidle")
+                dump(f"{child.slug}-ikke-fundet")
+                print(f"  ! Fandt ikke {child.name} i ForældreIntra – tjek `match:` i config",
+                      file=sys.stderr)
                 continue
-            for href, label in _links(page, host):
-                if href in visited or href in level2 or href in queue:
+            mine = prefixes.get(child.slug)
+            others = [p for s, p in prefixes.items() if s != child.slug and p and p != mine]
+
+            def allowed(href: str) -> bool:
+                pre = _child_prefix(href)
+                return not (pre and (pre in others or (mine and pre != mine)))
+
+            pages: list[Page] = []
+            visited: set[str] = set()
+
+            def grab(url: Optional[str] = None) -> bool:
+                if url:
+                    if url in visited:
+                        return False
+                    try:
+                        page.goto(url, wait_until="networkidle")
+                    except Exception as e:
+                        print(f"  ! kunne ikke åbne {url}: {e}", file=sys.stderr)
+                        return False
+                    visited.add(url)
+                visited.add(page.url.split("#")[0])
+                p = Page(page.url, page.title(), _page_text(page))
+                if p.text:
+                    pages.append(p)
+                return True
+
+            grab(start)
+            sections = [l for l in _links(page, host) if score(l) > 0 and allowed(l[0])]
+            sections.sort(key=score, reverse=True)
+            queue = [urljoin(home, u) for u in child.extra_urls] + [u for u, _ in sections]
+
+            # Niveau 1: sektioner. Niveau 2: enkelte opslag/beskeder i sektionerne.
+            level2: list[str] = []
+            for url in queue:
+                if len(pages) >= max_pages:
+                    break
+                if not grab(url):
                     continue
-                if href.startswith(url.rstrip("/") + "/") or re.search(r"\d{3,}", urlparse(href).path):
-                    level2.append(href)
-        for url in level2:
-            if len(pages) >= max_pages:
-                break
-            grab(url)
+                for href, _ in _links(page, host):
+                    if href in visited or href in level2 or href in queue or not allowed(href):
+                        continue
+                    if href.startswith(url.rstrip("/") + "/") or re.search(r"\d{3,}", urlparse(href).path):
+                        level2.append(href)
+            for url in level2:
+                if len(pages) >= max_pages:
+                    break
+                grab(url)
+            result[child.slug] = pages
 
         browser.close()
-        return pages
+    return result
 
 
 # --------------------------------------------------------------------------
@@ -339,12 +428,12 @@ Regler:
 
 
 def extract(client, cfg: dict, child: Child, pages: list[Page],
-            known: list[dict], today: dt.date) -> Extraction:
+            known: list[dict], today: dt.date, who: Optional[str] = None) -> Extraction:
     known_txt = "\n".join(
         f"- uid={e['uid']} | {e['date']} | {e['title']}" for e in known) or "(ingen)"
     body = "\n\n".join(
         f"=== SIDE: {p.title} ({p.url}) ===\n{p.text[:20000]}" for p in pages)
-    user = (f"I dag er {today.isoformat()} ({today.strftime('%A')}). Barn: {child.name}.\n\n"
+    user = (f"I dag er {today.isoformat()} ({today.strftime('%A')}). Barn: {who or child.name}.\n\n"
             f"Kendte kommende begivenheder:\n{known_txt}\n\n{body}")
 
     resp = client.beta.messages.parse(
@@ -652,44 +741,67 @@ def main() -> int:
         client = anthropic.Anthropic()
 
     failures = 0
-    for child in children:
-        print(f"\n== {child.name} ({child.url})")
+    wanted = {c.slug for c in children}
+    for acc, kids in cfg["accounts"]:
+        kids = [c for c in kids if c.slug in wanted]
+        if not kids:
+            continue
+        print(f"\n== Login {acc.url} ({', '.join(c.name for c in kids)})")
         try:
-            pages = crawl(child, cfg, base / "debug" if args.debug else None)
+            by_child = crawl_account(acc, kids, cfg, base / "debug" if args.debug else None)
         except Exception as e:
             print(f"  ! {type(e).__name__}: {e}", file=sys.stderr)
-            failures += 1
+            failures += len(kids)
             continue
-        print(f"  {len(pages)} sider hentet")
-        seen = state.data["pages"]
-        new = [p for p in pages if args.force or seen.get(p.url) != p.digest]
-        print(f"  {len(new)} nye/ændrede")
-        if args.dry_run:
-            for p in pages:
-                print(f"   - {p.title[:60]!r} {p.url} ({len(p.text)} tegn)")
-            continue
-        if new:
-            known = [e for e in state.events_for(child) if e["date"] >= today.isoformat()]
-            ext = extract(client, cfg, child, new, known, today)
-            changed = state.merge(child, ext, today)
-            print(f"  {len(ext.events)} begivenheder fundet, {changed} nye/ændrede")
-            for p in new:
-                seen[p.url] = p.digest
-        state.save()
+        # Sider uden barn i adressen, som optræder hos flere børn (fx indbakken),
+        # behandles én gang som "Fælles" i stedet for tre gange.
+        jobs = [(c, by_child[c.slug], None) for c in kids if c.slug in by_child]
+        failures += len(kids) - len(jobs)
+        if len(jobs) > 1:
+            counts: dict[str, int] = {}
+            for _, pages, _ in jobs:
+                for pg in pages:
+                    counts[pg.url] = counts.get(pg.url, 0) + 1
+            is_shared = lambda pg: counts[pg.url] > 1 and not _child_prefix(pg.url)
+            shared = list({pg.url: pg for _, pages, _ in jobs for pg in pages if is_shared(pg)}.values())
+            jobs = [(c, [pg for pg in pages if not is_shared(pg)], None) for c, pages, _ in jobs]
+            if shared:
+                names = ", ".join(c.name for c in kids)
+                jobs.append((SHARED, shared,
+                             f"Fælles beskeder for {names}. Står det, at noget kun gælder ét af "
+                             f"børnene (eller dets klasse), så skriv barnets navn først i titlen"))
+        for child, pages, who in jobs:
+            seen = state.data["pages"]
+            key = lambda p: f"{child.slug}|{p.url}"
+            new = [p for p in pages if args.force or seen.get(key(p)) != p.digest]
+            print(f"  {child.name}: {len(pages)} sider hentet, {len(new)} nye/ændrede")
+            if args.dry_run:
+                for p in pages:
+                    print(f"   - {p.title[:60]!r} {p.url} ({len(p.text)} tegn)")
+                continue
+            if new:
+                known = [e for e in state.events_for(child) if e["date"] >= today.isoformat()]
+                ext = extract(client, cfg, child, new, known, today, who)
+                changed = state.merge(child, ext, today)
+                print(f"  {child.name}: {len(ext.events)} begivenheder fundet, {changed} nye/ændrede")
+                for p in new:
+                    seen[key(p)] = p.digest
+            state.save()
 
     if args.dry_run:
         return 1 if failures else 0
 
     state.prune(today, int(cfg["keep_past_days"]))
     all_events = list(state.data["events"].values())
-    for c in cfg["children"]:
+    cal_children = cfg["children"] + ([SHARED] if state.events_for(SHARED) else [])
+    for c in cal_children:
         write_ics(out_dir / f"{c.slug}.ics", f"Skole – {c.name}", state.events_for(c))
     write_ics(out_dir / "alle-boern.ics", "Skole – alle børn", all_events)
-    write_overview(out_dir / "oversigt.md", state, cfg["children"], today)
+    write_overview(out_dir / "oversigt.md", state, cal_children, today)
     print(f"\nSkrev {len(all_events)} begivenheder til {out_dir}/")
 
     if cfg["google_calendar"].get("enabled"):
-        sync_google(state, cfg["children"], cfg["google_calendar"], cfg["timezone"], args.force)
+        sync_google(state, cal_children, cfg["google_calendar"], cfg["timezone"], args.force)
     state.save()
     return 1 if failures == len(children) else 0
 

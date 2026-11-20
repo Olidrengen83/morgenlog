@@ -45,12 +45,8 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          FI_BARN1_USER: ${{ secrets.FI_BARN1_USER }}
-          FI_BARN1_PASS: ${{ secrets.FI_BARN1_PASS }}
-          FI_BARN2_USER: ${{ secrets.FI_BARN2_USER }}
-          FI_BARN2_PASS: ${{ secrets.FI_BARN2_PASS }}
-          FI_BARN3_USER: ${{ secrets.FI_BARN3_USER }}
-          FI_BARN3_PASS: ${{ secrets.FI_BARN3_PASS }}
+          FI_USER: ${{ secrets.FI_USER }}
+          FI_PASS: ${{ secrets.FI_PASS }}
         run: python fetcher.py --config config.yaml ${{ inputs.force && '--force' || '' }}
 
       - name: Gem tilstand
