@@ -1,0 +1,37 @@
+# Kopiér til config.yaml og ret til. Adgangskoder skrives ALDRIG her –
+# kun navnet på den miljøvariabel, de ligger i.
+
+timezone: Europe/Copenhagen
+model: claude-opus-5-5
+max_pages: 25          # max antal sider pr. barn pr. kørsel
+keep_past_days: 30     # hvor længe gamle begivenheder bliver liggende
+
+children:
+  - name: Barn1
+    url: https://skolenavn.m.skoleintra.dk/   # adressen du logger ind på
+    login: direct                              # "direct" (ForældreIntra-login) eller "unilogin"
+    username_env: FI_BARN1_USER
+    password_env: FI_BARN1_PASS
+    color_id: "9"                              # Google-farve 1–11 (valgfri)
+    # calendar_id: xxx@group.calendar.google.com   # egen kalender kun til dette barn (valgfri)
+    # extra_urls: [https://skolenavn.m.skoleintra.dk/parent/123/Barn1/Calendar]
+
+  - name: Barn2
+    url: https://skolenavn.m.skoleintra.dk/
+    login: direct
+    username_env: FI_BARN2_USER
+    password_env: FI_BARN2_PASS
+    color_id: "10"
+
+  - name: Barn3
+    url: https://andenskole.m.skoleintra.dk/
+    login: direct
+    username_env: FI_BARN3_USER
+    password_env: FI_BARN3_PASS
+    color_id: "6"
+
+google_calendar:
+  enabled: false
+  # Fælles kalender (bruges for børn uden eget calendar_id; titler får [Navn] foran).
+  # Del kalenderen med servicekontoens e-mail med "Foretag ændringer i begivenheder".
+  calendar_id: xxx@group.calendar.google.com
