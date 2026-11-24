@@ -168,6 +168,55 @@
     display: flex; gap: 12px; align-items: center; z-index: 10; max-width: calc(100% - 32px);
   }
   .toast button { background: none; border: 0; color: var(--accent); font-weight: 700; padding: 0; }
+
+  /* iPad og andre brede skærme: brug bredden i stedet for én høj søjle */
+  @media (min-width: 720px) {
+    main { max-width: 1120px; padding: 24px 28px; padding-top: calc(24px + env(safe-area-inset-top)); }
+    h1 { font-size: 26px; }
+    h2 { font-size: 19px; }
+    .card { margin-bottom: 0; padding: 20px; }
+    section:not([hidden]) { display: grid; gap: 20px; align-items: start; }
+    section .head, section .intro, .daynav { grid-column: 1 / -1; margin-bottom: 0 !important; }
+    section .intro { margin-top: -8px !important; }
+
+    #v-dag { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); grid-template-areas: "nav nav" "jar acts" "log acts"; }
+    #v-dag .daynav { grid-area: nav; max-width: 520px; width: 100%; justify-self: center; }
+    #v-dag .c-jar { grid-area: jar; position: sticky; top: 20px; }
+    #v-dag .c-acts { grid-area: acts; }
+    #v-dag .c-log { grid-area: log; }
+    .cookie { font-size: clamp(36px, 4.6vw, 58px); }
+    .bignum { font-size: 52px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .act { min-height: 104px; padding: 14px; }
+    .act .e { font-size: 30px; }
+
+    #v-punkter { grid-template-columns: minmax(0, 1fr); }
+    #actList { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; }
+    #actList li:nth-child(2) { border-top: 0; }
+    #actList li.empty { grid-column: 1 / -1; }
+
+    #v-historik { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    #v-historik .c-stats { grid-column: 1 / -1; }
+
+    #v-indst { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
+    nav.tabs button { max-width: 200px; font-size: 14px; }
+
+    dialog { width: min(540px, calc(100% - 48px)); margin: auto; border-radius: 20px; }
+    .sheet { padding: 24px; }
+  }
+  /* Stående iPad: dåsen i fuld bredde med alle kiks på én række */
+  @media (min-width: 720px) and (max-width: 1099px) {
+    #v-dag { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); grid-template-areas: "nav nav" "jar jar" "acts log"; }
+    #v-dag .c-jar { position: static; }
+    .jar { grid-template-columns: repeat(var(--n, 10), 1fr); }
+    .cookie { font-size: clamp(36px, 6vw, 60px); }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  }
+  /* Liggende iPad: lidt mere plads til kiksedåsen */
+  @media (min-width: 1100px) {
+    #v-dag { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -183,7 +232,7 @@
       <button class="iconbtn" id="next" aria-label="Næste dag">›</button>
     </div>
 
-    <div class="card">
+    <div class="card c-jar">
       <div class="row spread">
         <div>
           <div class="bignum" id="left">10</div>
@@ -195,12 +244,12 @@
       <div class="status" id="status"></div>
     </div>
 
-    <div class="card">
+    <div class="card c-acts">
       <h2>Hvad har du lavet?</h2>
       <div class="grid" id="actGrid"></div>
     </div>
 
-    <div class="card">
+    <div class="card c-log">
       <h2>Dagens regnskab</h2>
       <ul class="log" id="log"></ul>
     </div>
@@ -208,11 +257,11 @@
 
   <!-- PUNKTER -->
   <section id="v-punkter" hidden>
-    <div class="row spread" style="margin-bottom:14px">
+    <div class="row spread head" style="margin-bottom:14px">
       <h1>Dine punkter</h1>
       <button class="btn primary" id="addAct">+ Nyt punkt</button>
     </div>
-    <p class="muted small" style="margin-top:0">Punkterne er de ting, der koster (eller giver) energi. Prisen her er bare et udgangspunkt — du kan altid justere den, når du trykker af.</p>
+    <p class="muted small intro" style="margin-top:0">Punkterne er de ting, der koster (eller giver) energi. Prisen her er bare et udgangspunkt — du kan altid justere den, når du trykker af.</p>
     <div class="card" style="padding:4px 16px">
       <ul class="log" id="actList"></ul>
     </div>
@@ -220,13 +269,13 @@
 
   <!-- HISTORIK -->
   <section id="v-historik" hidden>
-    <h1 style="margin-bottom:14px">Historik</h1>
-    <div class="card" id="histStats"></div>
-    <div class="card">
+    <h1 class="head" style="margin-bottom:14px">Historik</h1>
+    <div class="card c-stats" id="histStats"></div>
+    <div class="card c-hist">
       <h2>Seneste 14 dage</h2>
       <div class="hist" id="hist"></div>
     </div>
-    <div class="card" id="topCard">
+    <div class="card c-top" id="topCard">
       <h2>Hvor går kiksene hen?</h2>
       <p class="muted small" style="margin-top:-4px">De seneste 30 dage</p>
       <ul class="log" id="top"></ul>
@@ -235,7 +284,7 @@
 
   <!-- INDSTILLINGER -->
   <section id="v-indst" hidden>
-    <h1 style="margin-bottom:14px">Indstillinger</h1>
+    <h1 class="head" style="margin-bottom:14px">Indstillinger</h1>
     <div class="card">
       <h2>Kiks om dagen</h2>
       <p class="muted small" style="margin-top:-4px">Standard er 10. Ændringen gælder fra i dag; tidligere dage beholder deres eget tal.</p>
@@ -424,6 +473,7 @@
     const { budget, left } = totals(k);
     const slots = Math.max(budget, Math.ceil(budget - Math.min(left, 0)));
     const jar = $("jar");
+    jar.style.setProperty("--n", Math.min(slots, 10));
     let html = "";
     for (let i = 0; i < slots; i++) {
       let cls = "cookie";
