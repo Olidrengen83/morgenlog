@@ -261,7 +261,7 @@
       <h1>Dine punkter</h1>
       <button class="btn primary" id="addAct">+ Nyt punkt</button>
     </div>
-    <p class="muted small intro" style="margin-top:0">Punkterne er de ting, der koster (eller giver) energi. Prisen her er bare et udgangspunkt — du kan altid justere den, når du trykker af.</p>
+    <p class="muted small intro" style="margin-top:0">Punkterne er de ting, der koster (eller giver) energi. Prisen her er bare et udgangspunkt — du kan altid justere den, når du bruger punktet.</p>
     <div class="card" style="padding:4px 16px">
       <ul class="log" id="actList"></ul>
     </div>
@@ -297,7 +297,7 @@
     <div class="card">
       <h2>Halve kiks</h2>
       <div class="row spread">
-        <span class="small muted grow">Tillad halve kiks, når du trykker af.</span>
+        <span class="small muted grow">Tillad halve kiks, når du registrerer, hvad du har lavet.</span>
         <div class="seg" style="width:150px">
           <button id="halfOff">Nej</button>
           <button id="halfOn">Ja</button>
@@ -326,7 +326,7 @@
   <button role="tab" data-v="indst"><span class="i">⚙️</span>Indstillinger</button>
 </nav>
 
-<!-- Ark: tryk af -->
+<!-- Ark: registrér brug -->
 <dialog id="logSheet">
   <form method="dialog" class="sheet" id="logForm">
     <div class="row">
@@ -347,7 +347,7 @@
     <input type="text" id="lsNote" maxlength="120" placeholder="F.eks. fyldt bus, måtte stå op">
     <div class="actions">
       <button class="btn" value="cancel" formnovalidate>Annullér</button>
-      <button class="btn primary" value="ok" id="lsOk">Træk af</button>
+      <button class="btn primary" value="ok" id="lsOk">Træk fra</button>
     </div>
   </form>
 </dialog>
@@ -597,7 +597,7 @@
     else renderSettings();
   }
 
-  // ---------- Tryk af ----------
+  // ---------- Registrér brug ----------
   let ls = null; // { act, cost }
   const step = () => (S.half ? 0.5 : 1);
 
@@ -607,7 +607,7 @@
     $("lsName").textContent = act.name;
     $("lsKind").textContent = act.kind === "give" ? "Giver energi tilbage" : "Koster energi";
     $("lsHint").textContent = act.kind === "give" ? "Hvor mange kiks fik du igen?" : "Tryk på kiksene for at vælge, hvor meget det kostede.";
-    $("lsOk").textContent = act.kind === "give" ? "Læg i dåsen" : "Træk af";
+    $("lsOk").textContent = act.kind === "give" ? "Læg i dåsen" : "Træk fra";
     $("lsNote").value = "";
     drawLogPicker();
     $("logSheet").showModal();

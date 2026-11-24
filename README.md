@@ -220,7 +220,7 @@ adresserne `#tjek=1` og `#sync=1` stadig).
 En selvstændig lille app til energiregnskab: ti kiks om dagen (kan ændres
 under Indstillinger). Opret dine egne punkter — f.eks. »Bustur til skole« —
 med ikon og en normalpris i kiks. Under **I dag** trykker du på et punkt,
-justerer prisen ved at trykke på kiksene eller med ± og trækker af. Punkter kan
+justerer prisen ved at trykke på kiksene eller med ±, og så trækkes kiksene fra. Punkter kan
 også *give* kiks igen (hvil, pause). Går dagen i minus, vises de lånte kiks i
 rødt. **Historik** viser de seneste 14 dage og hvilke punkter der koster mest.
 

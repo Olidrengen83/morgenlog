@@ -1,6 +1,6 @@
 // Kikseregnskab service worker: netværk først, cache som reserve, så appen
 // også virker uden forbindelse. Rører aldrig localStorage.
-const CACHE = "kiks-v2";
+const CACHE = "kiks-v3";
 const FILER = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e) => {
